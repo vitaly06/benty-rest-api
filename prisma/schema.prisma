@@ -8,17 +8,19 @@ datasource db {
 }
 
 model User {
-  id                    Int         @id @default(autoincrement())
-  login                 String      @unique
-  email                 String      @unique
-  password              String
-  refreshToken          String?
-  profileTypeId         Int
-  emailVerificationCode String?
-  isEmailVerified       Boolean     @default(false)
-  profileType           ProfileType @relation(fields: [profileTypeId], references: [id])
-  createdAt             DateTime    @default(now())
-  updatedAt             DateTime    @updatedAt
+  id                            Int         @id @default(autoincrement())
+  login                         String      @unique
+  email                         String      @unique
+  password                      String
+  refreshToken                  String?
+  profileTypeId                 Int
+  emailVerificationCode         String?
+  resetPasswordVerificationCode String?
+  isResetVerified               Boolean     @default(false)
+  isEmailVerified               Boolean     @default(false)
+  profileType                   ProfileType @relation(fields: [profileTypeId], references: [id])
+  createdAt                     DateTime    @default(now())
+  updatedAt                     DateTime    @updatedAt
 }
 
 model ProfileType {

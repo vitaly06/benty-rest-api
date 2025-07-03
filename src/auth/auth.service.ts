@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -13,6 +14,7 @@ import { JwtPayload } from './interfaces/token.interface';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { v4 as uuidv4 } from 'uuid';
+import { ForgotPasswordRequest } from './dto/forgot-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -57,7 +59,12 @@ export class AuthService {
       },
     });
 
-    await this.sendVerificationEmail(user.email, user.emailVerificationCode);
+    await this.sendVerificationEmail(
+      user.email,
+      'Подтверждение email',
+      user.emailVerificationCode,
+      '/email-verification',
+    );
 
     const tokens = await this.getTokens(user.id, user.login);
     this.updateRefreshToken(user.id, tokens.refreshToken);
@@ -65,12 +72,17 @@ export class AuthService {
     return tokens;
   }
 
-  private async sendVerificationEmail(email: string, code: string) {
+  private async sendVerificationEmail(
+    email: string,
+    text: string,
+    code: string,
+    template: string,
+  ) {
     try {
       await this.mailerService.sendMail({
         to: email,
-        subject: 'Подтверждение email',
-        template: './email-verification', // Шаблон письма (создайте в папке templates)
+        subject: text,
+        template,
         context: {
           code,
         },
@@ -94,7 +106,7 @@ export class AuthService {
       where: { id: user.id },
       data: {
         isEmailVerified: true,
-        emailVerificationCode: null, // Удаляем код после подтверждения
+        emailVerificationCode: null,
       },
     });
 
@@ -114,8 +126,6 @@ export class AuthService {
 
     const tokens = await this.getTokens(checkUser.id, checkUser.login);
     await this.updateRefreshToken(checkUser.id, tokens.refreshToken);
-    // res.cookie['access_token'] = tokens.accessToken;
-    // res.cookie['refresh_token'] = tokens.refreshToken;
     return tokens;
   }
 
@@ -126,6 +136,70 @@ export class AuthService {
         refreshToken: null,
       },
     });
+  }
+
+  async forgotPassword(dto: ForgotPasswordRequest) {
+    const { email } = { ...dto };
+
+    const checkUser = await this.userService.findByEmail(email);
+    if (!checkUser) {
+      throw new NotFoundException('Данного пользователя не существует');
+    }
+    const code = await this.generateVerifyCode();
+    await this.prisma.user.updateMany({
+      where: { email },
+      data: {
+        resetPasswordVerificationCode: code,
+      },
+    });
+    await this.sendVerificationEmail(
+      email,
+      'Восстановление пароля',
+      code,
+      './change-password',
+    );
+  }
+
+  async verifyPassword(code: string) {
+    const user = await this.prisma.user.findFirst({
+      where: { resetPasswordVerificationCode: code },
+    });
+    if (!user) {
+      throw new NotFoundException('Такого пользователя не существует');
+    }
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetPasswordVerificationCode: null,
+        isResetVerified: true,
+      },
+    });
+
+    return user.id;
+  }
+
+  async changePassword(userId: number, password: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    if (!user.isResetVerified) {
+      throw new ForbiddenException('Требуется подтверждение сброса пароля');
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        password: await bcrypt.hash(password, 10),
+        isResetVerified: false,
+      },
+    });
+    return { success_true: true };
   }
 
   async refreshToken(userId: number, refreshToken: string) {

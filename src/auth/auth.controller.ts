@@ -18,11 +18,16 @@ import {
   RequestWithUserRefresh,
 } from './interfaces/request-with-user.dto';
 import { JwtRefreshGuard } from 'src/common/guards/jwt-refresh.guard';
+import { ApiOperation } from '@nestjs/swagger';
+import { ForgotPasswordRequest } from './dto/forgot-password.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @ApiOperation({
+    summary: 'Регистрация',
+  })
   @Post('sign-up')
   async signUp(
     @Res({ passthrough: true }) res: Response,
@@ -36,6 +41,9 @@ export class AuthController {
     };
   }
 
+  @ApiOperation({
+    summary: 'Авторизация',
+  })
   @Post('sign-in')
   async signIn(
     @Res({ passthrough: true }) res: Response,
@@ -46,6 +54,9 @@ export class AuthController {
     return { message: 'Успешный вход' };
   }
 
+  @ApiOperation({
+    summary: 'Выход',
+  })
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   async logout(
@@ -57,6 +68,9 @@ export class AuthController {
     return { message: 'Выход успешно выполен' };
   }
 
+  @ApiOperation({
+    summary: 'Обновление токенов',
+  })
   @UseGuards(JwtRefreshGuard)
   @Post('refresh')
   async refresh(
@@ -72,9 +86,27 @@ export class AuthController {
     return { message: 'Токены успешно обновлены' };
   }
 
+  @ApiOperation({
+    summary: 'Проверка кода верификации',
+  })
   @Get('verify-email')
   async verifyEmail(@Query('code') code: string) {
     return await this.authService.verifyEmail(code);
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() dto: ForgotPasswordRequest) {
+    return await this.authService.forgotPassword(dto);
+  }
+
+  @Get('verify-password-code')
+  async verifyPasswordCode(@Query('code') code: string) {
+    return await this.authService.verifyPassword(code);
+  }
+
+  @Post('change-password')
+  async changePassword(dto: { userId: number; password: string }) {
+    await this.authService.changePassword(dto.userId, dto.password);
   }
   private setCookies(
     res: Response,

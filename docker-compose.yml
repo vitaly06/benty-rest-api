@@ -7,7 +7,7 @@ services:
       - '3000:3000'
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/RosvodokanalQuiz?schema=public
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/Grinar?schema=public
     depends_on:
       db:
         condition: service_healthy
@@ -21,7 +21,7 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=RosvodokanalQuiz
+      - POSTGRES_DB=Grinar
     ports:
       - '5433:5432'
     volumes:
