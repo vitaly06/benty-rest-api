@@ -11,6 +11,8 @@ import * as bcrypt from 'bcrypt';
 import { signInRequest } from './dto/sign-in.dto';
 import { JwtPayload } from './interfaces/token.interface';
 import { JwtService } from '@nestjs/jwt';
+import { MailerService } from '@nestjs-modules/mailer';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +20,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly mailerService: MailerService,
   ) {}
 
   async signUp(dto: signUpRequest) {
@@ -49,15 +52,53 @@ export class AuthService {
         email,
         password: hashedPassword,
         profileTypeId,
+        emailVerificationCode: await this.generateVerifyCode(),
+        isEmailVerified: false,
       },
     });
 
+    await this.sendVerificationEmail(user.email, user.emailVerificationCode);
+
     const tokens = await this.getTokens(user.id, user.login);
     this.updateRefreshToken(user.id, tokens.refreshToken);
-    // res.cookie['access_token'] = tokens.accessToken;
-    // res.cookie['refresh_token'] = tokens.refreshToken;
 
     return tokens;
+  }
+
+  private async sendVerificationEmail(email: string, code: string) {
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        subject: 'Подтверждение email',
+        template: './email-verification', // Шаблон письма (создайте в папке templates)
+        context: {
+          code,
+        },
+      });
+    } catch (error) {
+      console.error('Ошибка отправки письма:', error);
+      throw new BadRequestException('Ошибка отправки письма подтверждения');
+    }
+  }
+
+  async verifyEmail(code: string) {
+    const user = await this.prisma.user.findFirst({
+      where: { emailVerificationCode: code },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Неверный код подтверждения');
+    }
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        isEmailVerified: true,
+        emailVerificationCode: null, // Удаляем код после подтверждения
+      },
+    });
+
+    return { message: 'Почта успешно подтверждена' };
   }
 
   async signIn(dto: signInRequest) {
@@ -141,5 +182,12 @@ export class AuthService {
     ]);
 
     return { accessToken, refreshToken };
+  }
+
+  async generateVerifyCode(): Promise<string> {
+    const uuid = uuidv4();
+    const numericValue = parseInt(uuid.replace(/[^0-9]/g, ''), 10);
+    const code = String(numericValue).substring(0, 6);
+    return code;
   }
 }

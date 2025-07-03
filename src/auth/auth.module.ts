@@ -10,6 +10,9 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtRefreshGuard } from 'src/common/guards/jwt-refresh.guard';
 import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { join } from 'path';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
 @Module({
   imports: [
@@ -25,6 +28,27 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
           expiresIn: configService.get('JWT_ACCESS_EXPIRES_IN'),
         },
       }),
+    }),
+    MailerModule.forRoot({
+      transport: {
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT),
+        secure: true,
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASSWORD,
+        },
+      },
+      defaults: {
+        from: `"Сервис" <${process.env.FROM_EMAIL}>`,
+      },
+      template: {
+        dir: join(__dirname, '../../templates'),
+        adapter: new HandlebarsAdapter(),
+        options: {
+          strict: true,
+        },
+      },
     }),
   ],
   controllers: [AuthController],

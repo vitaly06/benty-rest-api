@@ -1,4 +1,13 @@
-import { Body, Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { signUpRequest } from './dto/sign-up.dto';
 import { signInRequest } from './dto/sign-in.dto';
@@ -21,7 +30,10 @@ export class AuthController {
   ) {
     const tokens = await this.authService.signUp(dto);
     this.setCookies(res, tokens);
-    return { message: 'Регистрация прошла успешно' };
+    return {
+      message:
+        'Регистрация прошла успешно. Код подтверждения отправлен на почту.',
+    };
   }
 
   @Post('sign-in')
@@ -60,6 +72,10 @@ export class AuthController {
     return { message: 'Токены успешно обновлены' };
   }
 
+  @Get('verify-email')
+  async verifyEmail(@Query('code') code: string) {
+    return await this.authService.verifyEmail(code);
+  }
   private setCookies(
     res: Response,
     tokens: { accessToken: string; refreshToken: string },
