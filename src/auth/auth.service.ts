@@ -63,7 +63,7 @@ export class AuthService {
       user.email,
       'Подтверждение email',
       user.emailVerificationCode,
-      '/email-verification',
+      './email-verification',
     );
 
     const tokens = await this.getTokens(user.id, user.login);

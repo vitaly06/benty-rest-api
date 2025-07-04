@@ -68,7 +68,9 @@ CREATE TABLE public."User" (
     "updatedAt" timestamp(3) without time zone NOT NULL,
     "refreshToken" text,
     "emailVerificationCode" text,
-    "isEmailVerified" boolean DEFAULT false NOT NULL
+    "isEmailVerified" boolean DEFAULT false NOT NULL,
+    "isResetVerified" boolean DEFAULT false NOT NULL,
+    "resetPasswordVerificationCode" text
 );
 
 
@@ -124,8 +126,8 @@ COPY public."ProfileType" (id, name) FROM stdin;
 -- Data for Name: User; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "updatedAt", "refreshToken", "emailVerificationCode", "isEmailVerified") FROM stdin;
-6	vitaly.sadikov	vitaly.sadikov1@yandex.ru	$2b$10$UcS.a/DzfOH3A9RMhFkdBOvHtBa1Cq9cM1vawnerReDRK9xKGY5K.	1	2025-07-03 11:03:00.473	2025-07-03 11:03:21.461	$2b$10$k4MDQfsDHVaWa7aRF9o9Iu9aGNezuDzuNniz7QMFKmB.bTp9KS9Au	\N	t
+COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "updatedAt", "refreshToken", "emailVerificationCode", "isEmailVerified", "isResetVerified", "resetPasswordVerificationCode") FROM stdin;
+6	vitaly.sadikov	vitaly.sadikov1@yandex.ru	$2b$10$UcS.a/DzfOH3A9RMhFkdBOvHtBa1Cq9cM1vawnerReDRK9xKGY5K.	1	2025-07-03 11:03:00.473	2025-07-03 11:03:21.461	$2b$10$k4MDQfsDHVaWa7aRF9o9Iu9aGNezuDzuNniz7QMFKmB.bTp9KS9Au	\N	t	f	\N
 \.
 
 

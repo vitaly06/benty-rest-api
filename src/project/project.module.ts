@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { UserService } from './user.service';
-import { UserController } from './user.controller';
+import { ProjectService } from './project.service';
+import { ProjectController } from './project.controller';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as path from 'path';
@@ -9,7 +9,7 @@ import * as path from 'path';
   imports: [
     MulterModule.register({
       storage: diskStorage({
-        destination: './uploads/avatars',
+        destination: './uploads/projects',
         filename: (req, file, cb) => {
           const uniqueSuffix =
             Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -19,7 +19,7 @@ import * as path from 'path';
       }),
     }),
   ],
-  controllers: [UserController],
-  providers: [UserService],
+  controllers: [ProjectController],
+  providers: [ProjectService],
 })
-export class UserModule {}
+export class ProjectModule {}

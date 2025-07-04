@@ -8,23 +8,52 @@ datasource db {
 }
 
 model User {
-  id                            Int         @id @default(autoincrement())
-  login                         String      @unique
-  email                         String      @unique
+  id                            Int             @id @default(autoincrement())
+  login                         String          @unique
+  email                         String          @unique
+  fullName                      String?
   password                      String
   refreshToken                  String?
   profileTypeId                 Int
+  specializationId              Int?
   emailVerificationCode         String?
   resetPasswordVerificationCode String?
-  isResetVerified               Boolean     @default(false)
-  isEmailVerified               Boolean     @default(false)
-  profileType                   ProfileType @relation(fields: [profileTypeId], references: [id])
-  createdAt                     DateTime    @default(now())
-  updatedAt                     DateTime    @updatedAt
+  logoFileName                  String?
+  isResetVerified               Boolean         @default(false)
+  isEmailVerified               Boolean         @default(false)
+  profileType                   ProfileType     @relation(fields: [profileTypeId], references: [id])
+  specialization                Specialization? @relation(fields: [specializationId], references: [id])
+  createdAt                     DateTime        @default(now())
+  updatedAt                     DateTime        @updatedAt
+  projects                      Project[]
 }
 
 model ProfileType {
   id   Int    @id @default(autoincrement())
   name String @unique
   User User[]
+}
+
+model Specialization {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
+}
+
+// Проект
+model Project {
+  id         Int      @id @default(autoincrement())
+  name       String
+  photoName  String
+  categoryId Int
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id])
+  category   Category @relation(fields: [categoryId], references: [id])
+}
+
+// Категория проекта
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  projects Project[]
 }

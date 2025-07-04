@@ -20,6 +20,7 @@ import {
 import { JwtRefreshGuard } from 'src/common/guards/jwt-refresh.guard';
 import { ApiOperation } from '@nestjs/swagger';
 import { ForgotPasswordRequest } from './dto/forgot-password.dto';
+import { ChangePasswordRequest } from './dto/change-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -94,18 +95,27 @@ export class AuthController {
     return await this.authService.verifyEmail(code);
   }
 
+  @ApiOperation({
+    summary: 'Забыл пароль (отправка почты)',
+  })
   @Post('forgot-password')
   async forgotPassword(@Body() dto: ForgotPasswordRequest) {
     return await this.authService.forgotPassword(dto);
   }
 
+  @ApiOperation({
+    summary: 'Проверка кода для смены пароля',
+  })
   @Get('verify-password-code')
   async verifyPasswordCode(@Query('code') code: string) {
     return await this.authService.verifyPassword(code);
   }
 
+  @ApiOperation({
+    summary: 'Смена пароля',
+  })
   @Post('change-password')
-  async changePassword(dto: { userId: number; password: string }) {
+  async changePassword(@Body() dto: ChangePasswordRequest) {
     await this.authService.changePassword(dto.userId, dto.password);
   }
   private setCookies(
