@@ -9,6 +9,10 @@ import { join } from 'path';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Get('best-specialists')
+  async getBestSpecialists() {
+    return await this.userService.getBestSpecialists();
+  }
   @ApiOperation({
     summary: 'Получение фото пользователя',
   })

@@ -12,6 +12,7 @@ model User {
   login                         String          @unique
   email                         String          @unique
   fullName                      String?
+  city                          String?
   password                      String
   refreshToken                  String?
   profileTypeId                 Int
