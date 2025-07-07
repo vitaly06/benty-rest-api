@@ -31,7 +31,7 @@ export class ProjectService {
           select: {
             logoFileName: true,
             fullName: true,
-            specialization: {
+            specializations: {
               select: {
                 name: true,
               },
@@ -53,7 +53,7 @@ export class ProjectService {
         projectPhotoName: project.photoName,
         userLogoPhotoName: project.user.logoFileName,
         fullName: project.user.fullName,
-        specialization: project.user.specialization.name,
+        specialization: project.user.specializations[0].name,
         category: project.category.name,
       });
     }

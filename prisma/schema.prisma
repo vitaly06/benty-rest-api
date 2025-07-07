@@ -8,25 +8,35 @@ datasource db {
 }
 
 model User {
-  id                            Int             @id @default(autoincrement())
-  login                         String          @unique
-  email                         String          @unique
+  id                            Int              @id @default(autoincrement())
+  login                         String           @unique
+  email                         String           @unique
+  // Настройки профиля
   fullName                      String?
+  level                         String?
+  experience                    String?
+  about                         String?
   city                          String?
+  specializations               Specialization[] @relation("User Specializations")
+  // Контакты
+  website                       String?
+  phoneNumber                   String?
+  vk                            String?
+  telegram                      String?
   password                      String
   refreshToken                  String?
   profileTypeId                 Int
-  specializationId              Int?
   emailVerificationCode         String?
   resetPasswordVerificationCode String?
   logoFileName                  String?
-  isResetVerified               Boolean         @default(false)
-  isEmailVerified               Boolean         @default(false)
-  profileType                   ProfileType     @relation(fields: [profileTypeId], references: [id])
-  specialization                Specialization? @relation(fields: [specializationId], references: [id])
-  createdAt                     DateTime        @default(now())
-  updatedAt                     DateTime        @updatedAt
-  projects                      Project[]
+
+  isResetVerified Boolean     @default(false)
+  isEmailVerified Boolean     @default(false)
+  profileType     ProfileType @relation(fields: [profileTypeId], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  projects  Project[]
 }
 
 model ProfileType {
@@ -38,7 +48,7 @@ model ProfileType {
 model Specialization {
   id    Int    @id @default(autoincrement())
   name  String @unique
-  users User[]
+  users User[] @relation("User Specializations")
 }
 
 // Проект
