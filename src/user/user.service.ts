@@ -3,6 +3,9 @@ import { User } from '@prisma/client';
 import { RequestWithUser } from 'src/auth/interfaces/request-with-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { updateMainSettingsRequest } from './dto/update-main-settings.dto';
+import * as path from 'path';
+import * as fs from 'fs';
+import { UpdateNotificationsSettingsRequest } from './dto/update-notifications-settings.dto';
 
 @Injectable()
 export class UserService {
@@ -196,5 +199,129 @@ export class UserService {
     }
 
     return { message: 'Основные настройки успешно обновлены' };
+  }
+
+  async getDecorSettings(req: RequestWithUser) {
+    return await this.prisma.user.findUnique({
+      where: { id: req.user.sub },
+      select: {
+        id: true,
+        logoFileName: true,
+      },
+    });
+  }
+
+  async updateAvatar(fileName: string, req: RequestWithUser) {
+    // Сначала получаем текущий файл аватарки, чтобы потом его удалить
+    const user = await this.prisma.user.findUnique({
+      where: { id: req.user.sub },
+      select: { logoFileName: true },
+    });
+
+    // Обновляем аватарку в базе
+    const updatedUser = await this.prisma.user.update({
+      where: { id: req.user.sub },
+      data: { logoFileName: fileName },
+    });
+
+    // Удаляем старый файл, если он существует
+    if (user.logoFileName) {
+      const filePath = path.join('./uploads/avatars', user.logoFileName);
+      this.deleteFileIfExists(filePath);
+    }
+
+    return updatedUser;
+  }
+
+  async updateCover(fileName: string, req: RequestWithUser) {
+    // Аналогично для обложки
+    const user = await this.prisma.user.findUnique({
+      where: { id: req.user.sub },
+      select: { coverFileName: true },
+    });
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: req.user.sub },
+      data: { coverFileName: fileName },
+    });
+
+    if (user.coverFileName) {
+      const filePath = path.join('./uploads/covers', user.coverFileName);
+      this.deleteFileIfExists(filePath);
+    }
+
+    return updatedUser;
+  }
+
+  async deleteAvatar(req: RequestWithUser) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: req.user.sub },
+      select: { logoFileName: true },
+    });
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: req.user.sub },
+      data: { logoFileName: null },
+    });
+
+    if (user.logoFileName) {
+      const filePath = path.join('./uploads/avatars', user.logoFileName);
+      this.deleteFileIfExists(filePath);
+    }
+
+    return updatedUser;
+  }
+
+  async deleteCover(req: RequestWithUser) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: req.user.sub },
+      select: { coverFileName: true },
+    });
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: req.user.sub },
+      data: { coverFileName: null },
+    });
+
+    if (user.coverFileName) {
+      const filePath = path.join('./uploads/covers', user.coverFileName);
+      this.deleteFileIfExists(filePath);
+    }
+
+    return updatedUser;
+  }
+
+  private deleteFileIfExists(filePath: string) {
+    try {
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    } catch (err) {
+      console.error('Ошибка при удалении файла:', err);
+    }
+  }
+
+  async getNotificationsSettings(req: RequestWithUser) {
+    return await this.prisma.user.findUnique({
+      where: { id: req.user.sub },
+      select: {
+        id: true,
+        rewardNotifications: true,
+        weeklySummaryNotifications: true,
+        joinAuthorsNotifications: true,
+      },
+    });
+  }
+
+  async updateNotificationsSettings(
+    req: RequestWithUser,
+    dto: UpdateNotificationsSettingsRequest,
+  ) {
+    return await this.prisma.user.update({
+      where: { id: req.user.sub },
+      data: {
+        ...dto,
+      },
+    });
   }
 }

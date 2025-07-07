@@ -29,10 +29,14 @@ model User {
   emailVerificationCode         String?
   resetPasswordVerificationCode String?
   logoFileName                  String?
-
-  isResetVerified Boolean     @default(false)
-  isEmailVerified Boolean     @default(false)
-  profileType     ProfileType @relation(fields: [profileTypeId], references: [id])
+  coverFileName                 String?
+  // Уведомления
+  rewardNotifications           Boolean          @default(false)
+  weeklySummaryNotifications    Boolean          @default(false)
+  joinAuthorsNotifications      Boolean          @default(false)
+  isResetVerified               Boolean          @default(false)
+  isEmailVerified               Boolean          @default(false)
+  profileType                   ProfileType      @relation(fields: [profileTypeId], references: [id])
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
