@@ -8,21 +8,22 @@ datasource db {
 }
 
 model User {
-  id                            Int              @id @default(autoincrement())
-  login                         String           @unique
-  email                         String           @unique
+  id              Int              @id @default(autoincrement())
+  login           String           @unique
+  email           String           @unique
   // Настройки профиля
-  fullName                      String?
-  level                         String?
-  experience                    String?
-  about                         String?
-  city                          String?
-  specializations               Specialization[] @relation("User Specializations")
+  fullName        String?
+  level           String?
+  experience      String?
+  about           String?
+  city            String?
+  specializations Specialization[] @relation("User Specializations")
   // Контакты
-  website                       String?
-  phoneNumber                   String?
-  vk                            String?
-  telegram                      String?
+  website         String?
+  phoneNumber     String?
+  vk              String?
+  telegram        String?
+
   password                      String
   refreshToken                  String?
   profileTypeId                 Int
@@ -31,16 +32,20 @@ model User {
   logoFileName                  String?
   coverFileName                 String?
   // Уведомления
-  rewardNotifications           Boolean          @default(false)
-  weeklySummaryNotifications    Boolean          @default(false)
-  joinAuthorsNotifications      Boolean          @default(false)
-  isResetVerified               Boolean          @default(false)
-  isEmailVerified               Boolean          @default(false)
-  profileType                   ProfileType      @relation(fields: [profileTypeId], references: [id])
+  rewardNotifications           Boolean @default(false)
+  weeklySummaryNotifications    Boolean @default(false)
+  joinAuthorsNotifications      Boolean @default(false)
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  projects  Project[]
+  // 
+
+  isResetVerified Boolean     @default(false)
+  isEmailVerified Boolean     @default(false)
+  profileType     ProfileType @relation(fields: [profileTypeId], references: [id])
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  lastLoginUpdate DateTime?
+  projects        Project[]
 }
 
 model ProfileType {

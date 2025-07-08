@@ -69,7 +69,7 @@ export class AuthService {
     const tokens = await this.getTokens(user.id, user.login);
     this.updateRefreshToken(user.id, tokens.refreshToken);
 
-    return tokens;
+    return { tokens, user };
   }
 
   private async sendVerificationEmail(
@@ -126,7 +126,7 @@ export class AuthService {
 
     const tokens = await this.getTokens(checkUser.id, checkUser.login);
     await this.updateRefreshToken(checkUser.id, tokens.refreshToken);
-    return tokens;
+    return { tokens, checkUser };
   }
 
   async logout(userId: number) {

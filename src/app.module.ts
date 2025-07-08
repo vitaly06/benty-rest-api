@@ -7,6 +7,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { ProjectModule } from './project/project.module';
 import { SpecializationModule } from './specialization/specialization.module';
+import { PhotoModule } from './photo/photo.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { SpecializationModule } from './specialization/specialization.module';
       serveRoot: '/uploads',
     }),
     SpecializationModule,
+    PhotoModule,
   ],
 })
 export class AppModule {}

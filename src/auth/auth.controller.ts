@@ -21,10 +21,14 @@ import { JwtRefreshGuard } from 'src/common/guards/jwt-refresh.guard';
 import { ApiOperation } from '@nestjs/swagger';
 import { ForgotPasswordRequest } from './dto/forgot-password.dto';
 import { ChangePasswordRequest } from './dto/change-password.dto';
+import { UserService } from 'src/user/user.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UserService,
+  ) {}
 
   @ApiOperation({
     summary: 'Регистрация',
@@ -34,12 +38,10 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
     @Body() dto: signUpRequest,
   ) {
-    const tokens = await this.authService.signUp(dto);
-    this.setCookies(res, tokens);
-    return {
-      message:
-        'Регистрация прошла успешно. Код подтверждения отправлен на почту.',
-    };
+    const result = await this.authService.signUp(dto);
+
+    this.setCookies(res, result.tokens);
+    return await this.userService.getAvatar(result.user.id);
   }
 
   @ApiOperation({
@@ -50,9 +52,9 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
     @Body() dto: signInRequest,
   ) {
-    const tokens = await this.authService.signIn(dto);
-    this.setCookies(res, tokens);
-    return { message: 'Успешный вход' };
+    const result = await this.authService.signIn(dto);
+    this.setCookies(res, result.tokens);
+    return await this.userService.getAvatar(result.checkUser.id);
   }
 
   @ApiOperation({

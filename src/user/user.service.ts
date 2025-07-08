@@ -6,6 +6,7 @@ import { updateMainSettingsRequest } from './dto/update-main-settings.dto';
 import * as path from 'path';
 import * as fs from 'fs';
 import { UpdateNotificationsSettingsRequest } from './dto/update-notifications-settings.dto';
+import { ChangeLoginRequest } from './dto/change-password.dto';
 
 @Injectable()
 export class UserService {
@@ -124,10 +125,10 @@ export class UserService {
       experience: user.experience,
       about: user.about,
       website: user.website,
-      phoneNumber: true,
-      email: true,
-      vk: true,
-      telegram: true,
+      phoneNumber: user.phoneNumber,
+      email: user.email,
+      vk: user.vk,
+      telegram: user.telegram,
     };
   }
 
@@ -324,4 +325,15 @@ export class UserService {
       },
     });
   }
+
+  async getAvatar(userId: number) {
+    return await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        logoFileName: true,
+      },
+    });
+  }
+
+  async changeLogin(dto: ChangeLoginRequest, req: RequestWithUser) {}
 }

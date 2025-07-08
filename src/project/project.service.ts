@@ -53,7 +53,7 @@ export class ProjectService {
         projectPhotoName: project.photoName,
         userLogoPhotoName: project.user.logoFileName,
         fullName: project.user.fullName,
-        specialization: project.user.specializations[0].name,
+        specialization: project.user.specializations[0]?.name || null,
         category: project.category.name,
       });
     }

@@ -3,8 +3,7 @@ import {
   Controller,
   Delete,
   Get,
-  NotFoundException,
-  Param,
+  Post,
   Put,
   Req,
   Res,
@@ -28,54 +27,20 @@ import { RequestWithUser } from 'src/auth/interfaces/request-with-user.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
 import { updateMainSettingsRequest } from './dto/update-main-settings.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import mime from 'mime';
+
 import { UpdateNotificationsSettingsRequest } from './dto/update-notifications-settings.dto';
+import { ChangeLoginRequest } from './dto/change-password.dto';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @ApiOperation({
+    summary: 'Получение лучших специалистов',
+  })
   @Get('best-specialists')
   async getBestSpecialists() {
     return await this.userService.getBestSpecialists();
-  }
-  @ApiOperation({
-    summary: 'Получение фото пользователя',
-  })
-  @ApiParam({ name: 'filename', description: 'Имя файла', type: String })
-  @ApiProduces('image/*')
-  @Get('photo/:filename')
-  async getPhoto(
-    @Param('filename') filename: string,
-    @Res({ passthrough: true }) res: Response,
-  ): Promise<StreamableFile> {
-    let filePath: string;
-
-    // Сначала проверяем аватары
-    const avatarPath = join(process.cwd(), 'uploads', 'avatars', filename);
-    const coverPath = join(process.cwd(), 'uploads', 'covers', filename);
-
-    if (existsSync(avatarPath)) {
-      filePath = avatarPath;
-    } else if (existsSync(coverPath)) {
-      filePath = coverPath;
-    } else {
-      throw new NotFoundException('Файл не найден');
-    }
-
-    const mimeType = mime.lookup(filePath) || 'application/octet-stream';
-
-    // Создаем поток для чтения файла
-    const fileStream = createReadStream(filePath);
-
-    // Устанавливаем заголовки ответа
-    res.set({
-      'Content-Type': mimeType,
-      'Content-Disposition': `inline; filename="${filename}"`,
-      'Cache-Control': 'public, max-age=31536000',
-    });
-
-    return new StreamableFile(fileStream);
   }
 
   @ApiOperation({
@@ -99,6 +64,9 @@ export class UserController {
     return await this.userService.updateMainSettings(dto, req);
   }
 
+  @ApiOperation({
+    summary: 'Получение настроект оформления',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('get-decor-settings')
   async getDecorSettings(@Req() req: RequestWithUser) {
@@ -171,12 +139,18 @@ export class UserController {
     return await this.userService.deleteCover(req);
   }
 
+  @ApiOperation({
+    summary: 'Получение настроект уведомлений',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('get-notifications-settings')
   async getNotificationsSettings(@Req() req: RequestWithUser) {
     return await this.userService.getNotificationsSettings(req);
   }
 
+  @ApiOperation({
+    summary: 'Обновление настроект оформления',
+  })
   @UseGuards(JwtAuthGuard)
   @Put('update-notifications-settings')
   async updateNotificationsSettings(
@@ -184,5 +158,14 @@ export class UserController {
     @Body() dto: UpdateNotificationsSettingsRequest,
   ) {
     return await this.userService.updateNotificationsSettings(req, dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('change-login')
+  async changeLogin(
+    @Body() dto: ChangeLoginRequest,
+    @Req() req: RequestWithUser,
+  ) {
+    return await this.userService.changeLogin(dto, req);
   }
 }

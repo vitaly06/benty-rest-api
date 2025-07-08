@@ -176,10 +176,20 @@ CREATE TABLE public."User" (
     "isEmailVerified" boolean DEFAULT false NOT NULL,
     "isResetVerified" boolean DEFAULT false NOT NULL,
     "resetPasswordVerificationCode" text,
-    "specializationId" integer,
     "logoFileName" text,
     "fullName" text,
-    city text
+    city text,
+    about text,
+    level text,
+    "phoneNumber" text,
+    telegram text,
+    vk text,
+    website text,
+    experience text,
+    "coverFileName" text,
+    "joinAuthorsNotifications" boolean DEFAULT false NOT NULL,
+    "weeklySummaryNotifications" boolean DEFAULT false NOT NULL,
+    "rewardNotifications" boolean DEFAULT false NOT NULL
 );
 
 
@@ -206,6 +216,18 @@ ALTER TABLE public."User_id_seq" OWNER TO postgres;
 
 ALTER SEQUENCE public."User_id_seq" OWNED BY public."User".id;
 
+
+--
+-- Name: _User Specializations; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."_User Specializations" (
+    "A" integer NOT NULL,
+    "B" integer NOT NULL
+);
+
+
+ALTER TABLE public."_User Specializations" OWNER TO postgres;
 
 --
 -- Name: Category id; Type: DEFAULT; Schema: public; Owner: postgres
@@ -291,10 +313,21 @@ COPY public."Specialization" (id, name) FROM stdin;
 -- Data for Name: User; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "updatedAt", "refreshToken", "emailVerificationCode", "isEmailVerified", "isResetVerified", "resetPasswordVerificationCode", "specializationId", "logoFileName", "fullName", city) FROM stdin;
-6	vitaly.sadikov	vitaly.sadikov1@yandex.ru	$2b$10$UcS.a/DzfOH3A9RMhFkdBOvHtBa1Cq9cM1vawnerReDRK9xKGY5K.	1	2025-07-03 11:03:00.473	2025-07-04 11:00:50.344	$2b$10$k4MDQfsDHVaWa7aRF9o9Iu9aGNezuDzuNniz7QMFKmB.bTp9KS9Au	\N	t	f	\N	1	ava1.png	Садиков Виталий	Оренбург
-7	vital1y.sadikov	vitaly.sadikov2@yandex.ru	$2b$10$IkWiRHyJr0JYr4EsnTrDL.mEvkjoDc3FnwMhQq9mR0Z9eHdzH.0J.	1	2025-07-04 08:55:39.068	2025-07-04 11:00:50.344	\N	4.0188	f	f	\N	2	ava2.png	Афанасий Афанасьевич	Москва
-8	vital1332y.sadikov	vitaly.sadikov232@yandex.ru	$2b$10$Q3/C/I3NtwH6S65bMLJEM.GN09YQzI1F3UuriuFgZ3CfLX7WoNyJK	1	2025-07-04 08:58:47.464	2025-07-04 11:00:50.344	$2b$10$183MhKoCPo2J7OQrDaD3xekd8FOVWTGO5KPagC7JFGet0o8XXOAO2	281913	f	f	\N	1	ava3.png	Артур Пирожков	Челябинск
+COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "updatedAt", "refreshToken", "emailVerificationCode", "isEmailVerified", "isResetVerified", "resetPasswordVerificationCode", "logoFileName", "fullName", city, about, level, "phoneNumber", telegram, vk, website, experience, "coverFileName", "joinAuthorsNotifications", "weeklySummaryNotifications", "rewardNotifications") FROM stdin;
+6	vitaly.sadikov	vitaly.sadikov1@yandex.ru	$2b$10$UcS.a/DzfOH3A9RMhFkdBOvHtBa1Cq9cM1vawnerReDRK9xKGY5K.	1	2025-07-03 11:03:00.473	2025-07-07 11:41:57.086	$2b$10$KLcLOvr0.G5rw4nzgJJzMOB//rkb/q0OeyIri5wdiiQTgLhsoSdei	\N	t	f	\N	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f
+7	vital1y.sadikov	vitaly.sadikov2@yandex.ru	$2b$10$IkWiRHyJr0JYr4EsnTrDL.mEvkjoDc3FnwMhQq9mR0Z9eHdzH.0J.	1	2025-07-04 08:55:39.068	2025-07-04 11:00:50.344	\N	4.0188	f	f	\N	ava2.png	Афанасий Афанасьевич	Москва	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f
+8	vital1332y.sadikov	vitaly.sadikov232@yandex.ru	$2b$10$Q3/C/I3NtwH6S65bMLJEM.GN09YQzI1F3UuriuFgZ3CfLX7WoNyJK	1	2025-07-04 08:58:47.464	2025-07-04 11:00:50.344	$2b$10$183MhKoCPo2J7OQrDaD3xekd8FOVWTGO5KPagC7JFGet0o8XXOAO2	281913	f	f	\N	ava3.png	Артур Пирожков	Челябинск	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f
+9	vitaly.sadikov444	vitaly.sadikov133@yandex.ru	$2b$10$7C4aR3bURQjyA1GvX./VSutZ0dmioRNscT3nl/tnhxgpBUh1fDfIC	1	2025-07-07 11:39:00.097	2025-07-07 11:39:01.328	$2b$10$U.g2pY9cUDT0Zai/wGpq.ulKj8rpXM0nVVtw6MZ0wvI/D2Eh.WIUi	3.4570	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f
+\.
+
+
+--
+-- Data for Name: _User Specializations; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."_User Specializations" ("A", "B") FROM stdin;
+1	6
+2	6
 \.
 
 
@@ -330,7 +363,7 @@ SELECT pg_catalog.setval('public."Specialization_id_seq"', 2, true);
 -- Name: User_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."User_id_seq"', 8, true);
+SELECT pg_catalog.setval('public."User_id_seq"', 9, true);
 
 
 --
@@ -374,6 +407,14 @@ ALTER TABLE ONLY public."User"
 
 
 --
+-- Name: _User Specializations _User Specializations_AB_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_User Specializations"
+    ADD CONSTRAINT "_User Specializations_AB_pkey" PRIMARY KEY ("A", "B");
+
+
+--
 -- Name: Category_name_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -409,6 +450,13 @@ CREATE UNIQUE INDEX "User_login_key" ON public."User" USING btree (login);
 
 
 --
+-- Name: _User Specializations_B_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "_User Specializations_B_index" ON public."_User Specializations" USING btree ("B");
+
+
+--
 -- Name: Project Project_categoryId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -433,11 +481,19 @@ ALTER TABLE ONLY public."User"
 
 
 --
--- Name: User User_specializationId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: _User Specializations _User Specializations_A_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."User"
-    ADD CONSTRAINT "User_specializationId_fkey" FOREIGN KEY ("specializationId") REFERENCES public."Specialization"(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE ONLY public."_User Specializations"
+    ADD CONSTRAINT "_User Specializations_A_fkey" FOREIGN KEY ("A") REFERENCES public."Specialization"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: _User Specializations _User Specializations_B_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_User Specializations"
+    ADD CONSTRAINT "_User Specializations_B_fkey" FOREIGN KEY ("B") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

@@ -2,26 +2,15 @@ import {
   Body,
   Controller,
   Get,
-  Param,
   Post,
-  Res,
-  StreamableFile,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { Express, Response } from 'express';
+import { Express } from 'express';
 import { ProjectService } from './project.service';
 import { CreateProjectRequest } from './dto/create-project.dto';
-import {
-  ApiBody,
-  ApiConsumes,
-  ApiOperation,
-  ApiParam,
-  ApiProduces,
-} from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { createReadStream } from 'fs';
-import { join } from 'path';
 
 @Controller('project')
 export class ProjectController {
@@ -58,26 +47,5 @@ export class ProjectController {
   @Get('projects-to-main-page')
   async getProjects() {
     return await this.projectService.getProjectsToMainPage();
-  }
-
-  @ApiOperation({
-    summary: 'Получение фото проекта',
-  })
-  @ApiParam({ name: 'filename', description: 'Имя файла', type: String })
-  @ApiProduces('image/*')
-  @Get('photo/:filename')
-  async getPhoto(
-    @Param('filename') filename: string,
-    @Res({ passthrough: true }) res: Response,
-  ): Promise<StreamableFile> {
-    const file = createReadStream(
-      join(process.cwd(), 'uploads', 'projects', filename),
-    );
-    res.set({
-      'Content-Type': 'image/jpeg',
-      'Content-Disposition': `inline; filename="${filename}"`,
-    });
-
-    return new StreamableFile(file);
   }
 }
