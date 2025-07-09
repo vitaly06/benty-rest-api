@@ -17,8 +17,7 @@ import {
   RequestWithUser,
   RequestWithUserRefresh,
 } from './interfaces/request-with-user.dto';
-import { JwtRefreshGuard } from 'src/common/guards/jwt-refresh.guard';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ForgotPasswordRequest } from './dto/forgot-password.dto';
 import { ChangePasswordRequest } from './dto/change-password.dto';
 import { UserService } from 'src/user/user.service';
@@ -74,7 +73,7 @@ export class AuthController {
   @ApiOperation({
     summary: 'Обновление токенов',
   })
-  @UseGuards(JwtRefreshGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('refresh')
   async refresh(
     @Res({ passthrough: true }) res: Response,
@@ -92,11 +91,13 @@ export class AuthController {
   @ApiOperation({
     summary: 'Проверка кода верификации',
   })
+  @UseGuards(JwtAuthGuard)
   @Get('verify-email')
-  async verifyEmail(@Query('code') code: string) {
-    return await this.authService.verifyEmail(code);
+  async verifyEmail(@Query('code') code: string, @Req() req: RequestWithUser) {
+    return await this.authService.verifyEmail(code, req);
   }
 
+  @ApiTags('Забыл пароль')
   @ApiOperation({
     summary: 'Забыл пароль (отправка почты)',
   })
@@ -105,6 +106,7 @@ export class AuthController {
     return await this.authService.forgotPassword(dto);
   }
 
+  @ApiTags('Забыл пароль')
   @ApiOperation({
     summary: 'Проверка кода для смены пароля',
   })
@@ -113,6 +115,7 @@ export class AuthController {
     return await this.authService.verifyPassword(code);
   }
 
+  @ApiTags('Забыл пароль')
   @ApiOperation({
     summary: 'Смена пароля',
   })
@@ -120,6 +123,7 @@ export class AuthController {
   async changePassword(@Body() dto: ChangePasswordRequest) {
     await this.authService.changePassword(dto.userId, dto.password);
   }
+
   private setCookies(
     res: Response,
     tokens: { accessToken: string; refreshToken: string },

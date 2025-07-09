@@ -24,17 +24,16 @@ model User {
   vk              String?
   telegram        String?
 
-  password                      String
-  refreshToken                  String?
-  profileTypeId                 Int
-  emailVerificationCode         String?
-  resetPasswordVerificationCode String?
-  logoFileName                  String?
-  coverFileName                 String?
+  password      String
+  refreshToken  String?
+  profileTypeId Int
+
+  logoFileName               String?
+  coverFileName              String?
   // Уведомления
-  rewardNotifications           Boolean @default(false)
-  weeklySummaryNotifications    Boolean @default(false)
-  joinAuthorsNotifications      Boolean @default(false)
+  rewardNotifications        Boolean @default(false)
+  weeklySummaryNotifications Boolean @default(false)
+  joinAuthorsNotifications   Boolean @default(false)
 
   // 
 

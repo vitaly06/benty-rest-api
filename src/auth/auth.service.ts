@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -15,6 +16,9 @@ import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { v4 as uuidv4 } from 'uuid';
 import { ForgotPasswordRequest } from './dto/forgot-password.dto';
+import { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { RequestWithUser } from './interfaces/request-with-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -23,6 +27,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly mailerService: MailerService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async signUp(dto: signUpRequest) {
@@ -45,6 +50,7 @@ export class AuthService {
     if (password != repassword) {
       throw new BadRequestException('Пароли не совпадают');
     }
+    const code = await this.generateVerifyCode();
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -54,15 +60,15 @@ export class AuthService {
         email,
         password: hashedPassword,
         profileTypeId,
-        emailVerificationCode: await this.generateVerifyCode(),
         isEmailVerified: false,
       },
     });
+    await this.cacheManager.set(`verify-email:${user.id}`, code, 0);
 
     await this.sendVerificationEmail(
       user.email,
       'Подтверждение email',
-      user.emailVerificationCode,
+      code,
       './email-verification',
     );
 
@@ -93,22 +99,26 @@ export class AuthService {
     }
   }
 
-  async verifyEmail(code: string) {
-    const user = await this.prisma.user.findFirst({
-      where: { emailVerificationCode: code },
-    });
+  async verifyEmail(code: string, req: RequestWithUser) {
+    const cachedData = await this.cacheManager.get<string>(
+      `verify-email:${req.user.sub}`,
+    );
 
-    if (!user) {
+    if (!cachedData) {
+      console.log('Данные не найдены в кеше');
+    }
+    if (cachedData !== code) {
       throw new BadRequestException('Неверный код подтверждения');
     }
 
     await this.prisma.user.update({
-      where: { id: user.id },
+      where: { id: req.user.sub },
       data: {
         isEmailVerified: true,
-        emailVerificationCode: null,
       },
     });
+
+    await this.cacheManager.del(`verify-email:${req.user.sub}`);
 
     return { message: 'Почта успешно подтверждена' };
   }
@@ -140,18 +150,20 @@ export class AuthService {
 
   async forgotPassword(dto: ForgotPasswordRequest) {
     const { email } = { ...dto };
-
     const checkUser = await this.userService.findByEmail(email);
     if (!checkUser) {
       throw new NotFoundException('Данного пользователя не существует');
     }
     const code = await this.generateVerifyCode();
-    await this.prisma.user.updateMany({
-      where: { email },
-      data: {
-        resetPasswordVerificationCode: code,
-      },
-    });
+    await this.cacheManager.set(
+      `forgot-password:${code}`,
+      JSON.stringify({
+        id: checkUser.id.toString(),
+        code,
+      }),
+      0,
+    );
+
     await this.sendVerificationEmail(
       email,
       'Восстановление пароля',
@@ -161,9 +173,19 @@ export class AuthService {
   }
 
   async verifyPassword(code: string) {
-    const user = await this.prisma.user.findFirst({
-      where: { resetPasswordVerificationCode: code },
-    });
+    const cachedDataStr = await this.cacheManager.get<string>(
+      `forgot-password:${code}`,
+    );
+    const cachedData = cachedDataStr ? JSON.parse(cachedDataStr) : null;
+
+    if (!cachedData) {
+      console.log('Данные не найдены в кеше');
+    }
+    if (cachedData.code !== code) {
+      throw new BadRequestException('Неверный код подтверждения');
+    }
+    const user = await this.userService.findById(+cachedData.id);
+
     if (!user) {
       throw new NotFoundException('Такого пользователя не существует');
     }
@@ -171,11 +193,11 @@ export class AuthService {
     await this.prisma.user.update({
       where: { id: user.id },
       data: {
-        resetPasswordVerificationCode: null,
         isResetVerified: true,
       },
     });
 
+    await this.cacheManager.del(`forgot-password:${code}`);
     return user.id;
   }
 
@@ -199,6 +221,7 @@ export class AuthService {
         isResetVerified: false,
       },
     });
+
     return { success_true: true };
   }
 

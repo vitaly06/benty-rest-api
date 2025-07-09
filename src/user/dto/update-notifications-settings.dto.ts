@@ -19,5 +19,5 @@ export class UpdateNotificationsSettingsRequest {
     example: true,
   })
   @IsBoolean({ message: 'Настройка уведомлений должна быть Boolean' })
-  joinAuthorsNotifiсations: boolean;
+  joinAuthorsNotifications: boolean;
 }

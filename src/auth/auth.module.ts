@@ -7,12 +7,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { JwtRefreshGuard } from 'src/common/guards/jwt-refresh.guard';
 import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { join } from 'path';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { CustomMailerModule } from 'src/mailer.module';
 
 @Module({
   imports: [
@@ -29,36 +26,16 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
         },
       }),
     }),
-    MailerModule.forRoot({
-      transport: {
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT),
-        secure: true,
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASSWORD,
-        },
-      },
-      defaults: {
-        from: `"Сервис" <${process.env.FROM_EMAIL}>`,
-      },
-      template: {
-        dir: join(__dirname, '../../templates'),
-        adapter: new HandlebarsAdapter(),
-        options: {
-          strict: true,
-        },
-      },
-    }),
+    CustomMailerModule,
   ],
   controllers: [AuthController],
   providers: [
     AuthService,
     UserService,
     JwtStrategy,
-    JwtRefreshGuard,
     JwtAuthGuard,
     JwtRefreshStrategy,
   ],
+  exports: [AuthModule],
 })
 export class AuthModule {}

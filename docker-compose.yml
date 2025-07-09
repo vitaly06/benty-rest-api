@@ -8,9 +8,11 @@ services:
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/Grinar?schema=public
+      - REDIS_HOST=redis  # Меняем с localhost на имя сервиса
+      - REDIS_PORT=6379
     depends_on:
-      db:
-        condition: service_healthy
+      - db
+      - redis  # Добавляем зависимость от Redis
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
@@ -33,5 +35,18 @@ services:
       timeout: 5s
       retries: 10
 
+  redis:  # Добавляем сервис Redis
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
 volumes:
   postgres_data:
+  redis_data:  # Volume для Redis
