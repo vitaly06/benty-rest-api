@@ -7,12 +7,14 @@ import { AuthGuard } from '@nestjs/passport';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
   ) {
     super();
   }
@@ -22,66 +24,77 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const accessToken = this.extractAccessToken(request);
 
     try {
-      // Пробуем верифицировать access token
-      await this.jwtService.verifyAsync(accessToken);
-      return super.canActivate(context) as Promise<boolean>;
-    } catch (accessError) {
-      console.log(accessError);
-      // Если access token невалиден, проверяем refresh token
-      const refreshToken = this.extractRefreshToken(request);
-
-      if (!refreshToken) {
-        throw new UnauthorizedException('Необходима авторизация');
-      }
-
-      try {
-        // Верифицируем refresh token
-        const payload = await this.jwtService.verifyAsync(refreshToken);
-
-        // Проверяем, что refresh token есть в базе
-        const user = await this.prisma.user.findUnique({
-          where: { id: payload.sub, refreshToken },
+      if (accessToken) {
+        // Верифицируем access token с правильным секретом
+        await this.jwtService.verifyAsync(accessToken, {
+          secret: this.configService.get('JWT_ACCESS_SECRET'),
         });
-
-        if (!user) {
-          throw new UnauthorizedException('Недействительный refresh token');
-        }
-
-        // Генерируем новые токены
-        const newTokens = await this.generateTokens(payload.sub);
-
-        // Обновляем refresh token в базе
-        await this.prisma.user.update({
-          where: { id: payload.sub },
-          data: { refreshToken: newTokens.refreshToken },
-        });
-
-        // Устанавливаем новые токены в cookies
-        this.setTokensToResponse(context, newTokens);
-
-        // Добавляем новые токены в запрос
-        request.cookies['access_token'] = newTokens.accessToken;
-        request.cookies['refresh_token'] = newTokens.refreshToken;
-
         return super.canActivate(context) as Promise<boolean>;
-      } catch (refreshError) {
-        console.log(refreshError);
-        throw new UnauthorizedException(
-          'Сессия истекла, необходимо войти снова',
-        );
       }
+      return this.handleTokenRefresh(context, request);
+    } catch (accessError) {
+      if (accessError.name === 'TokenExpiredError') {
+        return this.handleTokenRefresh(context, request);
+      }
+      throw new UnauthorizedException('Недействительный токен');
     }
   }
 
-  private extractAccessToken(request: Request): string {
-    return (
-      request.cookies?.['access_token'] ||
-      request.headers['authorization']?.split(' ')[1]
-    );
+  private async handleTokenRefresh(
+    context: ExecutionContext,
+    request: Request,
+  ): Promise<boolean> {
+    const refreshToken = this.extractRefreshToken(request);
+
+    if (!refreshToken) {
+      throw new UnauthorizedException('Требуется авторизация');
+    }
+
+    try {
+      // Верифицируем refresh token с правильным секретом
+      const payload = await this.jwtService.verifyAsync(refreshToken, {
+        secret: this.configService.get('JWT_REFRESH_SECRET'),
+      });
+
+      const user = await this.prisma.user.findUnique({
+        where: {
+          id: payload.sub,
+          refreshToken, // Проверяем точное совпадение токена
+        },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('Сессия устарела');
+      }
+
+      const newTokens = await this.generateTokens(payload.sub);
+
+      await this.prisma.user.update({
+        where: { id: payload.sub },
+        data: { refreshToken: newTokens.refreshToken },
+      });
+
+      this.setTokensToResponse(context, newTokens);
+
+      request.cookies['access_token'] = newTokens.accessToken;
+      request.headers['authorization'] = `Bearer ${newTokens.accessToken}`;
+
+      return super.canActivate(context) as Promise<boolean>;
+    } catch (refreshError) {
+      console.error('Refresh token error:', refreshError);
+      throw new UnauthorizedException('Сессия истекла, войдите снова');
+    }
   }
 
-  private extractRefreshToken(request: Request): string {
-    return request.cookies?.['refresh_token'];
+  private extractAccessToken(request: Request): string | null {
+    const token =
+      request.cookies?.['access_token'] ||
+      request.headers['authorization']?.split(' ')[1];
+    return token || null;
+  }
+
+  private extractRefreshToken(request: Request): string | null {
+    return request.cookies?.['refresh_token'] || null;
   }
 
   private async generateTokens(userId: number): Promise<{
@@ -91,11 +104,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const payload = { sub: userId };
 
     return {
-      accessToken: this.jwtService.sign(payload, {
-        expiresIn: '15m',
+      accessToken: await this.jwtService.signAsync(payload, {
+        expiresIn: this.configService.get('JWT_ACCESS_EXPIRES_IN', '15m'),
+        secret: this.configService.get('JWT_ACCESS_SECRET'),
       }),
-      refreshToken: this.jwtService.sign(payload, {
-        expiresIn: '7d',
+      refreshToken: await this.jwtService.signAsync(payload, {
+        expiresIn: this.configService.get('JWT_REFRESH_EXPIRES_IN', '7d'),
+        secret: this.configService.get('JWT_REFRESH_SECRET'),
       }),
     };
   }
@@ -105,16 +120,20 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     tokens: { accessToken: string; refreshToken: string },
   ) {
     const response = context.switchToHttp().getResponse();
+
+    // Access token cookie
     response.cookie('access_token', tokens.accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: this.configService.get('NODE_ENV') === 'production',
+      sameSite: 'strict',
       maxAge: 15 * 60 * 1000, // 15 минут
     });
+
+    // Refresh token cookie
     response.cookie('refresh_token', tokens.refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: this.configService.get('NODE_ENV') === 'production',
+      sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 дней
     });
   }

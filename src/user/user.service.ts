@@ -1002,20 +1002,18 @@ export class UserService {
     });
   }
 
-  async getTokens(id: number, login: string) {
-    const payload: JwtPayload = { sub: id, login };
+  async getTokens(userId: number, login: string) {
+    const payload = { sub: userId, login };
 
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload, {
+    return {
+      accessToken: await this.jwtService.signAsync(payload, {
         secret: process.env.JWT_ACCESS_SECRET,
-        expiresIn: process.env.JWT_ACCESS_EXPIRES_IN,
+        expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
       }),
-      this.jwtService.signAsync(payload, {
+      refreshToken: await this.jwtService.signAsync(payload, {
         secret: process.env.JWT_REFRESH_SECRET,
-        expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
+        expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
       }),
-    ]);
-
-    return { accessToken, refreshToken };
+    };
   }
 }

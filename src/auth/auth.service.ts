@@ -11,18 +11,19 @@ import { UserService } from 'src/user/user.service';
 import { signUpRequest } from './dto/sign-up.dto';
 import * as bcrypt from 'bcrypt';
 import { signInRequest } from './dto/sign-in.dto';
-import { JwtPayload } from './interfaces/token.interface';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ForgotPasswordRequest } from './dto/forgot-password.dto';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { RequestWithUser } from './interfaces/request-with-user.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly mailerService: MailerService,
@@ -228,16 +229,12 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
-    if (!user) {
+    if (!user || !user.refreshToken) {
       throw new ForbiddenException('Доступ запрещён');
     }
 
-    const refreshTokenMatches = await bcrypt.compare(
-      refreshToken,
-      user.refreshToken,
-    );
-
-    if (!refreshTokenMatches) {
+    // Проверяем соответствие токена без хэширования
+    if (refreshToken !== user.refreshToken) {
       throw new ForbiddenException('Доступ запрещён');
     }
 
@@ -248,32 +245,31 @@ export class AuthService {
   }
 
   async updateRefreshToken(userId: number, refreshToken: string) {
-    const user = await this.userService.findById(userId);
-    if (!user) {
-      throw new BadRequestException('Такого пользователя не существует');
-    }
-
-    const hashedToken = await bcrypt.hash(refreshToken, 10);
-
     await this.prisma.user.update({
-      where: { id: user.id },
+      where: { id: userId },
       data: {
-        refreshToken: hashedToken,
+        refreshToken, // Сохраняем без хэширования
       },
     });
   }
 
-  async getTokens(id: number, login: string) {
-    const payload: JwtPayload = { sub: id, login };
+  async getTokens(userId: number, login: string) {
+    const payload = { sub: userId, login };
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        secret: process.env.JWT_ACCESS_SECRET,
-        expiresIn: process.env.JWT_ACCESS_EXPIRES_IN,
+        secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
+        expiresIn: this.configService.get<string>(
+          'JWT_ACCESS_EXPIRES_IN',
+          '15m',
+        ),
       }),
       this.jwtService.signAsync(payload, {
-        secret: process.env.JWT_REFRESH_SECRET,
-        expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        expiresIn: this.configService.get<string>(
+          'JWT_REFRESH_EXPIRES_IN',
+          '7d',
+        ),
       }),
     ]);
 
