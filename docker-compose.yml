@@ -16,7 +16,7 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
-    command: sh -c "sleep 5 && npx prisma db push && nest start --watch"
+    command: sh -c "sleep 5 && npx prisma db push --accept-data-loss && nest start --watch"
 
   db:
     image: postgres:13-alpine
@@ -38,7 +38,7 @@ services:
   redis:  # Добавляем сервис Redis
     image: redis:7-alpine
     ports:
-      - '6379:6379'
+      - '6380:6379'
     volumes:
       - redis_data:/data
     healthcheck:

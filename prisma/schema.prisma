@@ -35,7 +35,15 @@ model User {
   weeklySummaryNotifications Boolean @default(false)
   joinAuthorsNotifications   Boolean @default(false)
 
-  // 
+  // Статистика
+  following User[] @relation("UserFollows")
+  followers User[] @relation("UserFollows")
+
+  favorites   User[] @relation("UserStarred") // избранное
+  favoritedBy User[] @relation("UserStarred") // те, кто добавил в избранное
+
+  likedBy   User[] @relation("UserLikes") // те, кто поставили лайк
+  likedUser User[] @relation("UserLikes") // лайки пользователя
 
   isResetVerified Boolean     @default(false)
   isEmailVerified Boolean     @default(false)

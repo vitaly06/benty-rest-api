@@ -1,4 +1,10 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { User } from '@prisma/client';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -633,8 +639,351 @@ export class UserService {
     return { message: 'Пароль успешно изменён' };
   }
 
+  async getMyProfile(req: RequestWithUser) {
+    let result = {};
+    const currentUser = await this.prisma.user.findUnique({
+      where: { id: req.user.sub },
+      select: {
+        id: true,
+        fullName: true,
+        specializations: true,
+        city: true,
+        logoFileName: true,
+        coverFileName: true,
+        favoritedBy: true,
+        likedBy: true,
+        followers: true,
+        projects: {
+          select: {
+            id: true,
+            name: true,
+            photoName: true,
+            category: {
+              select: {
+                name: true,
+              },
+            },
+            user: {
+              select: {
+                fullName: true,
+                logoFileName: true,
+                profileType: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        phoneNumber: true,
+        email: true,
+        website: true,
+        vk: true,
+        telegram: true,
+        experience: true,
+        profileType: {
+          select: {
+            name: true,
+          },
+        },
+        createdAt: true,
+        about: true,
+        following: true,
+      },
+    });
+
+    result = {
+      id: currentUser.id,
+      fullName: currentUser.fullName,
+      specialization:
+        currentUser.specializations[0].name || 'Специализации не указаны',
+      city: currentUser.city || 'Город не указан',
+      logoFileName: currentUser.logoFileName,
+      coverFileName: currentUser.coverFileName,
+      favorited: currentUser.favoritedBy.length,
+      likes: currentUser.likedBy.length,
+      followers: currentUser.followers.length,
+      projects: [],
+      info: {
+        phoneNumber: currentUser.phoneNumber,
+        email: currentUser.email,
+        website: currentUser.website,
+        vk: currentUser.vk,
+        city: currentUser.city,
+        experience: currentUser.experience,
+        type: currentUser.profileType.name,
+        createdAt: currentUser.createdAt,
+        about: currentUser.about,
+      },
+      followings: await this.getSubscriptions(req.user.sub),
+    };
+
+    for (const project of currentUser.projects) {
+      result['projects'].push({
+        id: project.id,
+        name: project.name,
+        photoName: project.photoName,
+        category: project.category.name,
+        userLogo: project.user.logoFileName,
+        fullName: project.user.fullName,
+        profileType: project.user.profileType.name,
+      });
+    }
+
+    return result;
+  }
+
+  async subscribeUser(userId: number, req: RequestWithUser) {
+    if (userId === req.user.sub) {
+      throw new BadRequestException('Нельзя подписаться на самого себя');
+    }
+
+    const targetUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!targetUser) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    const existingSubscription = await this.prisma.user.findFirst({
+      where: {
+        id: req.user.sub,
+        following: {
+          some: {
+            id: userId,
+          },
+        },
+      },
+    });
+
+    if (existingSubscription) {
+      throw new ConflictException('Вы уже подписаны на этого пользователя');
+    }
+
+    await this.prisma.user.update({
+      where: {
+        id: req.user.sub,
+      },
+      data: {
+        following: {
+          connect: {
+            id: userId,
+          },
+        },
+      },
+      include: {
+        following: true,
+      },
+    });
+    return { message: 'Пользователь успешно добавлен в ваши подписки' };
+  }
+
+  async unsubscribeUser(userId: number, req: RequestWithUser) {
+    await this.prisma.user.update({
+      where: {
+        id: req.user.sub,
+      },
+      data: {
+        following: {
+          disconnect: {
+            id: userId,
+          },
+        },
+      },
+    });
+    return { message: 'Пользователь успешно удалён из ваших подписок' };
+  }
+
+  async favoriteUser(userId: number, req: RequestWithUser) {
+    const targetUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!targetUser) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    const existingFavorite = await this.prisma.user.findFirst({
+      where: {
+        id: req.user.sub,
+        favorites: {
+          some: {
+            id: userId,
+          },
+        },
+      },
+    });
+
+    if (existingFavorite) {
+      throw new ConflictException(
+        'Вы уже добавили в избранное этого пользователя',
+      );
+    }
+
+    await this.prisma.user.update({
+      where: {
+        id: req.user.sub,
+      },
+      data: {
+        favorites: {
+          connect: {
+            id: userId,
+          },
+        },
+      },
+      include: {
+        favorites: true,
+      },
+    });
+
+    return { message: 'Пользователь успешно добавлен в ваше избранное' };
+  }
+
+  async unfavoriteUser(userId: number, req: RequestWithUser) {
+    await this.prisma.user.update({
+      where: {
+        id: req.user.sub,
+      },
+      data: {
+        favorites: {
+          disconnect: {
+            id: userId,
+          },
+        },
+      },
+    });
+
+    return { message: 'Пользователь успешно удалён из вашего избранного' };
+  }
+
+  async likeUser(userId: number, req: RequestWithUser) {
+    const targetUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!targetUser) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    const existingLike = await this.prisma.user.findFirst({
+      where: {
+        id: req.user.sub,
+        likedUser: {
+          some: {
+            id: userId,
+          },
+        },
+      },
+    });
+
+    if (existingLike) {
+      throw new ConflictException('Вы уже поставили лайк этому пользователю');
+    }
+
+    await this.prisma.user.update({
+      where: {
+        id: req.user.sub,
+      },
+      data: {
+        likedUser: {
+          connect: {
+            id: userId,
+          },
+        },
+      },
+      include: {
+        likedUser: true,
+      },
+    });
+
+    return { message: 'Вы успешно добавили пользователя в понравившееся' };
+  }
+
+  async unlikeUser(userId: number, req: RequestWithUser) {
+    await this.prisma.user.update({
+      where: {
+        id: req.user.sub,
+      },
+      data: {
+        likedUser: {
+          disconnect: {
+            id: userId,
+          },
+        },
+      },
+    });
+
+    return { message: 'Вы успешно удалили пользователя из понравившегося' };
+  }
+  // Подписки пользователя
+  async getSubscriptions(userId: number) {
+    const userWithSubscriptions = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        following: {
+          where: {
+            projects: {
+              some: {},
+            },
+          },
+          select: {
+            id: true,
+            fullName: true,
+            logoFileName: true,
+            city: true,
+            projects: {
+              select: {
+                id: true,
+                name: true,
+                photoName: true,
+                category: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!userWithSubscriptions) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+    const categories = new Set<string>();
+
+    const subscriptions = userWithSubscriptions.following.map((user) => {
+      const projects = user.projects.map((project) => {
+        const categoryName = project.category.name;
+        categories.add(categoryName);
+
+        return {
+          id: project.id,
+          name: project.name,
+          photoName: project.photoName,
+          category: categoryName,
+        };
+      });
+
+      return {
+        id: user.id,
+        fullName: user.fullName,
+        logoFileName: user.logoFileName,
+        city: user.city,
+        projects,
+      };
+    });
+
+    return {
+      subscriptions,
+      categories: Array.from(categories),
+    };
+  }
   async generateVerifyCode(): Promise<string> {
-    return Math.floor(100000 + Math.random() * 900000).toString(); // Генерирует 6 цифр (от 100000 до 999999)
+    return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
   async updateRefreshToken(userId: number, refreshToken: string) {

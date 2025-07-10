@@ -283,6 +283,91 @@ export class UserController {
   ) {
     return await this.userService.verifyChangePasswordCode(code, req);
   }
+
+  @ApiTags('Мой профиль')
+  @ApiOperation({
+    summary: 'Возращает профиль пользователя',
+  })
+  @UseGuards(JwtAuthGuard)
+  @Get('get-my-profile')
+  async getMyProfile(@Req() req: RequestWithUser) {
+    return await this.userService.getMyProfile(req);
+  }
+
+  @ApiTags('Подписка/отписка')
+  @ApiOperation({
+    summary: 'Подписка на пользователя',
+  })
+  @UseGuards(JwtAuthGuard)
+  @Post('subscribe-user')
+  async subscribeUser(
+    @Query('userId') userId: string,
+    @Req() req: RequestWithUser,
+  ) {
+    return await this.userService.subscribeUser(+userId, req);
+  }
+
+  @ApiTags('Подписка/отписка')
+  @ApiOperation({
+    summary: 'Отписка от пользователя',
+  })
+  @UseGuards(JwtAuthGuard)
+  @Post('unsubscribe-user')
+  async unsubscribeUser(
+    @Query('userId') userId: string,
+    @Req() req: RequestWithUser,
+  ) {
+    return await this.userService.unsubscribeUser(+userId, req);
+  }
+
+  @ApiTags('Избранное')
+  @ApiOperation({
+    summary: 'Добавление пользователя в избранное',
+  })
+  @UseGuards(JwtAuthGuard)
+  @Post('favorite-user')
+  async favoriteUser(
+    @Query('userId') userId: string,
+    @Req() req: RequestWithUser,
+  ) {
+    return await this.userService.favoriteUser(+userId, req);
+  }
+
+  @ApiTags('Избранное')
+  @ApiOperation({
+    summary: 'Удаление пользователя из избранного',
+  })
+  @UseGuards(JwtAuthGuard)
+  @Post('unfavorite-user')
+  async unfavoriteUser(
+    @Query('userId') userId: string,
+    @Req() req: RequestWithUser,
+  ) {
+    return await this.userService.unfavoriteUser(+userId, req);
+  }
+
+  @ApiTags('Лайк')
+  @ApiOperation({
+    summary: 'Поставить лайк пользователю',
+  })
+  @UseGuards(JwtAuthGuard)
+  @Post('like-user')
+  async likeUser(@Query('userId') userId: string, @Req() req: RequestWithUser) {
+    return await this.userService.likeUser(+userId, req);
+  }
+
+  @ApiTags('Лайк')
+  @ApiOperation({
+    summary: 'Удаление лайка для пользователя',
+  })
+  @UseGuards(JwtAuthGuard)
+  @Post('unlike-user')
+  async unlikeUser(
+    @Query('userId') userId: string,
+    @Req() req: RequestWithUser,
+  ) {
+    return await this.userService.unlikeUser(+userId, req);
+  }
   private setCookies(
     res: Response,
     tokens: { accessToken: string; refreshToken: string },

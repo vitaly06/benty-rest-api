@@ -14,7 +14,6 @@ import { signInRequest } from './dto/sign-in.dto';
 import { JwtPayload } from './interfaces/token.interface';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
-import { v4 as uuidv4 } from 'uuid';
 import { ForgotPasswordRequest } from './dto/forgot-password.dto';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -282,9 +281,6 @@ export class AuthService {
   }
 
   async generateVerifyCode(): Promise<string> {
-    const uuid = uuidv4();
-    const numericValue = parseInt(uuid.replace(/[^0-9]/g, ''), 10);
-    const code = String(numericValue).substring(0, 6);
-    return code;
+    return Math.floor(100000 + Math.random() * 900000).toString(); // Генерирует 6 цифр (от 100000 до 999999)
   }
 }

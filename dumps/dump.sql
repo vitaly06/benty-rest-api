@@ -172,10 +172,8 @@ CREATE TABLE public."User" (
     "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updatedAt" timestamp(3) without time zone NOT NULL,
     "refreshToken" text,
-    "emailVerificationCode" text,
     "isEmailVerified" boolean DEFAULT false NOT NULL,
     "isResetVerified" boolean DEFAULT false NOT NULL,
-    "resetPasswordVerificationCode" text,
     "logoFileName" text,
     "fullName" text,
     city text,
@@ -229,6 +227,42 @@ CREATE TABLE public."_User Specializations" (
 
 
 ALTER TABLE public."_User Specializations" OWNER TO postgres;
+
+--
+-- Name: _UserFollows; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."_UserFollows" (
+    "A" integer NOT NULL,
+    "B" integer NOT NULL
+);
+
+
+ALTER TABLE public."_UserFollows" OWNER TO postgres;
+
+--
+-- Name: _UserLikes; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."_UserLikes" (
+    "A" integer NOT NULL,
+    "B" integer NOT NULL
+);
+
+
+ALTER TABLE public."_UserLikes" OWNER TO postgres;
+
+--
+-- Name: _UserStarred; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."_UserStarred" (
+    "A" integer NOT NULL,
+    "B" integer NOT NULL
+);
+
+
+ALTER TABLE public."_UserStarred" OWNER TO postgres;
 
 --
 -- Name: Category id; Type: DEFAULT; Schema: public; Owner: postgres
@@ -314,11 +348,12 @@ COPY public."Specialization" (id, name) FROM stdin;
 -- Data for Name: User; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "updatedAt", "refreshToken", "emailVerificationCode", "isEmailVerified", "isResetVerified", "resetPasswordVerificationCode", "logoFileName", "fullName", city, about, level, "phoneNumber", telegram, vk, website, experience, "coverFileName", "joinAuthorsNotifications", "weeklySummaryNotifications", "rewardNotifications", "lastLoginUpdate") FROM stdin;
-6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$UcS.a/DzfOH3A9RMhFkdBOvHtBa1Cq9cM1vawnerReDRK9xKGY5K.	1	2025-07-03 11:03:00.473	2025-07-09 07:06:03.237	$2b$10$blY5yOOf.bDBODjE9E/5reSdbdS3uXTS.lEm9BL9S32bWPWZC6NK2	\N	t	f	\N	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17
-7	vital1y.sadikov	vitaly.sadikov2@yandex.ru	$2b$10$IkWiRHyJr0JYr4EsnTrDL.mEvkjoDc3FnwMhQq9mR0Z9eHdzH.0J.	1	2025-07-04 08:55:39.068	2025-07-04 11:00:50.344	\N	4.0188	f	f	\N	ava2.png	Афанасий Афанасьевич	Москва	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
-8	vital1332y.sadikov	vitaly.sadikov232@yandex.ru	$2b$10$Q3/C/I3NtwH6S65bMLJEM.GN09YQzI1F3UuriuFgZ3CfLX7WoNyJK	1	2025-07-04 08:58:47.464	2025-07-04 11:00:50.344	$2b$10$183MhKoCPo2J7OQrDaD3xekd8FOVWTGO5KPagC7JFGet0o8XXOAO2	281913	f	f	\N	ava3.png	Артур Пирожков	Челябинск	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
-9	vitaly.sadikov444	vitaly.sadikov133@yandex.ru	$2b$10$7C4aR3bURQjyA1GvX./VSutZ0dmioRNscT3nl/tnhxgpBUh1fDfIC	1	2025-07-07 11:39:00.097	2025-07-07 11:39:01.328	$2b$10$U.g2pY9cUDT0Zai/wGpq.ulKj8rpXM0nVVtw6MZ0wvI/D2Eh.WIUi	3.4570	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
+COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "updatedAt", "refreshToken", "isEmailVerified", "isResetVerified", "logoFileName", "fullName", city, about, level, "phoneNumber", telegram, vk, website, experience, "coverFileName", "joinAuthorsNotifications", "weeklySummaryNotifications", "rewardNotifications", "lastLoginUpdate") FROM stdin;
+7	vital1y.sadikov	vitaly.sadikov2@yandex.ru	$2b$10$IkWiRHyJr0JYr4EsnTrDL.mEvkjoDc3FnwMhQq9mR0Z9eHdzH.0J.	1	2025-07-04 08:55:39.068	2025-07-04 11:00:50.344	\N	f	f	ava2.png	Афанасий Афанасьевич	Москва	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
+8	vital1332y.sadikov	vitaly.sadikov232@yandex.ru	$2b$10$Q3/C/I3NtwH6S65bMLJEM.GN09YQzI1F3UuriuFgZ3CfLX7WoNyJK	1	2025-07-04 08:58:47.464	2025-07-04 11:00:50.344	$2b$10$183MhKoCPo2J7OQrDaD3xekd8FOVWTGO5KPagC7JFGet0o8XXOAO2	f	f	ava3.png	Артур Пирожков	Челябинск	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
+9	vitaly.sadikov444	vitaly.sadikov133@yandex.ru	$2b$10$7C4aR3bURQjyA1GvX./VSutZ0dmioRNscT3nl/tnhxgpBUh1fDfIC	1	2025-07-07 11:39:00.097	2025-07-07 11:39:01.328	$2b$10$U.g2pY9cUDT0Zai/wGpq.ulKj8rpXM0nVVtw6MZ0wvI/D2Eh.WIUi	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
+10	vitaly.sadikov222	egorskomorohov020606@gmail.com	$2b$10$edmVUmZYfdRF6.ZyFfI4cO/X7IYfzykuaMByQbBl9IEkT3OWykjwy	1	2025-07-10 07:31:46.4	2025-07-10 07:32:29.146	$2b$10$SofNG6kr9RKjCzlseI8OFu.wTef79yQqFvepzdOvKHtu3ZXOv04Vi	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
+6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$UcS.a/DzfOH3A9RMhFkdBOvHtBa1Cq9cM1vawnerReDRK9xKGY5K.	1	2025-07-03 11:03:00.473	2025-07-10 09:52:55.092	$2b$10$EQRc5R7oZEUxeKXxFCCJSe6SPZVxHrZSBsGer3yXdpJyvXldxlSzK	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17
 \.
 
 
@@ -329,6 +364,34 @@ COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "u
 COPY public."_User Specializations" ("A", "B") FROM stdin;
 1	6
 2	6
+\.
+
+
+--
+-- Data for Name: _UserFollows; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."_UserFollows" ("A", "B") FROM stdin;
+7	6
+8	6
+9	6
+10	6
+\.
+
+
+--
+-- Data for Name: _UserLikes; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."_UserLikes" ("A", "B") FROM stdin;
+\.
+
+
+--
+-- Data for Name: _UserStarred; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."_UserStarred" ("A", "B") FROM stdin;
 \.
 
 
@@ -364,7 +427,7 @@ SELECT pg_catalog.setval('public."Specialization_id_seq"', 2, true);
 -- Name: User_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."User_id_seq"', 9, true);
+SELECT pg_catalog.setval('public."User_id_seq"', 10, true);
 
 
 --
@@ -416,6 +479,30 @@ ALTER TABLE ONLY public."_User Specializations"
 
 
 --
+-- Name: _UserFollows _UserFollows_AB_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_UserFollows"
+    ADD CONSTRAINT "_UserFollows_AB_pkey" PRIMARY KEY ("A", "B");
+
+
+--
+-- Name: _UserLikes _UserLikes_AB_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_UserLikes"
+    ADD CONSTRAINT "_UserLikes_AB_pkey" PRIMARY KEY ("A", "B");
+
+
+--
+-- Name: _UserStarred _UserStarred_AB_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_UserStarred"
+    ADD CONSTRAINT "_UserStarred_AB_pkey" PRIMARY KEY ("A", "B");
+
+
+--
 -- Name: Category_name_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -458,6 +545,27 @@ CREATE INDEX "_User Specializations_B_index" ON public."_User Specializations" U
 
 
 --
+-- Name: _UserFollows_B_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "_UserFollows_B_index" ON public."_UserFollows" USING btree ("B");
+
+
+--
+-- Name: _UserLikes_B_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "_UserLikes_B_index" ON public."_UserLikes" USING btree ("B");
+
+
+--
+-- Name: _UserStarred_B_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "_UserStarred_B_index" ON public."_UserStarred" USING btree ("B");
+
+
+--
 -- Name: Project Project_categoryId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -495,6 +603,54 @@ ALTER TABLE ONLY public."_User Specializations"
 
 ALTER TABLE ONLY public."_User Specializations"
     ADD CONSTRAINT "_User Specializations_B_fkey" FOREIGN KEY ("B") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: _UserFollows _UserFollows_A_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_UserFollows"
+    ADD CONSTRAINT "_UserFollows_A_fkey" FOREIGN KEY ("A") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: _UserFollows _UserFollows_B_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_UserFollows"
+    ADD CONSTRAINT "_UserFollows_B_fkey" FOREIGN KEY ("B") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: _UserLikes _UserLikes_A_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_UserLikes"
+    ADD CONSTRAINT "_UserLikes_A_fkey" FOREIGN KEY ("A") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: _UserLikes _UserLikes_B_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_UserLikes"
+    ADD CONSTRAINT "_UserLikes_B_fkey" FOREIGN KEY ("B") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: _UserStarred _UserStarred_A_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_UserStarred"
+    ADD CONSTRAINT "_UserStarred_A_fkey" FOREIGN KEY ("A") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: _UserStarred _UserStarred_B_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_UserStarred"
+    ADD CONSTRAINT "_UserStarred_B_fkey" FOREIGN KEY ("B") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
