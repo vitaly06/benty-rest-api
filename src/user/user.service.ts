@@ -134,11 +134,15 @@ export class UserService {
       throw new BadRequestException('Данного пользователя не существует');
     }
 
-    const nameInfo = user.fullName?.split(' ');
+    // Безопасное разбиение имени на части
+    const nameParts = user.fullName?.trim().split(/\s+/) || [];
+    const name = nameParts[0] || '';
+    const surname = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
     return {
       id: user.id,
-      name: nameInfo[0] || '',
-      surname: nameInfo[1] || '',
+      name: name,
+      surname: surname,
       city: user.city || '',
       specializations: user.specializations?.map((spec) => spec.id) || [],
       level: user.level || '',
