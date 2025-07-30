@@ -9,7 +9,17 @@ async function bootstrap() {
   app.use(cookieParser());
   app.enableCors({
     credentials: true,
-    origin: true,
+    origin: [
+      'http://localhost:5173',
+      'http://89.169.179.243:5173',
+      'https://89.169.179.243:5173',
+      'http://frontend:5173',
+      'https://frontend:5173',
+      'http://benty.work',
+      'https://benty.work',
+      'http://www.benty.work',
+      'https://www.benty.work',
+    ],
   });
   app.useGlobalPipes(new ValidationPipe());
 

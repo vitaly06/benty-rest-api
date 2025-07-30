@@ -8,11 +8,15 @@ services:
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/Grinar?schema=public
-      - REDIS_HOST=redis  # Меняем с localhost на имя сервиса
+      - REDIS_HOST=redis  
       - REDIS_PORT=6379
+      - SMTP_HOST=smtp.beget.com
+      - SMTP_PORT=465
+      - SMTP_USER=support@benty.work
+      - SMTP_PASSWORD=S_Be5173
     depends_on:
       - db
-      - redis  # Добавляем зависимость от Redis
+      - redis  
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules

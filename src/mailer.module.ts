@@ -17,11 +17,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
             user: configService.get('SMTP_USER'), // support@benty.work
             pass: configService.get('SMTP_PASSWORD'), // S_Be5173
           },
-          // Дополнительные настройки для стабильности
-          pool: true,
-          maxConnections: 5,
-          rateDelta: 2000, // Интервал между письмами (мс)
-          rateLimit: 5, // Лимит писем в секунду
         },
         defaults: {
           from: `"Benty" <${configService.get('SMTP_USER')}>`, // Формат "Имя <email>"

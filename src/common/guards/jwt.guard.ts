@@ -21,28 +21,37 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
+    const response = context.switchToHttp().getResponse();
     const accessToken = this.extractAccessToken(request);
 
     try {
       if (accessToken) {
-        // Верифицируем access token с правильным секретом
-        await this.jwtService.verifyAsync(accessToken, {
-          secret: this.configService.get('JWT_ACCESS_SECRET'),
-        });
-        return super.canActivate(context) as Promise<boolean>;
+        try {
+          // Пытаемся верифицировать access token
+          await this.jwtService.verifyAsync(accessToken, {
+            secret: this.configService.get('JWT_ACCESS_SECRET'),
+          });
+          return super.canActivate(context) as Promise<boolean>;
+        } catch (accessError) {
+          // Если токен просрочен, пытаемся обновить
+          if (accessError.name === 'TokenExpiredError') {
+            return this.refreshTokensAndContinue(context, request, response);
+          }
+          throw accessError;
+        }
       }
-      return this.handleTokenRefresh(context, request);
-    } catch (accessError) {
-      if (accessError.name === 'TokenExpiredError') {
-        return this.handleTokenRefresh(context, request);
-      }
-      throw new UnauthorizedException('Недействительный токен');
+      // Если access token отсутствует, пытаемся использовать refresh token
+      return this.refreshTokensAndContinue(context, request, response);
+    } catch (error) {
+      console.error('Authentication error:', error);
+      throw new UnauthorizedException('Требуется авторизация');
     }
   }
 
-  private async handleTokenRefresh(
+  private async refreshTokensAndContinue(
     context: ExecutionContext,
     request: Request,
+    response: any,
   ): Promise<boolean> {
     const refreshToken = this.extractRefreshToken(request);
 
@@ -51,7 +60,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     try {
-      // Верифицируем refresh token с правильным секретом
       const payload = await this.jwtService.verifyAsync(refreshToken, {
         secret: this.configService.get('JWT_REFRESH_SECRET'),
       });
@@ -59,7 +67,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       const user = await this.prisma.user.findUnique({
         where: {
           id: payload.sub,
-          refreshToken, // Проверяем точное совпадение токена
+          refreshToken,
         },
       });
 
@@ -76,9 +84,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
       this.setTokensToResponse(context, newTokens);
 
+      // Обновляем токены в запросе
       request.cookies['access_token'] = newTokens.accessToken;
       request.headers['authorization'] = `Bearer ${newTokens.accessToken}`;
-
+      console.log(response);
       return super.canActivate(context) as Promise<boolean>;
     } catch (refreshError) {
       console.error('Refresh token error:', refreshError);
@@ -121,7 +130,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   ) {
     const response = context.switchToHttp().getResponse();
 
-    // Access token cookie
     response.cookie('access_token', tokens.accessToken, {
       httpOnly: true,
       secure: this.configService.get('NODE_ENV') === 'production',
@@ -129,7 +137,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       maxAge: 15 * 60 * 1000, // 15 минут
     });
 
-    // Refresh token cookie
     response.cookie('refresh_token', tokens.refreshToken, {
       httpOnly: true,
       secure: this.configService.get('NODE_ENV') === 'production',

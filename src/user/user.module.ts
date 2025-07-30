@@ -68,7 +68,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         },
       },
     }),
-    // CustomCacheModule,
   ],
   controllers: [UserController],
   providers: [UserService, JwtStrategy, JwtAuthGuard, JwtRefreshStrategy],

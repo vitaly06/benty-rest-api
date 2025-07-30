@@ -16,7 +16,6 @@ import * as fs from 'fs';
 import { UpdateNotificationsSettingsRequest } from './dto/update-notifications-settings.dto';
 import { ChangeLoginRequest } from './dto/change-login.dto';
 import { MailerService } from '@nestjs-modules/mailer';
-import { JwtPayload } from 'src/auth/interfaces/token.interface';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { ChangeEmailRequest } from './dto/change-email.dto';
@@ -454,6 +453,13 @@ export class UserService {
     const currentUser = await this.prisma.user.findUnique({
       where: { id: req.user.sub },
     });
+
+    const checkUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
+    if (checkUser) {
+      throw new BadRequestException('Данная почта уже занята');
+    }
     const verificationCode = await this.generateVerifyCode();
 
     await this.cacheManager.set(
@@ -695,39 +701,42 @@ export class UserService {
 
     result = {
       id: currentUser.id,
-      fullName: currentUser.fullName,
+      fullName: currentUser.fullName || null,
       specialization:
-        currentUser.specializations[0].name || 'Специализации не указаны',
+        currentUser.specializations?.[0]?.name || 'Специализации не указаны',
       city: currentUser.city || 'Город не указан',
-      logoFileName: currentUser.logoFileName,
-      coverFileName: currentUser.coverFileName,
-      favorited: currentUser.favoritedBy.length,
-      likes: currentUser.likedBy.length,
-      followers: currentUser.followers.length,
+      logoFileName: currentUser.logoFileName || null,
+      coverFileName: currentUser.coverFileName || null,
+      favorited: currentUser.favoritedBy?.length || 0,
+      likes: currentUser.likedBy?.length || 0,
+      followers: currentUser.followers?.length || 0,
       projects: [],
       info: {
-        phoneNumber: currentUser.phoneNumber,
+        phoneNumber: currentUser.phoneNumber || null,
         email: currentUser.email,
-        website: currentUser.website,
-        vk: currentUser.vk,
+        website: currentUser.website || null,
+        vk: currentUser.vk || null,
+        telegram: currentUser.telegram || null,
         city: currentUser.city,
-        experience: currentUser.experience,
-        type: currentUser.profileType.name,
-        createdAt: currentUser.createdAt,
-        about: currentUser.about,
+        experience: currentUser.experience || null,
+        type: currentUser.profileType?.name || 'Тип не указан',
+        createdAt: await this.formatDateTimePeriod(
+          currentUser.createdAt.toString(),
+        ),
+        about: currentUser.about || null,
       },
       followings: await this.getSubscriptions(req.user.sub),
     };
 
-    for (const project of currentUser.projects) {
+    for (const project of currentUser.projects || []) {
       result['projects'].push({
         id: project.id,
         name: project.name,
         photoName: project.photoName,
-        category: project.category.name,
-        userLogo: project.user.logoFileName,
-        fullName: project.user.fullName,
-        profileType: project.user.profileType.name,
+        category: project.category?.name || 'Категория не указана',
+        userLogo: project.user?.logoFileName,
+        fullName: project.user?.fullName,
+        profileType: project.user?.profileType?.name || 'Тип не указан',
       });
     }
 
@@ -1015,5 +1024,38 @@ export class UserService {
         expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
       }),
     };
+  }
+
+  private formatDateTimePeriod(dateTimeStr: string): string {
+    const date = new Date(dateTimeStr);
+    const now = new Date();
+
+    // Разница в миллисекундах
+    const diffMs = now.getTime() - date.getTime();
+
+    // Конвертируем в дни
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    // Если больше года (365 дней)
+    if (diffDays >= 365) {
+      const years = Math.floor(diffDays / 365);
+      const remainingDays = diffDays % 365;
+      const months = Math.floor(remainingDays / 30);
+
+      if (months > 0) {
+        return `${years} год. ${months} мес.`;
+      } else {
+        return `${years} год.`;
+      }
+    }
+    // Если больше месяца (30 дней)
+    else if (diffDays >= 30) {
+      const months = Math.floor(diffDays / 30);
+      return `${months} мес.`;
+    }
+    // Если меньше месяца
+    else {
+      return `${diffDays} дн.`;
+    }
   }
 }

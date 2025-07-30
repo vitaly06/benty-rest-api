@@ -331,6 +331,10 @@ COPY public."Project" (id, name, "photoName", "categoryId", "userId") FROM stdin
 7	Nexus — Visual identity	1751622432970-468433038.png	3	8
 8	Тематическое исследование: Дизайн музыкального приложения	1751622451975-973069535.png	3	6
 9	Web3Pay© — Visual identity	1751622474871-653089185.png	3	7
+10	Система тестирования	1752235166056-826103934.png	3	6
+11	Система тестирования	1752235182470-903627617.png	3	7
+12	Система тестирования	1752235202230-60995368.png	3	8
+13	Система тестирования2	1752235204864-261067350.png	3	8
 \.
 
 
@@ -353,7 +357,7 @@ COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "u
 8	vital1332y.sadikov	vitaly.sadikov232@yandex.ru	$2b$10$Q3/C/I3NtwH6S65bMLJEM.GN09YQzI1F3UuriuFgZ3CfLX7WoNyJK	1	2025-07-04 08:58:47.464	2025-07-04 11:00:50.344	$2b$10$183MhKoCPo2J7OQrDaD3xekd8FOVWTGO5KPagC7JFGet0o8XXOAO2	f	f	ava3.png	Артур Пирожков	Челябинск	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
 9	vitaly.sadikov444	vitaly.sadikov133@yandex.ru	$2b$10$7C4aR3bURQjyA1GvX./VSutZ0dmioRNscT3nl/tnhxgpBUh1fDfIC	1	2025-07-07 11:39:00.097	2025-07-07 11:39:01.328	$2b$10$U.g2pY9cUDT0Zai/wGpq.ulKj8rpXM0nVVtw6MZ0wvI/D2Eh.WIUi	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
 10	vitaly.sadikov222	egorskomorohov020606@gmail.com	$2b$10$edmVUmZYfdRF6.ZyFfI4cO/X7IYfzykuaMByQbBl9IEkT3OWykjwy	1	2025-07-10 07:31:46.4	2025-07-10 07:32:29.146	$2b$10$SofNG6kr9RKjCzlseI8OFu.wTef79yQqFvepzdOvKHtu3ZXOv04Vi	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
-6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$UcS.a/DzfOH3A9RMhFkdBOvHtBa1Cq9cM1vawnerReDRK9xKGY5K.	1	2025-07-03 11:03:00.473	2025-07-10 09:52:55.092	$2b$10$EQRc5R7oZEUxeKXxFCCJSe6SPZVxHrZSBsGer3yXdpJyvXldxlSzK	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17
+6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$UcS.a/DzfOH3A9RMhFkdBOvHtBa1Cq9cM1vawnerReDRK9xKGY5K.	1	2025-07-03 11:03:00.473	2025-07-11 10:02:29.474	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImlhdCI6MTc1MjIyODE0OSwiZXhwIjoxNzUyODMyOTQ5fQ.BGgGPajkcn6-A--3jA0f6K85AV3He5-HTNAYOLvwc54	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17
 \.
 
 
@@ -413,7 +417,7 @@ SELECT pg_catalog.setval('public."ProfileType_id_seq"', 2, true);
 -- Name: Project_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Project_id_seq"', 9, true);
+SELECT pg_catalog.setval('public."Project_id_seq"', 13, true);
 
 
 --

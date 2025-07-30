@@ -9,8 +9,8 @@ import { ProjectModule } from './project/project.module';
 import { SpecializationModule } from './specialization/specialization.module';
 import { PhotoModule } from './photo/photo.module';
 import { CacheModule } from '@nestjs/cache-manager';
-// import * as redisStore from 'cache-manager-redis-store';
 import * as redisStore from 'cache-manager-ioredis';
+
 @Module({
   imports: [
     PrismaModule,
