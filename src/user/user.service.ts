@@ -134,21 +134,21 @@ export class UserService {
       throw new BadRequestException('Данного пользователя не существует');
     }
 
-    const nameInfo = user.fullName.split(' ');
+    const nameInfo = user.fullName?.split(' ');
     return {
       id: user.id,
       name: nameInfo[0] || '',
       surname: nameInfo[1] || '',
-      city: user.city,
+      city: user.city || '',
       specializations: user.specializations?.map((spec) => spec.id) || [],
-      level: user.level,
-      experience: user.experience,
-      about: user.about,
-      website: user.website,
-      phoneNumber: user.phoneNumber,
-      email: user.email,
-      vk: user.vk,
-      telegram: user.telegram,
+      level: user.level || '',
+      experience: user.experience || '',
+      about: user.about || '',
+      website: user.website || '',
+      phoneNumber: user.phoneNumber || '',
+      email: user.email || '',
+      vk: user.vk || '',
+      telegram: user.telegram || '',
     };
   }
 
