@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProjectDto } from './dto/create-project.dto';
-import { ProjectResponseDto } from './dto/project-response.dto';
 
 @Injectable()
 export class ProjectService {
@@ -11,38 +10,74 @@ export class ProjectService {
     createProjectDto: CreateProjectDto,
     userId: number,
     coverImage?: Express.Multer.File,
-  ): Promise<ProjectResponseDto> {
-    const { name, categoryId, content } = createProjectDto;
+  ) {
+    const {
+      name,
+      description,
+      categoryId,
+      specializationId,
+      content,
+      firstLink,
+      secondLink,
+    } = createProjectDto;
 
-    // Validate user and category exist
-    await this.validateUserAndCategory(userId, categoryId);
+    await this.validateRelations(userId, categoryId, specializationId);
 
-    try {
-      const project = await this.prisma.project.create({
-        data: {
-          name,
-          userId,
-          categoryId,
-          photoName: coverImage?.filename || null,
-          content: content ? JSON.parse(JSON.stringify(content)) : null,
-        },
-        include: {
-          user: {
-            include: {
-              specializations: true,
-            },
-          },
-          category: true,
-        },
+    return this.prisma.project.create({
+      data: {
+        name,
+        description,
+        photoName: coverImage?.filename,
+        categoryId,
+        specializationId,
+        userId,
+        firstLink,
+        secondLink,
+        content: content ? JSON.parse(JSON.stringify(content)) : null,
+      },
+      include: {
+        user: true,
+        category: true,
+        specialization: true,
+      },
+    });
+  }
+
+  private async validateRelations(
+    userId: number,
+    categoryId: number,
+    specializationId?: number,
+  ) {
+    // Проверка пользователя
+    const userExists = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!userExists) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    // Проверка категории
+    const categoryExists = await this.prisma.category.findUnique({
+      where: { id: categoryId },
+    });
+    if (!categoryExists) {
+      throw new NotFoundException(`Category with ID ${categoryId} not found`);
+    }
+
+    // Проверка специализации (если указана)
+    if (specializationId) {
+      const specializationExists = await this.prisma.specialization.findUnique({
+        where: { id: specializationId },
       });
-
-      return this.mapToProjectResponse(project);
-    } catch (error) {
-      throw new Error(`Failed to create project: ${error.message}`);
+      if (!specializationExists) {
+        throw new NotFoundException(
+          `Specialization with ID ${specializationId} not found`,
+        );
+      }
     }
   }
 
-  async getProjectsForMainPage(): Promise<ProjectResponseDto[]> {
+  async getProjectsForMainPage() {
     try {
       const projects = await this.prisma.project.findMany({
         take: 8,
@@ -81,7 +116,7 @@ export class ProjectService {
     }
   }
 
-  private mapToProjectResponse(project: any): ProjectResponseDto {
+  private mapToProjectResponse(project: any) {
     return {
       id: project.id,
       name: project.name,

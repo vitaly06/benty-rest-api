@@ -1,27 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-class AuthorDto {
-  @ApiProperty()
-  id: number;
-
-  @ApiProperty()
-  name: string;
-
-  @ApiProperty({ nullable: true })
-  avatar: string | null;
-
-  @ApiProperty({ type: [String] })
-  specializations: string[];
-}
-
-class CategoryDto {
-  @ApiProperty()
-  id: number;
-
-  @ApiProperty()
-  name: string;
-}
-
 export class ProjectResponseDto {
   @ApiProperty()
   id: number;
@@ -30,16 +8,28 @@ export class ProjectResponseDto {
   name: string;
 
   @ApiProperty({ nullable: true })
-  coverImage: string | null;
+  description?: string;
+
+  @ApiProperty({ nullable: true })
+  photoName?: string;
+
+  @ApiProperty({ nullable: true })
+  firstLink?: string;
+
+  @ApiProperty({ nullable: true })
+  secondLink?: string;
 
   @ApiProperty()
-  content: any;
+  categoryId: number;
 
-  @ApiProperty({ type: AuthorDto })
-  author: AuthorDto;
+  @ApiProperty({ nullable: true })
+  specializationId?: number;
 
-  @ApiProperty({ type: CategoryDto })
-  category: CategoryDto;
+  @ApiProperty()
+  userId: number;
+
+  @ApiProperty({ type: Object, nullable: true })
+  content?: any;
 
   @ApiProperty()
   createdAt: Date;

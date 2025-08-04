@@ -10,6 +10,7 @@ import {
   MaxFileSizeValidator,
   FileTypeValidator,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { Express } from 'express';
 import { ProjectService } from './project.service';
@@ -24,6 +25,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProjectResponseDto } from './dto/project-response.dto';
 import { RequestWithUser } from 'src/auth/interfaces/request-with-user.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
 
 @ApiTags('Projects')
 @Controller('projects')
@@ -45,6 +47,7 @@ export class ProjectController {
     type: CreateProjectDto,
   })
   @Post('create-projects')
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('coverImage'))
   async createProject(
     @Body() createProjectDto: CreateProjectDto,

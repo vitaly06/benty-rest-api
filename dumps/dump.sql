@@ -98,7 +98,13 @@ CREATE TABLE public."Project" (
     "photoName" text NOT NULL,
     "categoryId" integer NOT NULL,
     "userId" integer NOT NULL,
-    content jsonb
+    content jsonb,
+    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updatedAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    description text,
+    "firstLink" text,
+    "secondLink" text,
+    "specializationId" integer NOT NULL
 );
 
 
@@ -323,19 +329,19 @@ COPY public."ProfileType" (id, name) FROM stdin;
 -- Data for Name: Project; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Project" (id, name, "photoName", "categoryId", "userId", content) FROM stdin;
-2	Брендинг недвижимости Homotiq	1751622214349-830472717.png	3	6	\N
-3	Syncfine Fintech Branding	1751622348345-606634986.png	3	7	\N
-4	Брендинг недвижимости Homotiq	1751622370914-153436948.png	3	8	\N
-5	Брендинг SunVault Eco Energy	1751622387365-230599585.png	3	6	\N
-6	Брендинг фестиваля Visiou	1751622409601-423421912.png	3	7	\N
-7	Nexus — Visual identity	1751622432970-468433038.png	3	8	\N
-8	Тематическое исследование: Дизайн музыкального приложения	1751622451975-973069535.png	3	6	\N
-9	Web3Pay© — Visual identity	1751622474871-653089185.png	3	7	\N
-10	Система тестирования	1752235166056-826103934.png	3	6	\N
-11	Система тестирования	1752235182470-903627617.png	3	7	\N
-12	Система тестирования	1752235202230-60995368.png	3	8	\N
-13	Система тестирования2	1752235204864-261067350.png	3	8	\N
+COPY public."Project" (id, name, "photoName", "categoryId", "userId", content, "createdAt", "updatedAt", description, "firstLink", "secondLink", "specializationId") FROM stdin;
+2	Брендинг недвижимости Homotiq	1751622214349-830472717.png	3	6	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
+3	Syncfine Fintech Branding	1751622348345-606634986.png	3	7	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
+4	Брендинг недвижимости Homotiq	1751622370914-153436948.png	3	8	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
+5	Брендинг SunVault Eco Energy	1751622387365-230599585.png	3	6	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
+6	Брендинг фестиваля Visiou	1751622409601-423421912.png	3	7	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
+7	Nexus — Visual identity	1751622432970-468433038.png	3	8	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
+8	Тематическое исследование: Дизайн музыкального приложения	1751622451975-973069535.png	3	6	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
+9	Web3Pay© — Visual identity	1751622474871-653089185.png	3	7	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
+10	Система тестирования	1752235166056-826103934.png	3	6	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
+11	Система тестирования	1752235182470-903627617.png	3	7	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
+12	Система тестирования	1752235202230-60995368.png	3	8	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
+13	Система тестирования2	1752235204864-261067350.png	3	8	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
 \.
 
 
@@ -577,6 +583,14 @@ CREATE INDEX "_UserStarred_B_index" ON public."_UserStarred" USING btree ("B");
 
 ALTER TABLE ONLY public."Project"
     ADD CONSTRAINT "Project_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES public."Category"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: Project Project_specializationId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Project"
+    ADD CONSTRAINT "Project_specializationId_fkey" FOREIGN KEY ("specializationId") REFERENCES public."Specialization"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 --

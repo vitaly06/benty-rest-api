@@ -62,23 +62,30 @@ model ProfileType {
 }
 
 model Specialization {
-  id    Int    @id @default(autoincrement())
-  name  String @unique
-  users User[] @relation("User Specializations")
+  id      Int       @id @default(autoincrement())
+  name    String    @unique
+  users   User[]    @relation("User Specializations")
+  Project Project[]
 }
 
 // Проект
 model Project {
-  id         Int      @id @default(autoincrement())
-  name       String
-  photoName  String
-  categoryId Int
-  userId     Int
-  user       User     @relation(fields: [userId], references: [id])
-  category   Category @relation(fields: [categoryId], references: [id])
-  content    Json?
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  photoName   String
+  firstLink   String?
+  secondLink  String?
 
-  updatedAt DateTime @updatedAt
+  categoryId       Int
+  userId           Int
+  specializationId Int
+  specialization   Specialization @relation(fields: [specializationId], references: [id])
+  user             User           @relation(fields: [userId], references: [id])
+  category         Category       @relation(fields: [categoryId], references: [id])
+  content          Json?
+
+  updatedAt DateTime @default(now()) @updatedAt
   createdAt DateTime @default(now())
 }
 
