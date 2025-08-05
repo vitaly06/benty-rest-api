@@ -9,6 +9,8 @@ import { ProjectModule } from './project/project.module';
 import { SpecializationModule } from './specialization/specialization.module';
 import { PhotoModule } from './photo/photo.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { StorageModule } from './storage/storage.module';
+import { CategoryModule } from './category/category.module';
 import * as redisStore from 'cache-manager-ioredis';
 
 @Module({
@@ -31,10 +33,12 @@ import * as redisStore from 'cache-manager-ioredis';
       ttl: 0,
       isGlobal: true,
       store: redisStore,
-      // host: 'localhost',
-      host: 'redis',
+      host: 'localhost',
+      // host: 'redis',
       port: 6379,
     }),
+    StorageModule,
+    CategoryModule,
   ],
 })
 export class AppModule {}

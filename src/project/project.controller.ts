@@ -6,11 +6,9 @@ import {
   UploadedFile,
   UseInterceptors,
   HttpStatus,
-  ParseFilePipe,
-  MaxFileSizeValidator,
-  FileTypeValidator,
   Req,
   UseGuards,
+  Param,
 } from '@nestjs/common';
 import { Express } from 'express';
 import { ProjectService } from './project.service';
@@ -43,8 +41,54 @@ export class ProjectController {
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
-    description: 'Project creation data',
-    type: CreateProjectDto,
+    description: 'Project data with cover image',
+    schema: {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          example: 'Дизайн для мобильного приложения',
+          description: 'Project name',
+        },
+        description: {
+          type: 'string',
+          example: 'Описание проекта',
+          description: 'Project description',
+        },
+        specializationId: {
+          type: 'number',
+          example: 1,
+          description: 'Specialization ID',
+        },
+        categoryId: {
+          type: 'number',
+          example: 3,
+          description: 'Category ID',
+        },
+        content: {
+          type: 'string',
+          description: 'JSON stringified array of Slate.js content',
+          example:
+            '[{"type":"paragraph","children":[{"text":"Project content"}]}]',
+        },
+        firstLink: {
+          type: 'string',
+          example: 'figma.com/my-project',
+          description: 'First project link',
+        },
+        secondLink: {
+          type: 'string',
+          example: 'figma.com/my-second-project',
+          description: 'Second project link',
+        },
+        coverImage: {
+          type: 'string',
+          format: 'binary',
+          description: 'Project cover image',
+        },
+      },
+      required: ['name', 'specializationId', 'categoryId', 'content'],
+    },
   })
   @Post('create-projects')
   @UseGuards(JwtAuthGuard)
@@ -52,16 +96,7 @@ export class ProjectController {
   async createProject(
     @Body() createProjectDto: CreateProjectDto,
     @Req() req: RequestWithUser,
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5MB
-          new FileTypeValidator({ fileType: 'image/*' }),
-        ],
-        fileIsRequired: false,
-      }),
-    )
-    coverImage?: Express.Multer.File,
+    @UploadedFile() coverImage?: Express.Multer.File,
   ) {
     return this.projectService.createProject(
       createProjectDto,
@@ -82,5 +117,32 @@ export class ProjectController {
   @Get('main')
   async getProjectsForMainPage() {
     return this.projectService.getProjectsForMainPage();
+  }
+
+  @Get('project-by-id/:projectId')
+  async getProjectById(@Param('projectId') projectId: string) {
+    return await this.projectService.getProjectWithContent(+projectId);
+  }
+  // @Get(':id/content')
+  // async getProjectContent(@Param('id') projectId: string) {
+  //   return this.projectService.getProjectContent(+projectId);
+  // }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('like-project/:projectId')
+  async likeProject(
+    @Param('projectId') projectId: string,
+    @Req() req: RequestWithUser,
+  ) {
+    return await this.projectService.likeProject(+projectId, req.user.sub);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('unlike-project/:projectId')
+  async unlikeProject(
+    @Param('projectId') projectId: string,
+    @Req() req: RequestWithUser,
+  ) {
+    return await this.projectService.unlikeProject(+projectId, req.user.sub);
   }
 }

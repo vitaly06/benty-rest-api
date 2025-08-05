@@ -1,80 +1,151 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProjectDto } from './dto/create-project.dto';
+import { StorageService } from 'src/storage/storage.service';
 
 @Injectable()
 export class ProjectService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storageService: StorageService,
+  ) {}
 
   async createProject(
-    createProjectDto: CreateProjectDto,
+    dto: CreateProjectDto,
     userId: number,
     coverImage?: Express.Multer.File,
   ) {
-    const {
-      name,
-      description,
-      categoryId,
-      specializationId,
-      content,
-      firstLink,
-      secondLink,
-    } = createProjectDto;
+    // 1. Проверяем существование связанных сущностей
+    const [category, specialization] = await Promise.all([
+      this.prisma.category.findUnique({ where: { id: +dto.categoryId } }),
+      this.prisma.specialization.findUnique({
+        where: { id: +dto.specializationId },
+      }),
+    ]);
+    if (!category) throw new NotFoundException('Category not found');
+    if (!specialization)
+      throw new NotFoundException('Specialization not found');
 
-    await this.validateRelations(userId, categoryId, specializationId);
+    // 2. Сначала сохраняем контент в файл (ВНИМАНИЕ: до создания проекта!)
+    const tempFileName = `temp_${Date.now()}.json`;
+    const { path, size, hash } = await this.storageService.saveContent(
+      tempFileName,
+      dto.content,
+    );
 
-    return this.prisma.project.create({
-      data: {
-        name,
-        description,
-        photoName: coverImage?.filename,
-        categoryId,
-        specializationId,
-        userId,
-        firstLink,
-        secondLink,
-        content: content ? JSON.parse(JSON.stringify(content)) : null,
-      },
-      include: {
-        user: true,
-        category: true,
-        specialization: true,
-      },
-    });
+    console.log(coverImage?.filename);
+
+    try {
+      // 3. Создаем проект (БЕЗ передачи content в Prisma)
+      const project = await this.prisma.project.create({
+        data: {
+          name: dto.name,
+          description: dto.description || null,
+          userId: +userId,
+          photoName: coverImage?.filename || null,
+          categoryId: +dto.categoryId,
+          specializationId: +dto.specializationId,
+          firstLink: dto.firstLink || null,
+          secondLink: dto.secondLink || null,
+          contentPath: path,
+          contentSize: size,
+          contentHash: hash,
+        },
+      });
+
+      // 4. Переименовываем файл с учетом ID проекта
+      const newFileName = `project_${project.id}.json`;
+      await this.storageService.renameFile(path, newFileName);
+
+      return this.prisma.project.update({
+        where: { id: project.id },
+        data: { contentPath: newFileName },
+        include: { user: true, category: true, specialization: true },
+      });
+    } catch (error) {
+      // Удаляем временный файл при ошибке
+      await this.storageService.deleteFile(path).catch(console.error);
+      throw error;
+    }
   }
 
-  private async validateRelations(
-    userId: number,
-    categoryId: number,
-    specializationId?: number,
-  ) {
-    // Проверка пользователя
-    const userExists = await this.prisma.user.findUnique({
-      where: { id: userId },
+  async getProjectWithContent(projectId: number) {
+    // Получаем проект
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        photoName: true,
+        firstLink: true,
+        secondLink: true,
+        contentPath: true,
+        contentSize: true,
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            login: true,
+            logoFileName: true,
+            city: true,
+          },
+        },
+        likedBy: {
+          select: {
+            id: true,
+            logoFileName: true,
+          },
+        },
+      },
     });
-    if (!userExists) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
+
+    if (!project) {
+      throw new NotFoundException('Проект с таким id не найден');
     }
 
-    // Проверка категории
-    const categoryExists = await this.prisma.category.findUnique({
-      where: { id: categoryId },
+    // Получаем контент
+    const content = project.contentPath
+      ? await this.storageService.loadContent(project.contentPath)
+      : null;
+
+    // Форматируем результат
+    const result = {
+      ...project,
+      likedBy:
+        project.likedBy.length > 5
+          ? project.likedBy.slice(0, 5)
+          : project.likedBy,
+      content,
+    };
+
+    return result;
+  }
+
+  // async getProjectContent(projectId: number) {
+  //   const project = await this.prisma.project.findUnique({
+  //     where: { id: projectId },
+  //     select: { contentPath: true },
+  //   });
+
+  //   if (!project?.contentPath) {
+  //     throw new NotFoundException('Project content not found');
+  //   }
+
+  //   return this.storageService.loadContent(project.contentPath);
+  // }
+
+  async deleteProject(projectId: number) {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: { contentPath: true },
     });
-    if (!categoryExists) {
-      throw new NotFoundException(`Category with ID ${categoryId} not found`);
+
+    if (project?.contentPath) {
+      await this.storageService.deleteFile(project.contentPath);
     }
 
-    // Проверка специализации (если указана)
-    if (specializationId) {
-      const specializationExists = await this.prisma.specialization.findUnique({
-        where: { id: specializationId },
-      });
-      if (!specializationExists) {
-        throw new NotFoundException(
-          `Specialization with ID ${specializationId} not found`,
-        );
-      }
-    }
+    return this.prisma.project.delete({ where: { id: projectId } });
   }
 
   async getProjectsForMainPage() {
@@ -97,31 +168,12 @@ export class ProjectService {
     }
   }
 
-  private async validateUserAndCategory(
-    userId: number,
-    categoryId: number,
-  ): Promise<void> {
-    const userExists = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-    if (!userExists) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
-    }
-
-    const categoryExists = await this.prisma.category.findUnique({
-      where: { id: categoryId },
-    });
-    if (!categoryExists) {
-      throw new NotFoundException(`Category with ID ${categoryId} not found`);
-    }
-  }
-
   private mapToProjectResponse(project: any) {
     return {
       id: project.id,
       name: project.name,
       coverImage: project.photoName,
-      content: project.content,
+      contentPath: project.contentPath, // Теперь возвращаем путь к контенту
       author: {
         id: project.user.id,
         name: project.user.fullName,
@@ -135,5 +187,101 @@ export class ProjectService {
       createdAt: project.createdAt,
       updatedAt: project.updatedAt,
     };
+  }
+
+  // async getProjectById(projectId: number) {
+  //   const project = await this.prisma.project.findUnique({
+  //     where: { id: projectId },
+  //     select: {
+  //       id: true,
+  //       name: true,
+  //       description: true,
+  //       photoName: true,
+  //       firstLink: true,
+  //       secondLink: true,
+  //       contentPath: true, // Заменили content на contentPath
+  //       contentSize: true,
+  //       user: {
+  //         select: {
+  //           id: true,
+  //           fullName: true,
+  //           login: true,
+  //           logoFileName: true,
+  //           city: true,
+  //         },
+  //       },
+  //       likedBy: {
+  //         select: {
+  //           id: true,
+  //           logoFileName: true,
+  //         },
+  //       },
+  //     },
+  //   });
+
+  //   if (!project) {
+  //     throw new NotFoundException('Проект с таким id не найден');
+  //   }
+
+  //   project.likedBy =
+  //     project.likedBy.length > 5
+  //       ? project.likedBy.slice(0, 5)
+  //       : project.likedBy;
+
+  //   return project;
+  // }
+
+  async likeProject(projectId: number, userId: number) {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+    });
+
+    if (!project) {
+      throw new NotFoundException('Проект с таким id не найден');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь с таким id не найден');
+    }
+
+    return this.prisma.project.update({
+      where: { id: projectId },
+      data: {
+        likedBy: {
+          connect: { id: userId },
+        },
+      },
+    });
+  }
+
+  async unlikeProject(projectId: number, userId: number) {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+    });
+
+    if (!project) {
+      throw new NotFoundException('Проект с таким id не найден');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь с таким id не найден');
+    }
+
+    return this.prisma.project.update({
+      where: { id: projectId },
+      data: {
+        likedBy: {
+          disconnect: { id: userId },
+        },
+      },
+    });
   }
 }

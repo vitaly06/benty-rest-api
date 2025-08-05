@@ -89,50 +89,6 @@ ALTER SEQUENCE public."ProfileType_id_seq" OWNED BY public."ProfileType".id;
 
 
 --
--- Name: Project; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public."Project" (
-    id integer NOT NULL,
-    name text NOT NULL,
-    "photoName" text NOT NULL,
-    "categoryId" integer NOT NULL,
-    "userId" integer NOT NULL,
-    content jsonb,
-    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "updatedAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    description text,
-    "firstLink" text,
-    "secondLink" text,
-    "specializationId" integer NOT NULL
-);
-
-
-ALTER TABLE public."Project" OWNER TO postgres;
-
---
--- Name: Project_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public."Project_id_seq"
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public."Project_id_seq" OWNER TO postgres;
-
---
--- Name: Project_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public."Project_id_seq" OWNED BY public."Project".id;
-
-
---
 -- Name: Specialization; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -224,6 +180,18 @@ ALTER SEQUENCE public."User_id_seq" OWNED BY public."User".id;
 
 
 --
+-- Name: _ProjectLikes; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."_ProjectLikes" (
+    "A" integer NOT NULL,
+    "B" integer NOT NULL
+);
+
+
+ALTER TABLE public."_ProjectLikes" OWNER TO postgres;
+
+--
 -- Name: _User Specializations; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -272,6 +240,52 @@ CREATE TABLE public."_UserStarred" (
 ALTER TABLE public."_UserStarred" OWNER TO postgres;
 
 --
+-- Name: projects; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.projects (
+    id integer NOT NULL,
+    name text NOT NULL,
+    description text,
+    "photoName" text,
+    "firstLink" text,
+    "secondLink" text,
+    "categoryId" integer NOT NULL,
+    "userId" integer NOT NULL,
+    "specializationId" integer NOT NULL,
+    "updatedAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "contentHash" text,
+    "contentPath" text,
+    "contentSize" integer
+);
+
+
+ALTER TABLE public.projects OWNER TO postgres;
+
+--
+-- Name: projects_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.projects_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.projects_id_seq OWNER TO postgres;
+
+--
+-- Name: projects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.projects_id_seq OWNED BY public.projects.id;
+
+
+--
 -- Name: Category id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -286,13 +300,6 @@ ALTER TABLE ONLY public."ProfileType" ALTER COLUMN id SET DEFAULT nextval('publi
 
 
 --
--- Name: Project id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public."Project" ALTER COLUMN id SET DEFAULT nextval('public."Project_id_seq"'::regclass);
-
-
---
 -- Name: Specialization id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -304,6 +311,13 @@ ALTER TABLE ONLY public."Specialization" ALTER COLUMN id SET DEFAULT nextval('pu
 --
 
 ALTER TABLE ONLY public."User" ALTER COLUMN id SET DEFAULT nextval('public."User_id_seq"'::regclass);
+
+
+--
+-- Name: projects id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.projects ALTER COLUMN id SET DEFAULT nextval('public.projects_id_seq'::regclass);
 
 
 --
@@ -322,26 +336,6 @@ COPY public."Category" (id, name) FROM stdin;
 COPY public."ProfileType" (id, name) FROM stdin;
 1	Личный
 2	Компания
-\.
-
-
---
--- Data for Name: Project; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public."Project" (id, name, "photoName", "categoryId", "userId", content, "createdAt", "updatedAt", description, "firstLink", "secondLink", "specializationId") FROM stdin;
-2	Брендинг недвижимости Homotiq	1751622214349-830472717.png	3	6	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
-3	Syncfine Fintech Branding	1751622348345-606634986.png	3	7	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
-4	Брендинг недвижимости Homotiq	1751622370914-153436948.png	3	8	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
-5	Брендинг SunVault Eco Energy	1751622387365-230599585.png	3	6	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
-6	Брендинг фестиваля Visiou	1751622409601-423421912.png	3	7	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
-7	Nexus — Visual identity	1751622432970-468433038.png	3	8	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
-8	Тематическое исследование: Дизайн музыкального приложения	1751622451975-973069535.png	3	6	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
-9	Web3Pay© — Visual identity	1751622474871-653089185.png	3	7	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
-10	Система тестирования	1752235166056-826103934.png	3	6	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
-11	Система тестирования	1752235182470-903627617.png	3	7	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
-12	Система тестирования	1752235202230-60995368.png	3	8	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
-13	Система тестирования2	1752235204864-261067350.png	3	8	\N	2025-08-03 21:00:30.746	2025-08-03 21:00:30.746	\N	\N	\N	1
 \.
 
 
@@ -365,7 +359,15 @@ COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "u
 9	vitaly.sadikov444	vitaly.sadikov133@yandex.ru	$2b$10$7C4aR3bURQjyA1GvX./VSutZ0dmioRNscT3nl/tnhxgpBUh1fDfIC	1	2025-07-07 11:39:00.097	2025-07-07 11:39:01.328	$2b$10$U.g2pY9cUDT0Zai/wGpq.ulKj8rpXM0nVVtw6MZ0wvI/D2Eh.WIUi	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
 10	vitaly.sadikov222	egorskomorohov020606@gmail.com	$2b$10$edmVUmZYfdRF6.ZyFfI4cO/X7IYfzykuaMByQbBl9IEkT3OWykjwy	1	2025-07-10 07:31:46.4	2025-07-10 07:32:29.146	$2b$10$SofNG6kr9RKjCzlseI8OFu.wTef79yQqFvepzdOvKHtu3ZXOv04Vi	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
 11	tgflk	tgflk_tuv@mail.ru	$2b$10$vzwiWqqrOo6OstA.dWHmJuI8.sY/8OJ6hpAEKCPlA7gB.Yi5mOTA6	1	2025-07-14 18:39:22.108	2025-07-14 18:40:13.792	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjExLCJsb2dpbiI6InRnZmxrIiwiaWF0IjoxNzUyNTE4NDEzLCJleHAiOjE3NTMxMjMyMTN9.kWrY-bIHzM0X04J76hk78SeCvFu_5wcHPuep3ANvrCo	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
-6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$UcS.a/DzfOH3A9RMhFkdBOvHtBa1Cq9cM1vawnerReDRK9xKGY5K.	1	2025-07-03 11:03:00.473	2025-07-11 10:02:29.474	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImlhdCI6MTc1MjIyODE0OSwiZXhwIjoxNzUyODMyOTQ5fQ.BGgGPajkcn6-A--3jA0f6K85AV3He5-HTNAYOLvwc54	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17
+6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$UcS.a/DzfOH3A9RMhFkdBOvHtBa1Cq9cM1vawnerReDRK9xKGY5K.	1	2025-07-03 11:03:00.473	2025-08-05 17:13:03.763	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImlhdCI6MTc1NDQxMzk4MywiZXhwIjoxNzU1MDE4NzgzfQ.4TbQ_GE7yUCmtvkKubN2lwuk6M4NDlsra4HqahqnpiU	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17
+\.
+
+
+--
+-- Data for Name: _ProjectLikes; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."_ProjectLikes" ("A", "B") FROM stdin;
 \.
 
 
@@ -375,7 +377,11 @@ COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "u
 
 COPY public."_User Specializations" ("A", "B") FROM stdin;
 1	6
-2	6
+2	7
+1	8
+2	9
+1	10
+2	11
 \.
 
 
@@ -408,6 +414,26 @@ COPY public."_UserStarred" ("A", "B") FROM stdin;
 
 
 --
+-- Data for Name: projects; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.projects (id, name, description, "photoName", "firstLink", "secondLink", "categoryId", "userId", "specializationId", "updatedAt", "createdAt", "contentHash", "contentPath", "contentSize") FROM stdin;
+10	Брендинг SunVault Eco Energy	Брендинг SunVault Eco Energy	1754412145355-208180517.png	\N	\N	3	6	1	2025-08-05 16:42:25.385	2025-08-05 16:42:25.381	1672dc072e12893d09780f69b9b7e65d83fe74fd8c4c1e8bc12bdf0f97403c14	project_10.json	1076968
+13	Тематическое исследование: Дизайн музыкального приложения	Тематическое исследование: Дизайн музыкального приложения	1754413001865-271176779.png	\N	\N	3	6	1	2025-08-05 16:56:42.191	2025-08-05 16:56:42.103	08b4e412ebf605eec21b5d946d62cbda5a004aa3c2a2379a62aec8c2f8670594	project_13.json	714484
+16	Syncfine Fintech Branding	Syncfine Fintech Branding	1754413784532-993438299.png	\N	\N	3	6	1	2025-08-05 17:09:44.553	2025-08-05 17:09:44.549	c8fb82d51a176a906bade3b01f2af61d8000f150d0377d12cf1a14d7364180f2	project_16.json	651047
+7	Брендинг недвижимости Homotiq	Дизайн для недвижимости Homotiq	1751622214349-830472717.png	\N	\N	3	6	1	2025-08-05 17:17:44.498	2025-08-05 16:24:58.467	682af7867ce883803c1c287ae8fe0a921fc678c8f428ed1dd82b2ec0896230c1	project_7.json	1071317
+8	Syncfine Fintech Branding	Lorem Ipsum Syncfine Fintech Branding	1751622474871-653089185.png	\N	\N	3	7	1	2025-08-05 17:18:55.388	2025-08-05 16:35:41.2	6ac587d50b8b34209427b3c8dcb275c92c105d03328bd16e2f35c2243fa292c1	project_8.json	1260812
+9	Брендинг недвижимости Homotiq	Брендинг недвижимости Homotiq	1754411991004-100043934.png	\N	\N	3	8	1	2025-08-05 17:18:55.388	2025-08-05 16:39:51.028	7340edbb49de60163bd284279e2c1fe209f466e1ec1e26a9314b39dd963f7025	project_9.json	628044
+11	Брендинг фестиваля Visiou	Брендинг фестиваля Visiou\r\n	1754412366025-570242612.png	\N	\N	3	7	1	2025-08-05 17:18:55.388	2025-08-05 16:46:06.071	282e17d903c7d7b50127f1a37edba4846c5f6a05935e20ae4f886798305c7eaa	project_11.json	1215879
+12	Nexus — Visual identity	Nexus — Visual identity	1754412588868-395124168.png	\N	\N	3	8	1	2025-08-05 17:18:55.388	2025-08-05 16:49:48.893	6a420a6f690973e041bcd7ca7175ee5a95d46e989b2e94caf4707dbeca8d8cf1	project_12.json	800862
+14	Web3Pay© — Visual identity	Web3Pay© — Visual identity	1754413526310-41337425.png	\N	\N	3	7	1	2025-08-05 17:18:55.388	2025-08-05 17:05:26.354	3a198a13838858ecb22bce7440824e3ff809bb84f14133bfe8a9c3935bacb2dd	project_14.json	1578488
+15	Брендинг Monly	Брендинг Monly	1754413612709-508022081.png	\N	\N	3	8	1	2025-08-05 17:18:55.388	2025-08-05 17:06:52.719	e27af2a257019d082127a221c19166c168e5e35102de11b1ef29f14b44a5f239	project_15.json	651158
+17	Брендинг недвижимости Homotiq	Брендинг недвижимости Homotiq	1754413983781-291074898.png	\N	\N	3	7	1	2025-08-05 17:18:55.388	2025-08-05 17:13:03.806	35ea067a9d942d1a393c4ab3f8a13cb8e573e5b456aa215a93b31b9529bf3270	project_17.json	160225
+18	Брендинг SunVault Eco Energy	Брендинг SunVault Eco Energy	1754414109948-902939597.png	\N	\N	3	8	1	2025-08-05 17:18:55.388	2025-08-05 17:15:09.986	a75662d579cb6f3eb6c966f3ae90e3d6cc4fc814204d378b577b6e58c9a9d7c1	project_18.json	1163107
+\.
+
+
+--
 -- Name: Category_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -422,13 +448,6 @@ SELECT pg_catalog.setval('public."ProfileType_id_seq"', 2, true);
 
 
 --
--- Name: Project_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public."Project_id_seq"', 13, true);
-
-
---
 -- Name: Specialization_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -440,6 +459,13 @@ SELECT pg_catalog.setval('public."Specialization_id_seq"', 2, true);
 --
 
 SELECT pg_catalog.setval('public."User_id_seq"', 11, true);
+
+
+--
+-- Name: projects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.projects_id_seq', 18, true);
 
 
 --
@@ -459,14 +485,6 @@ ALTER TABLE ONLY public."ProfileType"
 
 
 --
--- Name: Project Project_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public."Project"
-    ADD CONSTRAINT "Project_pkey" PRIMARY KEY (id);
-
-
---
 -- Name: Specialization Specialization_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -480,6 +498,14 @@ ALTER TABLE ONLY public."Specialization"
 
 ALTER TABLE ONLY public."User"
     ADD CONSTRAINT "User_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: _ProjectLikes _ProjectLikes_AB_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_ProjectLikes"
+    ADD CONSTRAINT "_ProjectLikes_AB_pkey" PRIMARY KEY ("A", "B");
 
 
 --
@@ -512,6 +538,14 @@ ALTER TABLE ONLY public."_UserLikes"
 
 ALTER TABLE ONLY public."_UserStarred"
     ADD CONSTRAINT "_UserStarred_AB_pkey" PRIMARY KEY ("A", "B");
+
+
+--
+-- Name: projects projects_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT projects_pkey PRIMARY KEY (id);
 
 
 --
@@ -550,6 +584,13 @@ CREATE UNIQUE INDEX "User_login_key" ON public."User" USING btree (login);
 
 
 --
+-- Name: _ProjectLikes_B_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "_ProjectLikes_B_index" ON public."_ProjectLikes" USING btree ("B");
+
+
+--
 -- Name: _User Specializations_B_index; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -578,27 +619,10 @@ CREATE INDEX "_UserStarred_B_index" ON public."_UserStarred" USING btree ("B");
 
 
 --
--- Name: Project Project_categoryId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: projects_contentPath_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Project"
-    ADD CONSTRAINT "Project_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES public."Category"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
---
--- Name: Project Project_specializationId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public."Project"
-    ADD CONSTRAINT "Project_specializationId_fkey" FOREIGN KEY ("specializationId") REFERENCES public."Specialization"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
---
--- Name: Project Project_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public."Project"
-    ADD CONSTRAINT "Project_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+CREATE UNIQUE INDEX "projects_contentPath_key" ON public.projects USING btree ("contentPath");
 
 
 --
@@ -607,6 +631,22 @@ ALTER TABLE ONLY public."Project"
 
 ALTER TABLE ONLY public."User"
     ADD CONSTRAINT "User_profileTypeId_fkey" FOREIGN KEY ("profileTypeId") REFERENCES public."ProfileType"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: _ProjectLikes _ProjectLikes_A_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_ProjectLikes"
+    ADD CONSTRAINT "_ProjectLikes_A_fkey" FOREIGN KEY ("A") REFERENCES public.projects(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: _ProjectLikes _ProjectLikes_B_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_ProjectLikes"
+    ADD CONSTRAINT "_ProjectLikes_B_fkey" FOREIGN KEY ("B") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -671,6 +711,30 @@ ALTER TABLE ONLY public."_UserStarred"
 
 ALTER TABLE ONLY public."_UserStarred"
     ADD CONSTRAINT "_UserStarred_B_fkey" FOREIGN KEY ("B") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: projects projects_categoryId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT "projects_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES public."Category"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: projects projects_specializationId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT "projects_specializationId_fkey" FOREIGN KEY ("specializationId") REFERENCES public."Specialization"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: projects projects_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT "projects_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

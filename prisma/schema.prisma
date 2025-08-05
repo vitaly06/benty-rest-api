@@ -45,6 +45,8 @@ model User {
   likedBy   User[] @relation("UserLikes") // те, кто поставили лайк
   likedUser User[] @relation("UserLikes") // лайки пользователя
 
+  likedProjects Project[] @relation("ProjectLikes")
+
   isResetVerified Boolean     @default(false)
   isEmailVerified Boolean     @default(false)
   profileType     ProfileType @relation(fields: [profileTypeId], references: [id])
@@ -73,7 +75,7 @@ model Project {
   id          Int     @id @default(autoincrement())
   name        String
   description String?
-  photoName   String
+  photoName   String?
   firstLink   String?
   secondLink  String?
 
@@ -81,12 +83,17 @@ model Project {
   userId           Int
   specializationId Int
   specialization   Specialization @relation(fields: [specializationId], references: [id])
-  user             User           @relation(fields: [userId], references: [id])
+  likedBy          User[]         @relation("ProjectLikes")
   category         Category       @relation(fields: [categoryId], references: [id])
-  content          Json?
+  contentPath      String?        @unique
+  contentSize      Int?
+  contentHash      String?
 
   updatedAt DateTime @default(now()) @updatedAt
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("projects")
 }
 
 // Категория проекта

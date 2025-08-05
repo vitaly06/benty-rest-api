@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
-  IsArray,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -32,6 +32,7 @@ export class CreateProjectDto {
     example: 1,
     type: Number,
   })
+  @Type(() => Number)
   @IsInt({ message: 'Id специализации должен быть целым числом' })
   @IsPositive({ message: 'Id специализации должен быть положительным числом' })
   @IsNumber({}, { message: 'Id специализации должен быть числом' })
@@ -42,14 +43,11 @@ export class CreateProjectDto {
     example: 3,
     type: Number,
   })
+  @Type(() => Number)
   @IsInt({ message: 'Id категории должен быть целым числом' })
   @IsPositive({ message: 'Id категории должен быть положительным числом' })
   @IsNumber({}, { message: 'Id категории должен быть числом' })
   categoryId: number;
-
-  @ApiProperty({ type: Object })
-  @IsArray()
-  content: any[]; // Slate.js content as array
 
   @ApiProperty({
     description: 'firstLink',
@@ -68,4 +66,12 @@ export class CreateProjectDto {
   @IsString({ message: 'Вторая ссылка на проект должна быть строкой' })
   @IsOptional()
   secondLink?: string;
+
+  @ApiProperty({
+    description: 'Project content (Slate.js JSON)',
+    example: '[{"type":"paragraph","children":[{"text":"Project content"}]}]',
+    required: true,
+  })
+  @IsNotEmpty({ message: 'Контент проекта обязателен' })
+  content: any;
 }
