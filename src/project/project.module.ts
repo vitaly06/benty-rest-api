@@ -48,5 +48,6 @@ import { StorageService } from 'src/storage/storage.service';
     JwtRefreshStrategy,
     StorageService,
   ],
+  exports: [ProjectService],
 })
 export class ProjectModule {}

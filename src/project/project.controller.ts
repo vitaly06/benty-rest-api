@@ -123,10 +123,6 @@ export class ProjectController {
   async getProjectById(@Param('projectId') projectId: string) {
     return await this.projectService.getProjectWithContent(+projectId);
   }
-  // @Get(':id/content')
-  // async getProjectContent(@Param('id') projectId: string) {
-  //   return this.projectService.getProjectContent(+projectId);
-  // }
 
   @UseGuards(JwtAuthGuard)
   @Post('like-project/:projectId')

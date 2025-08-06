@@ -22,6 +22,7 @@ import { ChangeEmailRequest } from './dto/change-email.dto';
 import { NotFoundError } from 'rxjs';
 import { ChangePhoneRequest } from './dto/change-phone.dto';
 import { ChangePasswordRequest } from './dto/change-password';
+import { ProjectService } from 'src/project/project.service';
 
 @Injectable()
 export class UserService {
@@ -29,6 +30,7 @@ export class UserService {
     private readonly prisma: PrismaService,
     private readonly mailerService: MailerService,
     private readonly jwtService: JwtService,
+    private readonly projectService: ProjectService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -663,29 +665,6 @@ export class UserService {
         favoritedBy: true,
         likedBy: true,
         followers: true,
-        projects: {
-          select: {
-            id: true,
-            name: true,
-            photoName: true,
-            category: {
-              select: {
-                name: true,
-              },
-            },
-            user: {
-              select: {
-                fullName: true,
-                logoFileName: true,
-                profileType: {
-                  select: {
-                    name: true,
-                  },
-                },
-              },
-            },
-          },
-        },
         phoneNumber: true,
         email: true,
         website: true,
@@ -732,17 +711,10 @@ export class UserService {
       followings: await this.getSubscriptions(req.user.sub),
     };
 
-    for (const project of currentUser.projects || []) {
-      result['projects'].push({
-        id: project.id,
-        name: project.name,
-        photoName: project.photoName,
-        category: project.category?.name || 'Категория не указана',
-        userLogo: project.user?.logoFileName,
-        fullName: project.user?.fullName,
-        profileType: project.user?.profileType?.name || 'Тип не указан',
-      });
-    }
+    // Проекты пользователя
+    result['projects'] = await this.projectService.getUserProjects(
+      currentUser.id,
+    );
 
     return result;
   }

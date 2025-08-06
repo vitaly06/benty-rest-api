@@ -12,9 +12,11 @@ import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
 import { JwtRefreshStrategy } from 'src/auth/strategies/jwt-refresh.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ProjectModule } from 'src/project/project.module';
 
 @Module({
   imports: [
+    ProjectModule,
     MulterModule.registerAsync({
       useFactory: () => ({
         storage: diskStorage({

@@ -10,12 +10,14 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { CustomMailerModule } from 'src/mailer.module';
+import { ProjectModule } from 'src/project/project.module';
 
 @Module({
   imports: [
     UserModule,
     ConfigModule,
     PassportModule,
+    ProjectModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

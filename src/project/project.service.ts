@@ -99,7 +99,6 @@ export class ProjectService {
         },
       },
     });
-
     if (!project) {
       throw new NotFoundException('Проект с таким id не найден');
     }
@@ -109,6 +108,9 @@ export class ProjectService {
       ? await this.storageService.loadContent(project.contentPath)
       : null;
 
+    // Дополнительно проекты пользователя
+    const anotherProjects = await this.getUserProjects(project.user.id);
+
     // Форматируем результат
     const result = {
       ...project,
@@ -116,24 +118,15 @@ export class ProjectService {
         project.likedBy.length > 5
           ? project.likedBy.slice(0, 5)
           : project.likedBy,
+      projects:
+        anotherProjects.length <= 6
+          ? anotherProjects
+          : anotherProjects.slice(0, 6),
       content,
     };
 
     return result;
   }
-
-  // async getProjectContent(projectId: number) {
-  //   const project = await this.prisma.project.findUnique({
-  //     where: { id: projectId },
-  //     select: { contentPath: true },
-  //   });
-
-  //   if (!project?.contentPath) {
-  //     throw new NotFoundException('Project content not found');
-  //   }
-
-  //   return this.storageService.loadContent(project.contentPath);
-  // }
 
   async deleteProject(projectId: number) {
     const project = await this.prisma.project.findUnique({
@@ -189,48 +182,6 @@ export class ProjectService {
     };
   }
 
-  // async getProjectById(projectId: number) {
-  //   const project = await this.prisma.project.findUnique({
-  //     where: { id: projectId },
-  //     select: {
-  //       id: true,
-  //       name: true,
-  //       description: true,
-  //       photoName: true,
-  //       firstLink: true,
-  //       secondLink: true,
-  //       contentPath: true, // Заменили content на contentPath
-  //       contentSize: true,
-  //       user: {
-  //         select: {
-  //           id: true,
-  //           fullName: true,
-  //           login: true,
-  //           logoFileName: true,
-  //           city: true,
-  //         },
-  //       },
-  //       likedBy: {
-  //         select: {
-  //           id: true,
-  //           logoFileName: true,
-  //         },
-  //       },
-  //     },
-  //   });
-
-  //   if (!project) {
-  //     throw new NotFoundException('Проект с таким id не найден');
-  //   }
-
-  //   project.likedBy =
-  //     project.likedBy.length > 5
-  //       ? project.likedBy.slice(0, 5)
-  //       : project.likedBy;
-
-  //   return project;
-  // }
-
   async likeProject(projectId: number, userId: number) {
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
@@ -283,5 +234,48 @@ export class ProjectService {
         },
       },
     });
+  }
+
+  async getUserProjects(userId: number) {
+    const result = [];
+
+    const projects = await this.prisma.project.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        name: true,
+        photoName: true,
+        category: {
+          select: {
+            name: true,
+          },
+        },
+        user: {
+          select: {
+            fullName: true,
+            logoFileName: true,
+            profileType: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    for (const project of projects || []) {
+      result.push({
+        id: project.id,
+        name: project.name,
+        photoName: project.photoName,
+        category: project.category?.name || 'Категория не указана',
+        userLogo: project.user?.logoFileName,
+        fullName: project.user?.fullName,
+        profileType: project.user?.profileType?.name || 'Тип не указан',
+      });
+    }
+
+    return result;
   }
 }
