@@ -326,6 +326,21 @@ ALTER TABLE ONLY public.projects ALTER COLUMN id SET DEFAULT nextval('public.pro
 
 COPY public."Category" (id, name) FROM stdin;
 3	Медицина
+4	Строительные инструменты
+5	Продукты питания
+6	Товары для дома
+7	Одежда и аксессуары
+8	Специализированные услуги
+9	Образование и досуг
+10	Красота и здоровье
+11	Общественное питание
+12	Big Data и аналитика
+13	Искусственный интеллект
+14	Финтех и платежи
+15	Образовательные технологии
+16	Товары для бизнеса
+17	Локальное производство
+18	Ниши с особыми условиями
 \.
 
 
@@ -345,7 +360,11 @@ COPY public."ProfileType" (id, name) FROM stdin;
 
 COPY public."Specialization" (id, name) FROM stdin;
 1	SMM
-2	Агенство
+3	Контент менеджмент
+4	Крауд маркетинг
+5	Маркетинг
+2	Таргет
+6	Контекстная реклама
 \.
 
 
@@ -358,9 +377,9 @@ COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "u
 8	vital1332y.sadikov	vitaly.sadikov232@yandex.ru	$2b$10$Q3/C/I3NtwH6S65bMLJEM.GN09YQzI1F3UuriuFgZ3CfLX7WoNyJK	1	2025-07-04 08:58:47.464	2025-07-04 11:00:50.344	$2b$10$183MhKoCPo2J7OQrDaD3xekd8FOVWTGO5KPagC7JFGet0o8XXOAO2	f	f	ava3.png	Артур Пирожков	Челябинск	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
 9	vitaly.sadikov444	vitaly.sadikov133@yandex.ru	$2b$10$7C4aR3bURQjyA1GvX./VSutZ0dmioRNscT3nl/tnhxgpBUh1fDfIC	1	2025-07-07 11:39:00.097	2025-07-07 11:39:01.328	$2b$10$U.g2pY9cUDT0Zai/wGpq.ulKj8rpXM0nVVtw6MZ0wvI/D2Eh.WIUi	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
 10	vitaly.sadikov222	egorskomorohov020606@gmail.com	$2b$10$edmVUmZYfdRF6.ZyFfI4cO/X7IYfzykuaMByQbBl9IEkT3OWykjwy	1	2025-07-10 07:31:46.4	2025-07-10 07:32:29.146	$2b$10$SofNG6kr9RKjCzlseI8OFu.wTef79yQqFvepzdOvKHtu3ZXOv04Vi	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
+6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$Gq9LgS.dwDVeK93Th2ASgud7mrP/IRUyYxN5ccMA5DihzzUffUTR.	1	2025-07-03 11:03:00.473	2025-08-07 10:52:25.128	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImxvZ2luIjoidml0YWx5LnNhZGlra292MjIyIiwiaWF0IjoxNzU0NTYzOTQ1LCJleHAiOjE3NTUxNjg3NDV9.mYG3loooXQmCaet7DKTFdBnr1rCdZo-Qb9cnkKd3xpU	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17
 11	tgflk	tgflk_tuv@mail.ru	$2b$10$vzwiWqqrOo6OstA.dWHmJuI8.sY/8OJ6hpAEKCPlA7gB.Yi5mOTA6	1	2025-07-14 18:39:22.108	2025-07-14 18:40:13.792	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjExLCJsb2dpbiI6InRnZmxrIiwiaWF0IjoxNzUyNTE4NDEzLCJleHAiOjE3NTMxMjMyMTN9.kWrY-bIHzM0X04J76hk78SeCvFu_5wcHPuep3ANvrCo	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
 12	egorchik-pomidorchik	egor.skomorohoff@yandex.ru	$2b$10$EF.Di5n9b8UF869BYLl.MOsvlJeUCz1SzUEALQNe3/PCYuuHHfrze	1	2025-08-06 10:00:39.34	2025-08-06 12:37:35.182	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEyLCJpYXQiOjE3NTQ0ODM4NTUsImV4cCI6MTc1NTA4ODY1NX0.ke0mvfX_vm3zSPQGo_XMd_zg77Z32Qqrw_hNTkgS7WA	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
-6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$Gq9LgS.dwDVeK93Th2ASgud7mrP/IRUyYxN5ccMA5DihzzUffUTR.	1	2025-07-03 11:03:00.473	2025-08-06 12:38:41.391	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImxvZ2luIjoidml0YWx5LnNhZGlra292MjIyIiwiaWF0IjoxNzU0NDgzOTIxLCJleHAiOjE3NTUwODg3MjF9.uprIcfgT97EwvSU940k6JFPzezRPzcQMq7GFCzMYsRo	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17
 \.
 
 
@@ -369,6 +388,7 @@ COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "u
 --
 
 COPY public."_ProjectLikes" ("A", "B") FROM stdin;
+8	6
 \.
 
 
@@ -411,6 +431,7 @@ COPY public."_UserLikes" ("A", "B") FROM stdin;
 --
 
 COPY public."_UserStarred" ("A", "B") FROM stdin;
+7	6
 \.
 
 
@@ -438,7 +459,7 @@ COPY public.projects (id, name, description, "photoName", "firstLink", "secondLi
 -- Name: Category_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Category_id_seq"', 3, true);
+SELECT pg_catalog.setval('public."Category_id_seq"', 18, true);
 
 
 --
@@ -452,7 +473,7 @@ SELECT pg_catalog.setval('public."ProfileType_id_seq"', 2, true);
 -- Name: Specialization_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Specialization_id_seq"', 2, true);
+SELECT pg_catalog.setval('public."Specialization_id_seq"', 6, true);
 
 
 --
