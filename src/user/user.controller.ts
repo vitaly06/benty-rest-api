@@ -36,9 +36,10 @@ export class UserController {
   @ApiOperation({
     summary: 'Получение лучших специалистов',
   })
+  @UseGuards(OptionalJwtAuthGuard)
   @Get('best-specialists')
-  async getBestSpecialists() {
-    return await this.userService.getBestSpecialists();
+  async getBestSpecialists(@Req() req: Request & { user?: { sub: number } }) {
+    return await this.userService.getBestSpecialists(req);
   }
 
   @ApiOperation({

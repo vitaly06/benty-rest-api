@@ -53,7 +53,7 @@ export class UserService {
     });
   }
 
-  async getBestSpecialists() {
+  async getBestSpecialists(req: Request & { user?: { sub: number } }) {
     // Все категории
     const categories = [];
 
@@ -66,6 +66,7 @@ export class UserService {
         fullName: true,
         logoFileName: true,
         city: true,
+        favoritedBy: true,
         projects: {
           select: {
             id: true,
@@ -96,10 +97,16 @@ export class UserService {
           categories.push(project.category.name);
         }
       }
+
       result.push({
         id: user.id,
         fullName: user.fullName,
         logoFileName: user.logoFileName,
+        isFavorited: req?.user
+          ? user.favoritedBy.some(
+              (user) => String(user.id) === String(req.user.sub),
+            )
+          : false,
         city: user.city,
         projects,
         categories,
