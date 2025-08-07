@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Param,
   Post,
   Put,
   Query,
@@ -21,10 +22,11 @@ import { FileInterceptor } from '@nestjs/platform-express';
 
 import { UpdateNotificationsSettingsRequest } from './dto/update-notifications-settings.dto';
 import { ChangeLoginRequest } from './dto/change-login.dto';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { ChangeEmailRequest } from './dto/change-email.dto';
 import { ChangePhoneRequest } from './dto/change-phone.dto';
 import { ChangePasswordRequest } from './dto/change-password';
+import { OptionalJwtAuthGuard } from 'src/common/guards/optional.guard';
 
 @ApiTags('User')
 @Controller('user')
@@ -291,7 +293,19 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Get('get-my-profile')
   async getMyProfile(@Req() req: RequestWithUser) {
-    return await this.userService.getMyProfile(req);
+    return await this.userService.getProfile(+req.user.sub);
+  }
+
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('user-profile/:userId')
+  @ApiOperation({
+    summary: 'Получение профиля другого пользователя',
+  })
+  async getUserProfile(
+    @Param('userId') userId: string,
+    @Req() req: Request & { user?: { sub: number } },
+  ) {
+    return await this.userService.getProfile(+userId, req);
   }
 
   @ApiTags('Подписка/отписка')

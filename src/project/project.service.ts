@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { StorageService } from 'src/storage/storage.service';
+import { Request } from 'express';
 
 @Injectable()
 export class ProjectService {
@@ -69,7 +70,10 @@ export class ProjectService {
     }
   }
 
-  async getProjectWithContent(projectId: number) {
+  async getProjectWithContent(
+    projectId: number,
+    req: Request & { user?: { sub: number } },
+  ) {
     // Получаем проект
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
@@ -99,6 +103,7 @@ export class ProjectService {
         },
       },
     });
+
     if (!project) {
       throw new NotFoundException('Проект с таким id не найден');
     }
@@ -110,7 +115,11 @@ export class ProjectService {
 
     // Дополнительно проекты пользователя
     const anotherProjects = await this.getUserProjects(project.user.id);
-
+    console.log('Current user sub:', req.user?.sub);
+    console.log(
+      'LikedBy users:',
+      project.likedBy.map((u) => u.id),
+    );
     // Форматируем результат
     const result = {
       ...project,
@@ -118,12 +127,25 @@ export class ProjectService {
         project.likedBy.length > 5
           ? project.likedBy.slice(0, 5)
           : project.likedBy,
+      isLiked: req.user
+        ? project.likedBy.some(
+            (user) => String(user.id) === String(req.user.sub),
+          )
+        : false,
       projects:
         anotherProjects.length <= 6
           ? anotherProjects
           : anotherProjects.slice(0, 6),
       content,
     };
+
+    // if (req.user) {
+    //   result['isLiked'] = project.likedBy.some(
+    //     (user) => user.id == req.user.sub,
+    //   );
+    // } else {
+    //   result['isLiked'] = false;
+    // }
 
     return result;
   }

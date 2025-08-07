@@ -23,6 +23,7 @@ import { NotFoundError } from 'rxjs';
 import { ChangePhoneRequest } from './dto/change-phone.dto';
 import { ChangePasswordRequest } from './dto/change-password';
 import { ProjectService } from 'src/project/project.service';
+import { Request } from 'express';
 
 @Injectable()
 export class UserService {
@@ -651,10 +652,10 @@ export class UserService {
     return { message: 'Пароль успешно изменён' };
   }
 
-  async getMyProfile(req: RequestWithUser) {
+  async getProfile(userId: number, req?: Request & { user?: { sub: number } }) {
     let result = {};
     const currentUser = await this.prisma.user.findUnique({
-      where: { id: req.user.sub },
+      where: { id: userId },
       select: {
         id: true,
         fullName: true,
@@ -693,6 +694,11 @@ export class UserService {
       favorited: currentUser.favoritedBy?.length || 0,
       likes: currentUser.likedBy?.length || 0,
       followers: currentUser.followers?.length || 0,
+      isFollow: req?.user
+        ? currentUser.followers.some(
+            (user) => String(user.id) === String(req.user.sub),
+          )
+        : false,
       projects: [],
       info: {
         phoneNumber: currentUser.phoneNumber || null,
@@ -708,7 +714,7 @@ export class UserService {
         ),
         about: currentUser.about || null,
       },
-      followings: await this.getSubscriptions(req.user.sub),
+      followings: await this.getSubscriptions(userId),
     };
 
     // Проекты пользователя

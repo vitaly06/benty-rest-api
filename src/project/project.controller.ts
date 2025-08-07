@@ -10,7 +10,7 @@ import {
   UseGuards,
   Param,
 } from '@nestjs/common';
-import { Express } from 'express';
+import { Express, Request } from 'express';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import {
@@ -24,6 +24,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ProjectResponseDto } from './dto/project-response.dto';
 import { RequestWithUser } from 'src/auth/interfaces/request-with-user.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
+import { OptionalJwtAuthGuard } from 'src/common/guards/optional.guard';
 
 @ApiTags('Projects')
 @Controller('projects')
@@ -119,9 +120,13 @@ export class ProjectController {
     return this.projectService.getProjectsForMainPage();
   }
 
+  @UseGuards(OptionalJwtAuthGuard)
   @Get('project-by-id/:projectId')
-  async getProjectById(@Param('projectId') projectId: string) {
-    return await this.projectService.getProjectWithContent(+projectId);
+  async getProjectById(
+    @Param('projectId') projectId: string,
+    @Req() req: Request & { user?: { sub: number } },
+  ) {
+    return await this.projectService.getProjectWithContent(+projectId, req);
   }
 
   @UseGuards(JwtAuthGuard)

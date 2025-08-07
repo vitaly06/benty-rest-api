@@ -12,9 +12,9 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(
-    private readonly jwtService: JwtService,
-    private readonly prisma: PrismaService,
-    private readonly configService: ConfigService,
+    protected readonly jwtService: JwtService, // было private
+    protected readonly prisma: PrismaService, // было private
+    protected readonly configService: ConfigService, // было private
   ) {
     super();
   }
