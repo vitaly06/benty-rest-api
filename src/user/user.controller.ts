@@ -309,6 +309,14 @@ export class UserController {
     return await this.userService.getProfile(+userId, req);
   }
 
+  @ApiOperation({
+    summary: 'Все специалисты',
+  })
+  @Get('all-specialists')
+  @UseGuards(OptionalJwtAuthGuard)
+  async getAllSpecialists(@Req() req: Request & { user?: { sub: number } }) {
+    return await this.userService.getAllSpecialists(req);
+  }
   @ApiTags('Подписка/отписка')
   @ApiOperation({
     summary: 'Подписка на пользователя',

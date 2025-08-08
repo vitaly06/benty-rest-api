@@ -146,4 +146,12 @@ export class ProjectController {
   ) {
     return await this.projectService.unlikeProject(+projectId, req.user.sub);
   }
+
+  @ApiOperation({
+    summary: 'Получение всех проектов',
+  })
+  @Get('all-projects')
+  async getAllProjects() {
+    return await this.projectService.getAllProjects();
+  }
 }

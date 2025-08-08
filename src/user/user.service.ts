@@ -116,6 +116,71 @@ export class UserService {
     return result;
   }
 
+  async getAllSpecialists(req?: Request & { user?: { sub: number } }) {
+    // Все категории
+    const categories = [];
+
+    const result = [];
+
+    const users = await this.prisma.user.findMany({
+      select: {
+        id: true,
+        fullName: true,
+        logoFileName: true,
+        city: true,
+        favoritedBy: true,
+        projects: {
+          select: {
+            id: true,
+            name: true,
+            photoName: true,
+            category: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    for (const user of users) {
+      // проекты пользователя
+      if (user.projects.length == 0) {
+        continue;
+      }
+      const projects = [];
+      for (const project of user.projects) {
+        projects.push({
+          id: project.id,
+          name: project.name,
+          photoName: project.photoName,
+          category: project.category.name,
+        });
+
+        if (!categories.includes(project.category.name)) {
+          categories.push(project.category.name);
+        }
+      }
+
+      result.push({
+        id: user.id,
+        fullName: user.fullName,
+        logoFileName: user.logoFileName,
+        isFavorited: req?.user
+          ? user.favoritedBy.some(
+              (user) => String(user.id) === String(req.user.sub),
+            )
+          : false,
+        city: user.city,
+        projects,
+        categories,
+      });
+    }
+
+    return result;
+  }
+
   async getMainSettings(req: RequestWithUser) {
     const sub = req.user.sub;
 

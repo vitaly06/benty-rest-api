@@ -183,6 +183,21 @@ export class ProjectService {
     }
   }
 
+  async getAllProjects() {
+    const projects = await this.prisma.project.findMany({
+      include: {
+        user: {
+          include: {
+            specializations: true,
+          },
+        },
+        category: true,
+      },
+    });
+
+    return projects.map((project) => this.mapToProjectResponse(project));
+  }
+
   private mapToProjectResponse(project: any) {
     return {
       id: project.id,
