@@ -45,16 +45,62 @@ model User {
   likedBy   User[] @relation("UserLikes") // те, кто поставили лайк
   likedUser User[] @relation("UserLikes") // лайки пользователя
 
-  likedProjects Project[] @relation("ProjectLikes")
+  likedProjects  Project[] @relation("ProjectLikes")
+  viewedProjects Project[] @relation("ProjectViews") // проекты, просмотренные пользователем
+  likedBlogs     Blog[]    @relation("BlogLikes")
 
   isResetVerified Boolean     @default(false)
   isEmailVerified Boolean     @default(false)
+  // Тип профиля
   profileType     ProfileType @relation(fields: [profileTypeId], references: [id])
+
+  // Подписка
+  subscriptionId Int           @default(1)
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
 
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   lastLoginUpdate DateTime?
   projects        Project[]
+  Blog            Blog[]
+  blogId          Int?
+  sentMessages    Message[] @relation("MessageSender")
+  chatsAsUser1    Chat[]    @relation("ChatUser1")
+  chatsAsUser2    Chat[]    @relation("ChatUser2")
+}
+
+model Chat {
+  id        Int       @id @default(autoincrement())
+  user1Id   Int
+  user2Id   Int
+  user1     User      @relation("ChatUser1", fields: [user1Id], references: [id])
+  user2     User      @relation("ChatUser2", fields: [user2Id], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Message   Message[]
+
+  @@unique([user1Id, user2Id])
+  @@unique([user2Id, user1Id], name: "user_pair_reverse")
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  senderId  Int
+  sender    User     @relation("MessageSender", fields: [senderId], references: [id])
+  chatId    Int
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  read      Boolean  @default(false)
+
+  @@index([chatId, createdAt])
+}
+
+model Subscription {
+  id          Int    @id @default(autoincrement())
+  name        String @unique
+  ratingBoost Int? // процент буста рейтинга
+  User        User[]
 }
 
 model ProfileType {
@@ -68,6 +114,7 @@ model Specialization {
   name    String    @unique
   users   User[]    @relation("User Specializations")
   Project Project[]
+  Blog    Blog[]
 }
 
 // Проект
@@ -84,6 +131,7 @@ model Project {
   specializationId Int
   specialization   Specialization @relation(fields: [specializationId], references: [id])
   likedBy          User[]         @relation("ProjectLikes")
+  viewedBy         User[]         @relation("ProjectViews")
   category         Category       @relation(fields: [categoryId], references: [id])
   contentPath      String?        @unique
   contentSize      Int?
@@ -94,6 +142,26 @@ model Project {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("projects")
+}
+
+model Blog {
+  id        Int     @id @default(autoincrement())
+  name      String
+  photoName String?
+
+  contentPath String? @unique
+  contentSize Int?
+  contentHash String?
+
+  userId  Int
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  likedBy User[] @relation("BlogLikes")
+
+  specializationId Int
+  specialization   Specialization @relation(fields: [specializationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Категория проекта

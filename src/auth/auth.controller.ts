@@ -37,10 +37,10 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
     @Body() dto: signUpRequest,
   ) {
-    const result = await this.authService.signUp(dto);
+    return await this.authService.signUp(dto);
 
-    this.setCookies(res, result.tokens);
-    return await this.userService.getAvatar(result.user.id);
+    // this.setCookies(res, result.tokens);
+    // return await this.userService.getAvatar(result.user.id);
   }
 
   @ApiOperation({
@@ -91,10 +91,15 @@ export class AuthController {
   @ApiOperation({
     summary: 'Проверка кода верификации',
   })
-  @UseGuards(JwtAuthGuard)
   @Get('verify-email')
-  async verifyEmail(@Query('code') code: string, @Req() req: RequestWithUser) {
-    return await this.authService.verifyEmail(code, req);
+  async verifyEmail(
+    @Query('code') code: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.authService.verifyEmail(code);
+
+    this.setCookies(res, result.tokens);
+    return await this.userService.getAvatar(result.user.id);
   }
 
   @ApiTags('Забыл пароль')

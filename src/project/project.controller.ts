@@ -107,6 +107,14 @@ export class ProjectController {
   }
 
   @ApiOperation({
+    summary: 'Получение популярных проектов',
+  })
+  @Get('popular-projects')
+  async getPopularProjects() {
+    return await this.projectService.getPopularProjects();
+  }
+
+  @ApiOperation({
     summary: 'Get projects for main page',
     description: 'Returns projects for display on the main page',
   })

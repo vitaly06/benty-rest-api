@@ -16,7 +16,6 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { ForgotPasswordRequest } from './dto/forgot-password.dto';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { RequestWithUser } from './interfaces/request-with-user.dto';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -54,28 +53,38 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await this.prisma.user.create({
-      data: {
-        login,
-        email,
-        password: hashedPassword,
-        profileTypeId,
-        isEmailVerified: false,
-      },
+    // Подписка обычная
+    const subscription = await this.prisma.subscription.findUnique({
+      where: { name: 'default' },
     });
-    await this.cacheManager.set(`verify-email:${user.id}`, code, 0);
+    console.log(code);
+    const cachedData = {
+      login,
+      email,
+      password: hashedPassword,
+      profileTypeId,
+      isEmailVerified: true,
+      subscriptionId: subscription.id,
+    };
+
+    await this.cacheManager.set(
+      `verify-email:${code}`,
+      JSON.stringify(cachedData),
+      3600,
+    );
 
     await this.sendVerificationEmail(
-      user.email,
+      email,
       'Подтверждение email',
       code,
       './email-verification',
     );
 
-    const tokens = await this.getTokens(user.id, user.login);
-    this.updateRefreshToken(user.id, tokens.refreshToken);
+    // const tokens = await this.getTokens(user.id, user.login);
+    // this.updateRefreshToken(user.id, tokens.refreshToken);
 
-    return { tokens, user };
+    // return { tokens, user };
+    return { message: 'Код отправлен на почту' };
   }
 
   private async sendVerificationEmail(
@@ -99,28 +108,29 @@ export class AuthService {
     }
   }
 
-  async verifyEmail(code: string, req: RequestWithUser) {
+  async verifyEmail(code: string) {
     const cachedData = await this.cacheManager.get<string>(
-      `verify-email:${req.user.sub}`,
+      `verify-email:${code}`,
     );
 
     if (!cachedData) {
-      console.log('Данные не найдены в кеше');
-    }
-    if (cachedData !== code) {
-      throw new BadRequestException('Неверный код подтверждения');
+      console.log('Неверный код');
     }
 
-    await this.prisma.user.update({
-      where: { id: req.user.sub },
+    const registrationData = JSON.parse(cachedData);
+
+    const user = await this.prisma.user.create({
       data: {
-        isEmailVerified: true,
+        ...registrationData,
       },
     });
 
-    await this.cacheManager.del(`verify-email:${req.user.sub}`);
+    const tokens = await this.getTokens(user.id, user.login);
+    await this.updateRefreshToken(user.id, tokens.refreshToken);
 
-    return { message: 'Почта успешно подтверждена' };
+    await this.cacheManager.del(`verify-email:${code}`);
+
+    return { tokens, user };
   }
 
   async signIn(dto: signInRequest) {
@@ -161,7 +171,7 @@ export class AuthService {
         id: checkUser.id.toString(),
         code,
       }),
-      0,
+      3600,
     );
 
     await this.sendVerificationEmail(

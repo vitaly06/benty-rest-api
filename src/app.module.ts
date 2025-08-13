@@ -11,7 +11,10 @@ import { PhotoModule } from './photo/photo.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { StorageModule } from './storage/storage.module';
 import { CategoryModule } from './category/category.module';
+import { BlogModule } from './blog/blog.module';
+import { ChatModule } from './chat/chat.module';
 import * as redisStore from 'cache-manager-ioredis';
+import { WebSocketGateway } from '@nestjs/websockets';
 
 @Module({
   imports: [
@@ -30,15 +33,18 @@ import * as redisStore from 'cache-manager-ioredis';
     SpecializationModule,
     PhotoModule,
     CacheModule.register({
-      ttl: 0,
+      ttl: 60 * 60 * 100,
       isGlobal: true,
       store: redisStore,
-      // host: 'localhost',
-      host: 'redis',
+      host: 'localhost',
+      // host: 'redis',
       port: 6379,
     }),
     StorageModule,
     CategoryModule,
+    BlogModule,
+    ChatModule,
   ],
+  // providers: [WebSocketGateway],
 })
 export class AppModule {}

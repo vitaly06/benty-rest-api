@@ -57,16 +57,24 @@ export class UserService {
     // Все категории
     const categories = [];
 
-    const result = [];
+    let result = [];
 
     const users = await this.prisma.user.findMany({
-      take: 3,
       select: {
         id: true,
         fullName: true,
         logoFileName: true,
         city: true,
+        website: true,
         favoritedBy: true,
+        followers: true,
+        subscription: {
+          select: {
+            id: true,
+            name: true,
+            ratingBoost: true,
+          },
+        },
         projects: {
           select: {
             id: true,
@@ -102,6 +110,12 @@ export class UserService {
         id: user.id,
         fullName: user.fullName,
         logoFileName: user.logoFileName,
+        subscription: user.subscription.name,
+        info: {
+          rating: await this.calculateRating(user.id),
+          followers: user.followers.length,
+          website: user.website || null,
+        },
         isFavorited: req?.user
           ? user.favoritedBy.some(
               (user) => String(user.id) === String(req.user.sub),
@@ -113,7 +127,10 @@ export class UserService {
       });
     }
 
-    return result;
+    result = result
+      .filter((item) => item.projects.length != 0)
+      .sort((a, b) => b.info.rating - a.info.rating);
+    return result.length < 3 ? result : result.slice(0, 3);
   }
 
   async getAllSpecialists(req?: Request & { user?: { sub: number } }) {
@@ -129,6 +146,14 @@ export class UserService {
         logoFileName: true,
         city: true,
         favoritedBy: true,
+        followers: true,
+        website: true,
+        subscription: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         projects: {
           select: {
             id: true,
@@ -167,6 +192,12 @@ export class UserService {
         id: user.id,
         fullName: user.fullName,
         logoFileName: user.logoFileName,
+        subscription: user.subscription.name,
+        info: {
+          rating: await this.calculateRating(user.id),
+          followers: user.followers.length,
+          website: user.website || null,
+        },
         isFavorited: req?.user
           ? user.favoritedBy.some(
               (user) => String(user.id) === String(req.user.sub),
@@ -450,7 +481,7 @@ export class UserService {
         newLogin: dto.login,
         code: verificationCode.toString(),
       }),
-      0,
+      3600,
     );
 
     const user = await this.prisma.user.findUnique({
@@ -629,7 +660,7 @@ export class UserService {
         newPhoneNumber: dto.phoneNumber,
         code,
       }),
-      0,
+      3600,
     );
 
     await this.sendVerificationEmail(
@@ -730,7 +761,9 @@ export class UserService {
       where: { id: userId },
       select: {
         id: true,
+        login: true,
         fullName: true,
+        subscription: true,
         specializations: true,
         city: true,
         logoFileName: true,
@@ -755,9 +788,15 @@ export class UserService {
       },
     });
 
+    if (!currentUser) {
+      throw new NotFoundException('Такого пользователя не существует');
+    }
+
     result = {
       id: currentUser.id,
+      login: currentUser.login || null,
       fullName: currentUser.fullName || null,
+      subscription: currentUser.subscription.name,
       specialization:
         currentUser.specializations?.[0]?.name || 'Специализации не указаны',
       city: currentUser.city || 'Город не указан',
@@ -1078,6 +1117,35 @@ export class UserService {
         expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
       }),
     };
+  }
+
+  private async calculateRating(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        followers: true,
+        subscription: true,
+        projects: {
+          select: {
+            viewedBy: true,
+            likedBy: true,
+          },
+        },
+      },
+    });
+    // rating = (viewedBy + followers + likes) + boostRating
+    const likes = user.projects.reduce(
+      (sum, elem) => (sum += elem.likedBy.length),
+      0,
+    );
+
+    const views = user.projects.reduce(
+      (sum, elem) => (sum += elem.viewedBy.length),
+      0,
+    );
+    const rating = views + likes + user.followers.length;
+
+    return rating * (1 + user.subscription.ratingBoost / 100);
   }
 
   private formatDateTimePeriod(dateTimeStr: string): string {

@@ -21,6 +21,48 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: Blog; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Blog" (
+    id integer NOT NULL,
+    name text NOT NULL,
+    "photoName" text,
+    "contentPath" text,
+    "contentSize" integer,
+    "contentHash" text,
+    "userId" integer NOT NULL,
+    "specializationId" integer NOT NULL,
+    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL
+);
+
+
+ALTER TABLE public."Blog" OWNER TO postgres;
+
+--
+-- Name: Blog_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public."Blog_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."Blog_id_seq" OWNER TO postgres;
+
+--
+-- Name: Blog_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public."Blog_id_seq" OWNED BY public."Blog".id;
+
+
+--
 -- Name: Category; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -52,6 +94,81 @@ ALTER TABLE public."Category_id_seq" OWNER TO postgres;
 --
 
 ALTER SEQUENCE public."Category_id_seq" OWNED BY public."Category".id;
+
+
+--
+-- Name: Chat; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Chat" (
+    id integer NOT NULL,
+    "user1Id" integer NOT NULL,
+    "user2Id" integer NOT NULL,
+    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL
+);
+
+
+ALTER TABLE public."Chat" OWNER TO postgres;
+
+--
+-- Name: Chat_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public."Chat_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."Chat_id_seq" OWNER TO postgres;
+
+--
+-- Name: Chat_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public."Chat_id_seq" OWNED BY public."Chat".id;
+
+
+--
+-- Name: Message; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Message" (
+    id integer NOT NULL,
+    content text NOT NULL,
+    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "senderId" integer NOT NULL,
+    "chatId" integer NOT NULL,
+    read boolean DEFAULT false NOT NULL
+);
+
+
+ALTER TABLE public."Message" OWNER TO postgres;
+
+--
+-- Name: Message_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public."Message_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."Message_id_seq" OWNER TO postgres;
+
+--
+-- Name: Message_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public."Message_id_seq" OWNED BY public."Message".id;
 
 
 --
@@ -123,6 +240,41 @@ ALTER SEQUENCE public."Specialization_id_seq" OWNED BY public."Specialization".i
 
 
 --
+-- Name: Subscription; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Subscription" (
+    id integer NOT NULL,
+    name text NOT NULL,
+    "ratingBoost" integer
+);
+
+
+ALTER TABLE public."Subscription" OWNER TO postgres;
+
+--
+-- Name: Subscription_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public."Subscription_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."Subscription_id_seq" OWNER TO postgres;
+
+--
+-- Name: Subscription_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public."Subscription_id_seq" OWNED BY public."Subscription".id;
+
+
+--
 -- Name: User; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -151,7 +303,9 @@ CREATE TABLE public."User" (
     "joinAuthorsNotifications" boolean DEFAULT false NOT NULL,
     "weeklySummaryNotifications" boolean DEFAULT false NOT NULL,
     "rewardNotifications" boolean DEFAULT false NOT NULL,
-    "lastLoginUpdate" timestamp(3) without time zone
+    "lastLoginUpdate" timestamp(3) without time zone,
+    "blogId" integer,
+    "subscriptionId" integer DEFAULT 1 NOT NULL
 );
 
 
@@ -180,6 +334,18 @@ ALTER SEQUENCE public."User_id_seq" OWNED BY public."User".id;
 
 
 --
+-- Name: _BlogLikes; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."_BlogLikes" (
+    "A" integer NOT NULL,
+    "B" integer NOT NULL
+);
+
+
+ALTER TABLE public."_BlogLikes" OWNER TO postgres;
+
+--
 -- Name: _ProjectLikes; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -190,6 +356,18 @@ CREATE TABLE public."_ProjectLikes" (
 
 
 ALTER TABLE public."_ProjectLikes" OWNER TO postgres;
+
+--
+-- Name: _ProjectViews; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."_ProjectViews" (
+    "A" integer NOT NULL,
+    "B" integer NOT NULL
+);
+
+
+ALTER TABLE public."_ProjectViews" OWNER TO postgres;
 
 --
 -- Name: _User Specializations; Type: TABLE; Schema: public; Owner: postgres
@@ -286,10 +464,31 @@ ALTER SEQUENCE public.projects_id_seq OWNED BY public.projects.id;
 
 
 --
+-- Name: Blog id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Blog" ALTER COLUMN id SET DEFAULT nextval('public."Blog_id_seq"'::regclass);
+
+
+--
 -- Name: Category id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public."Category" ALTER COLUMN id SET DEFAULT nextval('public."Category_id_seq"'::regclass);
+
+
+--
+-- Name: Chat id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Chat" ALTER COLUMN id SET DEFAULT nextval('public."Chat_id_seq"'::regclass);
+
+
+--
+-- Name: Message id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Message" ALTER COLUMN id SET DEFAULT nextval('public."Message_id_seq"'::regclass);
 
 
 --
@@ -307,6 +506,13 @@ ALTER TABLE ONLY public."Specialization" ALTER COLUMN id SET DEFAULT nextval('pu
 
 
 --
+-- Name: Subscription id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Subscription" ALTER COLUMN id SET DEFAULT nextval('public."Subscription_id_seq"'::regclass);
+
+
+--
 -- Name: User id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -318,6 +524,18 @@ ALTER TABLE ONLY public."User" ALTER COLUMN id SET DEFAULT nextval('public."User
 --
 
 ALTER TABLE ONLY public.projects ALTER COLUMN id SET DEFAULT nextval('public.projects_id_seq'::regclass);
+
+
+--
+-- Data for Name: Blog; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."Blog" (id, name, "photoName", "contentPath", "contentSize", "contentHash", "userId", "specializationId", "createdAt", "updatedAt") FROM stdin;
+1	Половина россиян не доверяет вопросы управления своими финансами искусственному интеллекту.	1755088308795-535682405.png	blog_1.json	6	f072cbec3bf8841871d4284230c5e983dc211a56837aed862487148f947d1a1f	6	1	2025-08-13 12:31:48.805	2025-08-13 12:31:48.81
+4	Как сделать логотип: основные принципы и правила	1755088833390-86462156.png	blog_4.json	6	f072cbec3bf8841871d4284230c5e983dc211a56837aed862487148f947d1a1f	6	5	2025-08-13 12:40:33.396	2025-08-13 12:40:33.402
+2	Доверяете ли​ вы финан­совым советам нейро­сетей? Расскажите о своем опыте	1755088539406-813092294.png	blog_2.json	6	f072cbec3bf8841871d4284230c5e983dc211a56837aed862487148f947d1a1f	7	4	2025-08-13 12:35:39.418	2025-08-13 12:43:22.275
+3	Лучшие нейросети 2026	1755088710648-904717871.png	blog_3.json	6	f072cbec3bf8841871d4284230c5e983dc211a56837aed862487148f947d1a1f	8	3	2025-08-13 12:38:30.659	2025-08-13 12:43:22.275
+\.
 
 
 --
@@ -341,6 +559,22 @@ COPY public."Category" (id, name) FROM stdin;
 16	Товары для бизнеса
 17	Локальное производство
 18	Ниши с особыми условиями
+\.
+
+
+--
+-- Data for Name: Chat; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."Chat" (id, "user1Id", "user2Id", "createdAt", "updatedAt") FROM stdin;
+\.
+
+
+--
+-- Data for Name: Message; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."Message" (id, content, "createdAt", "senderId", "chatId", read) FROM stdin;
 \.
 
 
@@ -369,17 +603,36 @@ COPY public."Specialization" (id, name) FROM stdin;
 
 
 --
+-- Data for Name: Subscription; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."Subscription" (id, name, "ratingBoost") FROM stdin;
+1	default	0
+2	pro	10
+3	premium	20
+\.
+
+
+--
 -- Data for Name: User; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "updatedAt", "refreshToken", "isEmailVerified", "isResetVerified", "logoFileName", "fullName", city, about, level, "phoneNumber", telegram, vk, website, experience, "coverFileName", "joinAuthorsNotifications", "weeklySummaryNotifications", "rewardNotifications", "lastLoginUpdate") FROM stdin;
-7	vital1y.sadikov	vitaly.sadikov2@yandex.ru	$2b$10$IkWiRHyJr0JYr4EsnTrDL.mEvkjoDc3FnwMhQq9mR0Z9eHdzH.0J.	1	2025-07-04 08:55:39.068	2025-07-04 11:00:50.344	\N	f	f	ava2.png	Афанасий Афанасьевич	Москва	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
-8	vital1332y.sadikov	vitaly.sadikov232@yandex.ru	$2b$10$Q3/C/I3NtwH6S65bMLJEM.GN09YQzI1F3UuriuFgZ3CfLX7WoNyJK	1	2025-07-04 08:58:47.464	2025-07-04 11:00:50.344	$2b$10$183MhKoCPo2J7OQrDaD3xekd8FOVWTGO5KPagC7JFGet0o8XXOAO2	f	f	ava3.png	Артур Пирожков	Челябинск	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
-9	vitaly.sadikov444	vitaly.sadikov133@yandex.ru	$2b$10$7C4aR3bURQjyA1GvX./VSutZ0dmioRNscT3nl/tnhxgpBUh1fDfIC	1	2025-07-07 11:39:00.097	2025-07-07 11:39:01.328	$2b$10$U.g2pY9cUDT0Zai/wGpq.ulKj8rpXM0nVVtw6MZ0wvI/D2Eh.WIUi	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
-10	vitaly.sadikov222	egorskomorohov020606@gmail.com	$2b$10$edmVUmZYfdRF6.ZyFfI4cO/X7IYfzykuaMByQbBl9IEkT3OWykjwy	1	2025-07-10 07:31:46.4	2025-07-10 07:32:29.146	$2b$10$SofNG6kr9RKjCzlseI8OFu.wTef79yQqFvepzdOvKHtu3ZXOv04Vi	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
-6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$Gq9LgS.dwDVeK93Th2ASgud7mrP/IRUyYxN5ccMA5DihzzUffUTR.	1	2025-07-03 11:03:00.473	2025-08-07 10:52:25.128	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImxvZ2luIjoidml0YWx5LnNhZGlra292MjIyIiwiaWF0IjoxNzU0NTYzOTQ1LCJleHAiOjE3NTUxNjg3NDV9.mYG3loooXQmCaet7DKTFdBnr1rCdZo-Qb9cnkKd3xpU	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17
-11	tgflk	tgflk_tuv@mail.ru	$2b$10$vzwiWqqrOo6OstA.dWHmJuI8.sY/8OJ6hpAEKCPlA7gB.Yi5mOTA6	1	2025-07-14 18:39:22.108	2025-07-14 18:40:13.792	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjExLCJsb2dpbiI6InRnZmxrIiwiaWF0IjoxNzUyNTE4NDEzLCJleHAiOjE3NTMxMjMyMTN9.kWrY-bIHzM0X04J76hk78SeCvFu_5wcHPuep3ANvrCo	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
-12	egorchik-pomidorchik	egor.skomorohoff@yandex.ru	$2b$10$EF.Di5n9b8UF869BYLl.MOsvlJeUCz1SzUEALQNe3/PCYuuHHfrze	1	2025-08-06 10:00:39.34	2025-08-06 12:37:35.182	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEyLCJpYXQiOjE3NTQ0ODM4NTUsImV4cCI6MTc1NTA4ODY1NX0.ke0mvfX_vm3zSPQGo_XMd_zg77Z32Qqrw_hNTkgS7WA	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N
+COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "updatedAt", "refreshToken", "isEmailVerified", "isResetVerified", "logoFileName", "fullName", city, about, level, "phoneNumber", telegram, vk, website, experience, "coverFileName", "joinAuthorsNotifications", "weeklySummaryNotifications", "rewardNotifications", "lastLoginUpdate", "blogId", "subscriptionId") FROM stdin;
+16	asdfg	egorskomorohov020606@gmai.com	$2b$10$jVGw8VSh79ZjVUDhEwyxtOl157mzzTZEQSRzSKOtxC79aWjRWSwhi	1	2025-08-11 11:39:09.085	2025-08-11 13:29:22.518	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE2LCJpYXQiOjE3NTQ5MTg5NjIsImV4cCI6MTc1NTUyMzc2Mn0.lW4rOWocikwX1ZvxACDkR_vHweCZ0KqG0eTWz7jS0KI	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1
+7	vital1y.sadikov	vitaly.sadikov2@yandex.ru	$2b$10$IkWiRHyJr0JYr4EsnTrDL.mEvkjoDc3FnwMhQq9mR0Z9eHdzH.0J.	1	2025-07-04 08:55:39.068	2025-08-11 10:05:38.17	\N	f	f	ava2.png	Афанасий Афанасьевич	Москва	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	2
+8	vital1332y.sadikov	vitaly.sadikov232@yandex.ru	$2b$10$Q3/C/I3NtwH6S65bMLJEM.GN09YQzI1F3UuriuFgZ3CfLX7WoNyJK	1	2025-07-04 08:58:47.464	2025-08-11 10:05:38.17	$2b$10$183MhKoCPo2J7OQrDaD3xekd8FOVWTGO5KPagC7JFGet0o8XXOAO2	f	f	ava3.png	Артур Пирожков	Челябинск	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1
+9	vitaly.sadikov444	vitaly.sadikov133@yandex.ru	$2b$10$7C4aR3bURQjyA1GvX./VSutZ0dmioRNscT3nl/tnhxgpBUh1fDfIC	1	2025-07-07 11:39:00.097	2025-08-11 10:08:27.076	$2b$10$U.g2pY9cUDT0Zai/wGpq.ulKj8rpXM0nVVtw6MZ0wvI/D2Eh.WIUi	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1
+11	tgflk	tgflk_tuv@mail.ru	$2b$10$vzwiWqqrOo6OstA.dWHmJuI8.sY/8OJ6hpAEKCPlA7gB.Yi5mOTA6	1	2025-07-14 18:39:22.108	2025-08-11 10:08:27.076	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjExLCJsb2dpbiI6InRnZmxrIiwiaWF0IjoxNzUyNTE4NDEzLCJleHAiOjE3NTMxMjMyMTN9.kWrY-bIHzM0X04J76hk78SeCvFu_5wcHPuep3ANvrCo	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1
+12	egorchik-pomidorchik	egor.skomorohoff@yandex.ru	$2b$10$EF.Di5n9b8UF869BYLl.MOsvlJeUCz1SzUEALQNe3/PCYuuHHfrze	1	2025-08-06 10:00:39.34	2025-08-11 10:08:27.076	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEyLCJpYXQiOjE3NTQ0ODM4NTUsImV4cCI6MTc1NTA4ODY1NX0.ke0mvfX_vm3zSPQGo_XMd_zg77Z32Qqrw_hNTkgS7WA	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1
+6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$Gq9LgS.dwDVeK93Th2ASgud7mrP/IRUyYxN5ccMA5DihzzUffUTR.	1	2025-07-03 11:03:00.473	2025-08-13 12:29:51.947	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImxvZ2luIjoidml0YWx5LnNhZGlra292MjIyIiwiaWF0IjoxNzU1MDg4MTkxLCJleHAiOjE3NTU2OTI5OTF9.ZmbbJhj8QmcPSUP-qQhPlbbZ-SOIQgVywxfSm62p4Sk	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17	\N	3
+\.
+
+
+--
+-- Data for Name: _BlogLikes; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."_BlogLikes" ("A", "B") FROM stdin;
 \.
 
 
@@ -393,6 +646,15 @@ COPY public."_ProjectLikes" ("A", "B") FROM stdin;
 
 
 --
+-- Data for Name: _ProjectViews; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."_ProjectViews" ("A", "B") FROM stdin;
+7	16
+\.
+
+
+--
 -- Data for Name: _User Specializations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -401,7 +663,6 @@ COPY public."_User Specializations" ("A", "B") FROM stdin;
 2	7
 1	8
 2	9
-1	10
 2	11
 \.
 
@@ -414,7 +675,6 @@ COPY public."_UserFollows" ("A", "B") FROM stdin;
 7	6
 8	6
 9	6
-10	6
 \.
 
 
@@ -456,10 +716,31 @@ COPY public.projects (id, name, description, "photoName", "firstLink", "secondLi
 
 
 --
+-- Name: Blog_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public."Blog_id_seq"', 4, true);
+
+
+--
 -- Name: Category_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public."Category_id_seq"', 18, true);
+
+
+--
+-- Name: Chat_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public."Chat_id_seq"', 1, false);
+
+
+--
+-- Name: Message_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public."Message_id_seq"', 1, false);
 
 
 --
@@ -477,10 +758,17 @@ SELECT pg_catalog.setval('public."Specialization_id_seq"', 6, true);
 
 
 --
+-- Name: Subscription_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public."Subscription_id_seq"', 3, true);
+
+
+--
 -- Name: User_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."User_id_seq"', 12, true);
+SELECT pg_catalog.setval('public."User_id_seq"', 16, true);
 
 
 --
@@ -491,11 +779,35 @@ SELECT pg_catalog.setval('public.projects_id_seq', 18, true);
 
 
 --
+-- Name: Blog Blog_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Blog"
+    ADD CONSTRAINT "Blog_pkey" PRIMARY KEY (id);
+
+
+--
 -- Name: Category Category_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public."Category"
     ADD CONSTRAINT "Category_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Chat Chat_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Chat"
+    ADD CONSTRAINT "Chat_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Message Message_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Message"
+    ADD CONSTRAINT "Message_pkey" PRIMARY KEY (id);
 
 
 --
@@ -515,6 +827,14 @@ ALTER TABLE ONLY public."Specialization"
 
 
 --
+-- Name: Subscription Subscription_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Subscription"
+    ADD CONSTRAINT "Subscription_pkey" PRIMARY KEY (id);
+
+
+--
 -- Name: User User_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -523,11 +843,27 @@ ALTER TABLE ONLY public."User"
 
 
 --
+-- Name: _BlogLikes _BlogLikes_AB_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_BlogLikes"
+    ADD CONSTRAINT "_BlogLikes_AB_pkey" PRIMARY KEY ("A", "B");
+
+
+--
 -- Name: _ProjectLikes _ProjectLikes_AB_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public."_ProjectLikes"
     ADD CONSTRAINT "_ProjectLikes_AB_pkey" PRIMARY KEY ("A", "B");
+
+
+--
+-- Name: _ProjectViews _ProjectViews_AB_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_ProjectViews"
+    ADD CONSTRAINT "_ProjectViews_AB_pkey" PRIMARY KEY ("A", "B");
 
 
 --
@@ -571,10 +907,38 @@ ALTER TABLE ONLY public.projects
 
 
 --
+-- Name: Blog_contentPath_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "Blog_contentPath_key" ON public."Blog" USING btree ("contentPath");
+
+
+--
 -- Name: Category_name_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE UNIQUE INDEX "Category_name_key" ON public."Category" USING btree (name);
+
+
+--
+-- Name: Chat_user1Id_user2Id_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "Chat_user1Id_user2Id_key" ON public."Chat" USING btree ("user1Id", "user2Id");
+
+
+--
+-- Name: Chat_user2Id_user1Id_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "Chat_user2Id_user1Id_key" ON public."Chat" USING btree ("user2Id", "user1Id");
+
+
+--
+-- Name: Message_chatId_createdAt_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "Message_chatId_createdAt_idx" ON public."Message" USING btree ("chatId", "createdAt");
 
 
 --
@@ -592,6 +956,13 @@ CREATE UNIQUE INDEX "Specialization_name_key" ON public."Specialization" USING b
 
 
 --
+-- Name: Subscription_name_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "Subscription_name_key" ON public."Subscription" USING btree (name);
+
+
+--
 -- Name: User_email_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -606,10 +977,24 @@ CREATE UNIQUE INDEX "User_login_key" ON public."User" USING btree (login);
 
 
 --
+-- Name: _BlogLikes_B_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "_BlogLikes_B_index" ON public."_BlogLikes" USING btree ("B");
+
+
+--
 -- Name: _ProjectLikes_B_index; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX "_ProjectLikes_B_index" ON public."_ProjectLikes" USING btree ("B");
+
+
+--
+-- Name: _ProjectViews_B_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "_ProjectViews_B_index" ON public."_ProjectViews" USING btree ("B");
 
 
 --
@@ -648,11 +1033,83 @@ CREATE UNIQUE INDEX "projects_contentPath_key" ON public.projects USING btree ("
 
 
 --
+-- Name: Blog Blog_specializationId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Blog"
+    ADD CONSTRAINT "Blog_specializationId_fkey" FOREIGN KEY ("specializationId") REFERENCES public."Specialization"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: Blog Blog_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Blog"
+    ADD CONSTRAINT "Blog_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: Chat Chat_user1Id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Chat"
+    ADD CONSTRAINT "Chat_user1Id_fkey" FOREIGN KEY ("user1Id") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: Chat Chat_user2Id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Chat"
+    ADD CONSTRAINT "Chat_user2Id_fkey" FOREIGN KEY ("user2Id") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: Message Message_chatId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Message"
+    ADD CONSTRAINT "Message_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES public."Chat"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: Message Message_senderId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Message"
+    ADD CONSTRAINT "Message_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
 -- Name: User User_profileTypeId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public."User"
     ADD CONSTRAINT "User_profileTypeId_fkey" FOREIGN KEY ("profileTypeId") REFERENCES public."ProfileType"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: User User_subscriptionId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."User"
+    ADD CONSTRAINT "User_subscriptionId_fkey" FOREIGN KEY ("subscriptionId") REFERENCES public."Subscription"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: _BlogLikes _BlogLikes_A_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_BlogLikes"
+    ADD CONSTRAINT "_BlogLikes_A_fkey" FOREIGN KEY ("A") REFERENCES public."Blog"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: _BlogLikes _BlogLikes_B_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_BlogLikes"
+    ADD CONSTRAINT "_BlogLikes_B_fkey" FOREIGN KEY ("B") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -669,6 +1126,22 @@ ALTER TABLE ONLY public."_ProjectLikes"
 
 ALTER TABLE ONLY public."_ProjectLikes"
     ADD CONSTRAINT "_ProjectLikes_B_fkey" FOREIGN KEY ("B") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: _ProjectViews _ProjectViews_A_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_ProjectViews"
+    ADD CONSTRAINT "_ProjectViews_A_fkey" FOREIGN KEY ("A") REFERENCES public.projects(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: _ProjectViews _ProjectViews_B_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_ProjectViews"
+    ADD CONSTRAINT "_ProjectViews_B_fkey" FOREIGN KEY ("B") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

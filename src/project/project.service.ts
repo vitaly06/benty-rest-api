@@ -32,9 +32,8 @@ export class ProjectService {
     const { path, size, hash } = await this.storageService.saveContent(
       tempFileName,
       dto.content,
+      'projects',
     );
-
-    console.log(coverImage?.filename);
 
     try {
       // 3. Создаем проект (БЕЗ передачи content в Prisma)
@@ -56,7 +55,7 @@ export class ProjectService {
 
       // 4. Переименовываем файл с учетом ID проекта
       const newFileName = `project_${project.id}.json`;
-      await this.storageService.renameFile(path, newFileName);
+      await this.storageService.renameFile(path, newFileName, 'projects');
 
       return this.prisma.project.update({
         where: { id: project.id },
@@ -65,11 +64,46 @@ export class ProjectService {
       });
     } catch (error) {
       // Удаляем временный файл при ошибке
-      await this.storageService.deleteFile(path).catch(console.error);
+      await this.storageService
+        .deleteFile(path, 'projects')
+        .catch(console.error);
       throw error;
     }
   }
 
+  async getPopularProjects() {
+    try {
+      const allProjects = await this.prisma.project.findMany({
+        include: {
+          user: {
+            include: {
+              specializations: true,
+              subscription: true,
+            },
+          },
+          category: true,
+          _count: {
+            select: {
+              likedBy: true,
+              viewedBy: true,
+            },
+          },
+        },
+      });
+
+      const sortedProjects = allProjects.sort((a, b) => {
+        const aPopularity = a._count.likedBy + a._count.viewedBy;
+        const bPopularity = b._count.likedBy + b._count.viewedBy;
+        return bPopularity - aPopularity;
+      });
+
+      const topProjects = sortedProjects.slice(0, 4);
+
+      return topProjects.map((project) => this.mapToProjectResponse(project));
+    } catch (error) {
+      throw new Error(`Failed to get popular projects: ${error.message}`);
+    }
+  }
   async getProjectWithContent(
     projectId: number,
     req: Request & { user?: { sub: number } },
@@ -101,6 +135,7 @@ export class ProjectService {
             logoFileName: true,
           },
         },
+        viewedBy: true,
       },
     });
 
@@ -110,7 +145,7 @@ export class ProjectService {
 
     // Получаем контент
     const content = project.contentPath
-      ? await this.storageService.loadContent(project.contentPath)
+      ? await this.storageService.loadContent(project.contentPath, 'projects')
       : null;
 
     // Дополнительно проекты пользователя
@@ -138,6 +173,28 @@ export class ProjectService {
           : anotherProjects.slice(0, 6),
       content,
     };
+    if (req.user?.sub) {
+      const checkView = await this.prisma.project.findFirst({
+        where: {
+          id: projectId,
+          viewedBy: {
+            some: {
+              id: req.user.sub,
+            },
+          },
+        },
+      });
+      if (!checkView) {
+        await this.prisma.project.update({
+          where: { id: projectId },
+          data: {
+            viewedBy: {
+              connect: { id: req.user.sub },
+            },
+          },
+        });
+      }
+    }
 
     // if (req.user) {
     //   result['isLiked'] = project.likedBy.some(
@@ -157,7 +214,7 @@ export class ProjectService {
     });
 
     if (project?.contentPath) {
-      await this.storageService.deleteFile(project.contentPath);
+      await this.storageService.deleteFile(project.contentPath, 'projects');
     }
 
     return this.prisma.project.delete({ where: { id: projectId } });
@@ -171,6 +228,7 @@ export class ProjectService {
           user: {
             include: {
               specializations: true,
+              subscription: true,
             },
           },
           category: true,
@@ -189,6 +247,7 @@ export class ProjectService {
         user: {
           include: {
             specializations: true,
+            subscription: true,
           },
         },
         category: true,
@@ -209,6 +268,7 @@ export class ProjectService {
         name: project.user.fullName,
         avatar: project.user.logoFileName,
         specializations: project.user.specializations.map((spec) => spec.name),
+        subscription: project.user.subscription.name,
       },
       category: {
         id: project.category.id,
