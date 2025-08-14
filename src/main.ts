@@ -19,6 +19,7 @@ async function bootstrap() {
       'https://benty.work',
       'http://www.benty.work',
       'https://www.benty.work',
+      'http://localhost:3000',
     ],
   });
   app.useGlobalPipes(new ValidationPipe());

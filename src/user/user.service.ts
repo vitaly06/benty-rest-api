@@ -1145,7 +1145,7 @@ export class UserService {
     );
     const rating = views + likes + user.followers.length;
 
-    return rating * (1 + user.subscription.ratingBoost / 100);
+    return Math.ceil(rating * (1 + user.subscription.ratingBoost / 100));
   }
 
   private formatDateTimePeriod(dateTimeStr: string): string {

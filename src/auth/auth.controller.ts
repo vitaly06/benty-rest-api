@@ -53,7 +53,9 @@ export class AuthController {
   ) {
     const result = await this.authService.signIn(dto);
     this.setCookies(res, result.tokens);
-    return await this.userService.getAvatar(result.checkUser.id);
+    const userLogo = await this.userService.getAvatar(result.checkUser.id);
+
+    return { userLogo, id: result.checkUser.id };
   }
 
   @ApiOperation({
@@ -99,7 +101,9 @@ export class AuthController {
     const result = await this.authService.verifyEmail(code);
 
     this.setCookies(res, result.tokens);
-    return await this.userService.getAvatar(result.user.id);
+    const logoUser = await this.userService.getAvatar(result.user.id);
+
+    return { logoUser, id: result.user.id };
   }
 
   @ApiTags('Забыл пароль')

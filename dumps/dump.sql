@@ -97,53 +97,17 @@ ALTER SEQUENCE public."Category_id_seq" OWNED BY public."Category".id;
 
 
 --
--- Name: Chat; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public."Chat" (
-    id integer NOT NULL,
-    "user1Id" integer NOT NULL,
-    "user2Id" integer NOT NULL,
-    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "updatedAt" timestamp(3) without time zone NOT NULL
-);
-
-
-ALTER TABLE public."Chat" OWNER TO postgres;
-
---
--- Name: Chat_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public."Chat_id_seq"
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public."Chat_id_seq" OWNER TO postgres;
-
---
--- Name: Chat_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public."Chat_id_seq" OWNED BY public."Chat".id;
-
-
---
 -- Name: Message; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public."Message" (
     id integer NOT NULL,
-    content text NOT NULL,
+    content text,
     "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "senderId" integer NOT NULL,
-    "chatId" integer NOT NULL,
-    read boolean DEFAULT false NOT NULL
+    "receiverId" integer NOT NULL,
+    "filePath" text,
+    "isRead" boolean DEFAULT false NOT NULL
 );
 
 
@@ -305,7 +269,8 @@ CREATE TABLE public."User" (
     "rewardNotifications" boolean DEFAULT false NOT NULL,
     "lastLoginUpdate" timestamp(3) without time zone,
     "blogId" integer,
-    "subscriptionId" integer DEFAULT 1 NOT NULL
+    "subscriptionId" integer DEFAULT 1 NOT NULL,
+    status text DEFAULT 'offline'::text NOT NULL
 );
 
 
@@ -478,13 +443,6 @@ ALTER TABLE ONLY public."Category" ALTER COLUMN id SET DEFAULT nextval('public."
 
 
 --
--- Name: Chat id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public."Chat" ALTER COLUMN id SET DEFAULT nextval('public."Chat_id_seq"'::regclass);
-
-
---
 -- Name: Message id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -563,18 +521,11 @@ COPY public."Category" (id, name) FROM stdin;
 
 
 --
--- Data for Name: Chat; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public."Chat" (id, "user1Id", "user2Id", "createdAt", "updatedAt") FROM stdin;
-\.
-
-
---
 -- Data for Name: Message; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Message" (id, content, "createdAt", "senderId", "chatId", read) FROM stdin;
+COPY public."Message" (id, content, "createdAt", "senderId", "receiverId", "filePath", "isRead") FROM stdin;
+1	Привет	2025-08-14 09:41:54.031	6	8	\N	f
 \.
 
 
@@ -617,14 +568,14 @@ COPY public."Subscription" (id, name, "ratingBoost") FROM stdin;
 -- Data for Name: User; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "updatedAt", "refreshToken", "isEmailVerified", "isResetVerified", "logoFileName", "fullName", city, about, level, "phoneNumber", telegram, vk, website, experience, "coverFileName", "joinAuthorsNotifications", "weeklySummaryNotifications", "rewardNotifications", "lastLoginUpdate", "blogId", "subscriptionId") FROM stdin;
-16	asdfg	egorskomorohov020606@gmai.com	$2b$10$jVGw8VSh79ZjVUDhEwyxtOl157mzzTZEQSRzSKOtxC79aWjRWSwhi	1	2025-08-11 11:39:09.085	2025-08-11 13:29:22.518	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE2LCJpYXQiOjE3NTQ5MTg5NjIsImV4cCI6MTc1NTUyMzc2Mn0.lW4rOWocikwX1ZvxACDkR_vHweCZ0KqG0eTWz7jS0KI	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1
-7	vital1y.sadikov	vitaly.sadikov2@yandex.ru	$2b$10$IkWiRHyJr0JYr4EsnTrDL.mEvkjoDc3FnwMhQq9mR0Z9eHdzH.0J.	1	2025-07-04 08:55:39.068	2025-08-11 10:05:38.17	\N	f	f	ava2.png	Афанасий Афанасьевич	Москва	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	2
-8	vital1332y.sadikov	vitaly.sadikov232@yandex.ru	$2b$10$Q3/C/I3NtwH6S65bMLJEM.GN09YQzI1F3UuriuFgZ3CfLX7WoNyJK	1	2025-07-04 08:58:47.464	2025-08-11 10:05:38.17	$2b$10$183MhKoCPo2J7OQrDaD3xekd8FOVWTGO5KPagC7JFGet0o8XXOAO2	f	f	ava3.png	Артур Пирожков	Челябинск	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1
-9	vitaly.sadikov444	vitaly.sadikov133@yandex.ru	$2b$10$7C4aR3bURQjyA1GvX./VSutZ0dmioRNscT3nl/tnhxgpBUh1fDfIC	1	2025-07-07 11:39:00.097	2025-08-11 10:08:27.076	$2b$10$U.g2pY9cUDT0Zai/wGpq.ulKj8rpXM0nVVtw6MZ0wvI/D2Eh.WIUi	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1
-11	tgflk	tgflk_tuv@mail.ru	$2b$10$vzwiWqqrOo6OstA.dWHmJuI8.sY/8OJ6hpAEKCPlA7gB.Yi5mOTA6	1	2025-07-14 18:39:22.108	2025-08-11 10:08:27.076	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjExLCJsb2dpbiI6InRnZmxrIiwiaWF0IjoxNzUyNTE4NDEzLCJleHAiOjE3NTMxMjMyMTN9.kWrY-bIHzM0X04J76hk78SeCvFu_5wcHPuep3ANvrCo	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1
-12	egorchik-pomidorchik	egor.skomorohoff@yandex.ru	$2b$10$EF.Di5n9b8UF869BYLl.MOsvlJeUCz1SzUEALQNe3/PCYuuHHfrze	1	2025-08-06 10:00:39.34	2025-08-11 10:08:27.076	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEyLCJpYXQiOjE3NTQ0ODM4NTUsImV4cCI6MTc1NTA4ODY1NX0.ke0mvfX_vm3zSPQGo_XMd_zg77Z32Qqrw_hNTkgS7WA	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1
-6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$Gq9LgS.dwDVeK93Th2ASgud7mrP/IRUyYxN5ccMA5DihzzUffUTR.	1	2025-07-03 11:03:00.473	2025-08-13 12:29:51.947	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImxvZ2luIjoidml0YWx5LnNhZGlra292MjIyIiwiaWF0IjoxNzU1MDg4MTkxLCJleHAiOjE3NTU2OTI5OTF9.ZmbbJhj8QmcPSUP-qQhPlbbZ-SOIQgVywxfSm62p4Sk	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17	\N	3
+COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "updatedAt", "refreshToken", "isEmailVerified", "isResetVerified", "logoFileName", "fullName", city, about, level, "phoneNumber", telegram, vk, website, experience, "coverFileName", "joinAuthorsNotifications", "weeklySummaryNotifications", "rewardNotifications", "lastLoginUpdate", "blogId", "subscriptionId", status) FROM stdin;
+16	asdfg	egorskomorohov020606@gmai.com	$2b$10$jVGw8VSh79ZjVUDhEwyxtOl157mzzTZEQSRzSKOtxC79aWjRWSwhi	1	2025-08-11 11:39:09.085	2025-08-11 13:29:22.518	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE2LCJpYXQiOjE3NTQ5MTg5NjIsImV4cCI6MTc1NTUyMzc2Mn0.lW4rOWocikwX1ZvxACDkR_vHweCZ0KqG0eTWz7jS0KI	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline
+6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$Gq9LgS.dwDVeK93Th2ASgud7mrP/IRUyYxN5ccMA5DihzzUffUTR.	1	2025-07-03 11:03:00.473	2025-08-14 09:37:35.814	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImxvZ2luIjoidml0YWx5LnNhZGlra292MjIyIiwiaWF0IjoxNzU1MTY0MjU1LCJleHAiOjE3NTU3NjkwNTV9.7ETno9qn4R556_tpEWd4nVC1Ci5HoCy-Ppx1MsQWQlI	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17	\N	3	offline
+7	vital1y.sadikov	vitaly.sadikov2@yandex.ru	$2b$10$IkWiRHyJr0JYr4EsnTrDL.mEvkjoDc3FnwMhQq9mR0Z9eHdzH.0J.	1	2025-07-04 08:55:39.068	2025-08-11 10:05:38.17	\N	f	f	ava2.png	Афанасий Афанасьевич	Москва	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	2	offline
+8	vital1332y.sadikov	vitaly.sadikov232@yandex.ru	$2b$10$Q3/C/I3NtwH6S65bMLJEM.GN09YQzI1F3UuriuFgZ3CfLX7WoNyJK	1	2025-07-04 08:58:47.464	2025-08-11 10:05:38.17	$2b$10$183MhKoCPo2J7OQrDaD3xekd8FOVWTGO5KPagC7JFGet0o8XXOAO2	f	f	ava3.png	Артур Пирожков	Челябинск	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline
+9	vitaly.sadikov444	vitaly.sadikov133@yandex.ru	$2b$10$7C4aR3bURQjyA1GvX./VSutZ0dmioRNscT3nl/tnhxgpBUh1fDfIC	1	2025-07-07 11:39:00.097	2025-08-11 10:08:27.076	$2b$10$U.g2pY9cUDT0Zai/wGpq.ulKj8rpXM0nVVtw6MZ0wvI/D2Eh.WIUi	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline
+11	tgflk	tgflk_tuv@mail.ru	$2b$10$vzwiWqqrOo6OstA.dWHmJuI8.sY/8OJ6hpAEKCPlA7gB.Yi5mOTA6	1	2025-07-14 18:39:22.108	2025-08-11 10:08:27.076	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjExLCJsb2dpbiI6InRnZmxrIiwiaWF0IjoxNzUyNTE4NDEzLCJleHAiOjE3NTMxMjMyMTN9.kWrY-bIHzM0X04J76hk78SeCvFu_5wcHPuep3ANvrCo	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline
+12	egorchik-pomidorchik	egor.skomorohoff@yandex.ru	$2b$10$EF.Di5n9b8UF869BYLl.MOsvlJeUCz1SzUEALQNe3/PCYuuHHfrze	1	2025-08-06 10:00:39.34	2025-08-11 10:08:27.076	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEyLCJpYXQiOjE3NTQ0ODM4NTUsImV4cCI6MTc1NTA4ODY1NX0.ke0mvfX_vm3zSPQGo_XMd_zg77Z32Qqrw_hNTkgS7WA	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline
 \.
 
 
@@ -730,17 +681,10 @@ SELECT pg_catalog.setval('public."Category_id_seq"', 18, true);
 
 
 --
--- Name: Chat_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public."Chat_id_seq"', 1, false);
-
-
---
 -- Name: Message_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Message_id_seq"', 1, false);
+SELECT pg_catalog.setval('public."Message_id_seq"', 1, true);
 
 
 --
@@ -792,14 +736,6 @@ ALTER TABLE ONLY public."Blog"
 
 ALTER TABLE ONLY public."Category"
     ADD CONSTRAINT "Category_pkey" PRIMARY KEY (id);
-
-
---
--- Name: Chat Chat_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public."Chat"
-    ADD CONSTRAINT "Chat_pkey" PRIMARY KEY (id);
 
 
 --
@@ -921,27 +857,6 @@ CREATE UNIQUE INDEX "Category_name_key" ON public."Category" USING btree (name);
 
 
 --
--- Name: Chat_user1Id_user2Id_key; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE UNIQUE INDEX "Chat_user1Id_user2Id_key" ON public."Chat" USING btree ("user1Id", "user2Id");
-
-
---
--- Name: Chat_user2Id_user1Id_key; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE UNIQUE INDEX "Chat_user2Id_user1Id_key" ON public."Chat" USING btree ("user2Id", "user1Id");
-
-
---
--- Name: Message_chatId_createdAt_idx; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX "Message_chatId_createdAt_idx" ON public."Message" USING btree ("chatId", "createdAt");
-
-
---
 -- Name: ProfileType_name_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1049,27 +964,11 @@ ALTER TABLE ONLY public."Blog"
 
 
 --
--- Name: Chat Chat_user1Id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public."Chat"
-    ADD CONSTRAINT "Chat_user1Id_fkey" FOREIGN KEY ("user1Id") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
---
--- Name: Chat Chat_user2Id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public."Chat"
-    ADD CONSTRAINT "Chat_user2Id_fkey" FOREIGN KEY ("user2Id") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
---
--- Name: Message Message_chatId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: Message Message_receiverId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public."Message"
-    ADD CONSTRAINT "Message_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES public."Chat"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+    ADD CONSTRAINT "Message_receiverId_fkey" FOREIGN KEY ("receiverId") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 --

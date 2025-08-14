@@ -12,12 +12,12 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { StorageModule } from './storage/storage.module';
 import { CategoryModule } from './category/category.module';
 import { BlogModule } from './blog/blog.module';
-import { ChatModule } from './chat/chat.module';
 import * as redisStore from 'cache-manager-ioredis';
-import { WebSocketGateway } from '@nestjs/websockets';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
+    ChatModule,
     PrismaModule,
     AuthModule,
     UserModule,
@@ -43,8 +43,7 @@ import { WebSocketGateway } from '@nestjs/websockets';
     StorageModule,
     CategoryModule,
     BlogModule,
-    ChatModule,
   ],
-  // providers: [WebSocketGateway],
+  providers: [], // Убрали WebSocketGateway отсюда
 })
 export class AppModule {}
