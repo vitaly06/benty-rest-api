@@ -24,7 +24,7 @@ export class PhotoController {
   @ApiParam({
     name: 'type',
     description: 'Тип файла (avatar, cover и и т.д.)',
-    enum: ['avatar', 'cover', 'project', 'blog'],
+    enum: ['avatar', 'cover', 'project', 'blog', 'chat'],
   })
   @ApiParam({ name: 'filename', description: 'Имя файла', type: String })
   @ApiProduces('image/*')
@@ -34,7 +34,7 @@ export class PhotoController {
     @Param('filename') filename: string,
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
-    if (!['avatar', 'cover', 'project', 'blog'].includes(type)) {
+    if (!['avatar', 'cover', 'project', 'blog', 'chat'].includes(type)) {
       throw new BadRequestException(
         'Недопустимый тип файла. Допустимые значения: avatar, cover, project, blog',
       );

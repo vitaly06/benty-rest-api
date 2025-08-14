@@ -15,8 +15,6 @@ import { JwtAuthGuard } from '../common/guards/jwt.guard';
 import { RequestWithUser } from '../auth/interfaces/request-with-user.dto';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
 
 @ApiTags('Chat')
 @Controller('chat')
@@ -47,34 +45,7 @@ export class ChatController {
 
   @Post('upload-file')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, cb) => {
-          const randomName = Array(32)
-            .fill(null)
-            .map(() => Math.round(Math.random() * 16).toString(16))
-            .join('');
-          return cb(null, `${randomName}${extname(file.originalname)}`);
-        },
-      }),
-      fileFilter: (req, file, cb) => {
-        const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
-        if (allowedTypes.includes(file.mimetype)) {
-          cb(null, true);
-        } else {
-          cb(
-            new BadRequestException(
-              'Недопустимый тип файла. Разрешены: JPEG, PNG, PDF',
-            ),
-            false,
-          );
-        }
-      },
-      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-    }),
-  )
+  @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     // @Req() req: RequestWithUser,
@@ -82,6 +53,6 @@ export class ChatController {
     if (!file) {
       throw new BadRequestException('Файл не загружен');
     }
-    return { filePath: `/uploads/${file.filename}` };
+    return { filePath: `${file.filename}` };
   }
 }
