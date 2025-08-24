@@ -136,6 +136,50 @@ ALTER SEQUENCE public."Message_id_seq" OWNED BY public."Message".id;
 
 
 --
+-- Name: Payment; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Payment" (
+    id integer NOT NULL,
+    amount double precision NOT NULL,
+    purpose text NOT NULL,
+    "orderId" text NOT NULL,
+    "userId" integer NOT NULL,
+    "operationId" text NOT NULL,
+    "externalPaymentId" text,
+    "paymentLink" text NOT NULL,
+    status text DEFAULT 'pending'::text NOT NULL,
+    "expiresAt" timestamp(3) without time zone NOT NULL,
+    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "updatedAt" timestamp(3) without time zone NOT NULL
+);
+
+
+ALTER TABLE public."Payment" OWNER TO postgres;
+
+--
+-- Name: Payment_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public."Payment_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public."Payment_id_seq" OWNER TO postgres;
+
+--
+-- Name: Payment_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public."Payment_id_seq" OWNED BY public."Payment".id;
+
+
+--
 -- Name: ProfileType; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -210,7 +254,10 @@ ALTER SEQUENCE public."Specialization_id_seq" OWNED BY public."Specialization".i
 CREATE TABLE public."Subscription" (
     id integer NOT NULL,
     name text NOT NULL,
-    "ratingBoost" integer
+    "ratingBoost" integer,
+    duration integer DEFAULT 30 NOT NULL,
+    features text[],
+    price numeric(65,30) DEFAULT 0 NOT NULL
 );
 
 
@@ -450,6 +497,13 @@ ALTER TABLE ONLY public."Message" ALTER COLUMN id SET DEFAULT nextval('public."M
 
 
 --
+-- Name: Payment id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Payment" ALTER COLUMN id SET DEFAULT nextval('public."Payment_id_seq"'::regclass);
+
+
+--
 -- Name: ProfileType id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -534,6 +588,17 @@ COPY public."Message" (id, content, "createdAt", "senderId", "receiverId", "file
 
 
 --
+-- Data for Name: Payment; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."Payment" (id, amount, purpose, "orderId", "userId", "operationId", "externalPaymentId", "paymentLink", status, "expiresAt", "createdAt", "updatedAt") FROM stdin;
+1	1200	Оплата подписки: pro	sub_2_user_6_1755950000573	6	6a8061f4-38ca-4482-bf01-49c5d773029e	\N	https://merch.tochka.com/order/?uuid=6a8061f4-38ca-4482-bf01-49c5d773029e	pending	2025-08-30 11:53:21.332	2025-08-23 11:53:21.335	2025-08-23 11:53:21.335
+2	1200	Оплата подписки: pro	sub_2_user_6_1755952063582	6	f2da8688-ac1d-44db-8534-e1a87801dc03	\N	https://merch.tochka.com/order/?uuid=f2da8688-ac1d-44db-8534-e1a87801dc03	pending	2025-08-30 12:27:45.383	2025-08-23 12:27:45.384	2025-08-23 12:27:45.384
+3	1200	Оплата подписки: pro	sub_2_user_6_1755975119494	6	e08aa797-3d6d-3834-b8d4-8a90d8fd1244	\N	https://merch.example.com/order/?uuid=e08aa797-3d6d-3834-b8d4-8a90d8fd1244	APPROVED	2025-08-30 18:51:59.911	2025-08-23 18:51:59.912	2025-08-23 19:21:26.864
+\.
+
+
+--
 -- Data for Name: ProfileType; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -561,10 +626,10 @@ COPY public."Specialization" (id, name) FROM stdin;
 -- Data for Name: Subscription; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Subscription" (id, name, "ratingBoost") FROM stdin;
-1	default	0
-2	pro	10
-3	premium	20
+COPY public."Subscription" (id, name, "ratingBoost", duration, features, price) FROM stdin;
+1	default	0	30	\N	0.000000000000000000000000000000
+2	pro	10	30	\N	1200.000000000000000000000000000000
+3	premium	20	30	\N	2000.000000000000000000000000000000
 \.
 
 
@@ -573,7 +638,7 @@ COPY public."Subscription" (id, name, "ratingBoost") FROM stdin;
 --
 
 COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "updatedAt", "refreshToken", "isEmailVerified", "isResetVerified", "logoFileName", "fullName", city, about, level, "phoneNumber", telegram, vk, website, experience, "coverFileName", "joinAuthorsNotifications", "weeklySummaryNotifications", "rewardNotifications", "lastLoginUpdate", "blogId", "subscriptionId", status) FROM stdin;
-6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$Gq9LgS.dwDVeK93Th2ASgud7mrP/IRUyYxN5ccMA5DihzzUffUTR.	1	2025-07-03 11:03:00.473	2025-08-14 16:30:39.948	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImlhdCI6MTc1NTE4ODkxMCwiZXhwIjoxNzU1NzkzNzEwfQ.RM4_4cHBeiyRRt9Fk4kBfFtV-3kSE9NlQEgK9QXv9Tg	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17	\N	3	offline
+6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$Gq9LgS.dwDVeK93Th2ASgud7mrP/IRUyYxN5ccMA5DihzzUffUTR.	1	2025-07-03 11:03:00.473	2025-08-23 19:21:26.874	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImxvZ2luIjoidml0YWx5LnNhZGlra292MjIyIiwiaWF0IjoxNzU1OTc0ODc1LCJleHAiOjE3NTY1Nzk2NzV9.BZ5T-sdmsMiVLDc7fowc3Hn0a7GVKr-MDgEsnYKSAg0	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17	\N	2	offline
 16	asdfg	egorskomorohov020606@gmai.com	$2b$10$jVGw8VSh79ZjVUDhEwyxtOl157mzzTZEQSRzSKOtxC79aWjRWSwhi	1	2025-08-11 11:39:09.085	2025-08-11 13:29:22.518	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE2LCJpYXQiOjE3NTQ5MTg5NjIsImV4cCI6MTc1NTUyMzc2Mn0.lW4rOWocikwX1ZvxACDkR_vHweCZ0KqG0eTWz7jS0KI	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline
 8	vital1332y.sadikov	vitaly.sadikov232@yandex.ru	$2b$10$Q3/C/I3NtwH6S65bMLJEM.GN09YQzI1F3UuriuFgZ3CfLX7WoNyJK	1	2025-07-04 08:58:47.464	2025-08-14 16:00:24.431	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjgsImxvZ2luIjoidml0YWwxMzMyeS5zYWRpa292IiwiaWF0IjoxNzU1MTg3MjE5LCJleHAiOjE3NTU3OTIwMTl9.Ktnk0kPXXTAWAUTeggwDuz5-RDlUTf0gW1PGxzeNOmM	f	f	ava3.png	Артур Пирожков	Челябинск	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	online
 7	vital1y.sadikov	vitaly.sadikov2@yandex.ru	$2b$10$IkWiRHyJr0JYr4EsnTrDL.mEvkjoDc3FnwMhQq9mR0Z9eHdzH.0J.	1	2025-07-04 08:55:39.068	2025-08-11 10:05:38.17	\N	f	f	ava2.png	Афанасий Афанасьевич	Москва	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	2	offline
@@ -693,6 +758,13 @@ SELECT pg_catalog.setval('public."Message_id_seq"', 5, true);
 
 
 --
+-- Name: Payment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public."Payment_id_seq"', 3, true);
+
+
+--
 -- Name: ProfileType_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -749,6 +821,14 @@ ALTER TABLE ONLY public."Category"
 
 ALTER TABLE ONLY public."Message"
     ADD CONSTRAINT "Message_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Payment Payment_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Payment"
+    ADD CONSTRAINT "Payment_pkey" PRIMARY KEY (id);
 
 
 --
@@ -859,6 +939,41 @@ CREATE UNIQUE INDEX "Blog_contentPath_key" ON public."Blog" USING btree ("conten
 --
 
 CREATE UNIQUE INDEX "Category_name_key" ON public."Category" USING btree (name);
+
+
+--
+-- Name: Payment_externalPaymentId_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "Payment_externalPaymentId_idx" ON public."Payment" USING btree ("externalPaymentId");
+
+
+--
+-- Name: Payment_operationId_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "Payment_operationId_idx" ON public."Payment" USING btree ("operationId");
+
+
+--
+-- Name: Payment_operationId_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "Payment_operationId_key" ON public."Payment" USING btree ("operationId");
+
+
+--
+-- Name: Payment_orderId_key; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX "Payment_orderId_key" ON public."Payment" USING btree ("orderId");
+
+
+--
+-- Name: Payment_status_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "Payment_status_idx" ON public."Payment" USING btree (status);
 
 
 --
@@ -982,6 +1097,14 @@ ALTER TABLE ONLY public."Message"
 
 ALTER TABLE ONLY public."Message"
     ADD CONSTRAINT "Message_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: Payment Payment_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Payment"
+    ADD CONSTRAINT "Payment_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 --

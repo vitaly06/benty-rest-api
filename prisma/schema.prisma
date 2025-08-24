@@ -70,6 +70,7 @@ model User {
   // Сообщения
   sentMessages     Message[] @relation("Sender") // Сообщения, отправленные пользователем
   receivedMessages Message[] @relation("Receiver") // Сообщения, полученные пользователем
+  Payment          Payment[]
 }
 
 model Message {
@@ -84,10 +85,33 @@ model Message {
   receiver   User     @relation("Receiver", fields: [receiverId], references: [id])
 }
 
+model Payment {
+  id                Int      @id @default(autoincrement())
+  amount            Float
+  purpose           String
+  orderId           String   @unique
+  userId            Int
+  user              User     @relation(fields: [userId], references: [id])
+  operationId       String   @unique
+  externalPaymentId String? // ID платежа из Точки
+  paymentLink       String
+  status            String   @default("pending")
+  expiresAt         DateTime
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([operationId])
+  @@index([externalPaymentId])
+  @@index([status])
+}
+
 model Subscription {
-  id          Int    @id @default(autoincrement())
-  name        String @unique
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  price       Decimal  @default(0)
+  duration    Int      @default(30) // длительность в днях
   ratingBoost Int? // процент буста рейтинга
+  features    String[] // массив фич подписки
   User        User[]
 }
 
