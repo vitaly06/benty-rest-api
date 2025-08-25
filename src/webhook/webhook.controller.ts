@@ -3,9 +3,8 @@ import {
   Post,
   Body,
   Headers,
-  HttpException,
-  HttpStatus,
   Logger,
+  HttpStatus,
 } from '@nestjs/common';
 import { WebhookService } from './webhook.service';
 import { PaymentService } from 'src/payment/payment.service';
@@ -32,41 +31,48 @@ export class WebhookController {
         await this.webhookVerificationService.verifyWebhookToken(body);
 
       this.logger.log(`Webhook type: ${decodedData.webhookType}`);
-      this.logger.log(`Decoded data: ${JSON.stringify(decodedData)}`);
+      this.logger.debug(`Decoded data: ${JSON.stringify(decodedData)}`);
 
-      // Обрабатываем разные типы вебхуков
-      switch (decodedData.webhookType) {
-        case 'incomingPayment':
-          await this.handleIncomingPayment(decodedData);
-          break;
+      // Асинхронно обрабатываем вебхук (после отправки ответа)
+      setTimeout(async () => {
+        try {
+          // Обрабатываем разные типы вебхуков
+          switch (decodedData.webhookType) {
+            case 'incomingPayment':
+              await this.handleIncomingPayment(decodedData);
+              break;
 
-        // case 'outgoingPayment':
-        //   await this.handleOutgoingPayment(decodedData);
-        //   break;
+            case 'incomingSbpPayment':
+              await this.handleIncomingSbpPayment(decodedData);
+              break;
 
-        case 'incomingSbpPayment':
-          await this.handleIncomingSbpPayment(decodedData);
-          break;
+            case 'acquiringInternetPayment':
+              await this.handleAcquiringPayment(decodedData);
+              break;
 
-        // case 'incomingSbpB2BPayment':
-        //   await this.handleIncomingSbpB2BPayment(decodedData);
-        //   break;
+            default:
+              this.logger.warn(
+                `Unknown webhook type: ${decodedData.webhookType}`,
+              );
+          }
+        } catch (error) {
+          this.logger.error('Async webhook processing error:', error);
+        }
+      }, 0);
 
-        case 'acquiringInternetPayment':
-          await this.handleAcquiringPayment(decodedData);
-          break;
-
-        default:
-          this.logger.warn(`Unknown webhook type: ${decodedData.webhookType}`);
-      }
-
-      return { status: 'success', message: 'Webhook processed successfully' };
+      // ВАЖНО: Всегда возвращаем 200 OK API Точке немедленно
+      return {
+        status: 'success',
+        message: 'Webhook accepted for processing',
+      };
     } catch (error) {
       this.logger.error('Webhook processing error:', error);
-      throw new HttpException(
-        'Webhook processing failed',
-        HttpStatus.BAD_REQUEST,
-      );
+
+      // ВАЖНО: Даже при ошибке возвращаем 200 OK!
+      return {
+        status: 'accepted',
+        message: 'Webhook received (processing may have failed)',
+      };
     }
   }
 
@@ -79,8 +85,8 @@ export class WebhookController {
       amount,
       purpose,
       customerCode,
-      SidePayer, // Информация о плательщике
-      SideRecipient, // Информация о получателе
+      SidePayer,
+      SideRecipient,
       documentNumber,
       date,
     } = data;
@@ -104,16 +110,11 @@ export class WebhookController {
     this.logger.log(`Incoming payment processed: ${paymentId}`);
   }
 
-  // Обработка исходящего платежа
-  private async handleOutgoingPayment(data: any) {
-    this.logger.log(`Processing outgoing payment: ${data.paymentId}`);
-    // Логика обработки исходящих платежей
-  }
-
   // Обработка SBP платежа
   private async handleIncomingSbpPayment(data: any) {
     this.logger.log(`Processing SBP payment: ${data.paymentId}`);
     // Логика обработки SBP платежей
+    // Аналогично handleIncomingPayment
   }
 
   // Обработка acquiring платежа
