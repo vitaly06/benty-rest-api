@@ -183,7 +183,7 @@ export class BlogService {
           id: blog.user.id,
           fullName: blog.user.fullName,
           login: blog.user.login,
-          logoFileNmae: blog.user.logoFileName,
+          logoFileName: blog.user.logoFileName,
           city: blog.user.city,
         },
         views: blog.viewedBy.length,
