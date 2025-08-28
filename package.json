@@ -41,6 +41,7 @@
     "@types/nodemailer": "^6.4.17",
     "axios": "^1.11.0",
     "bcrypt": "^6.0.0",
+    "body-parser": "^2.2.0",
     "cache-manager": "^5.2.1",
     "cache-manager-ioredis": "^2.1.0",
     "class-transformer": "^0.5.1",

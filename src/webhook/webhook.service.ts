@@ -9,18 +9,20 @@ export class WebhookService {
 
   constructor() {
     this.client = jwksClient({
-      jwksUri: 'https://enter.tochka.com/.well-known/jwks.json',
-      timeout: 30000, // 30 секунд таймаут
+      jwksUri: 'https://enter.tochka.com/uapi/.well-known/jwks.json',
+      timeout: 30000,
+      cache: true,
+      cacheMaxEntries: 5,
+      cacheMaxAge: 600000, // 10 минут
     });
   }
 
-  // Получение публичного ключа
   private getKey(header: any): Promise<string> {
     return new Promise((resolve, reject) => {
       this.client.getSigningKey(header.kid, (err, key) => {
         if (err) {
           this.logger.error('Error getting signing key:', err);
-          reject(err);
+          reject(new Error(`Failed to get signing key: ${err.message}`));
           return;
         }
 
@@ -29,20 +31,28 @@ export class WebhookService {
           resolve(signingKey);
         } catch (error) {
           this.logger.error('Error extracting public key:', error);
-          reject(error);
+          reject(new Error('Failed to extract public key'));
         }
       });
     });
   }
 
-  // Верификация JWT токена вебхука
   async verifyWebhookToken(token: string): Promise<any> {
     try {
-      // Сначала декодируем без верификации для получения header
+      // Проверяем, что токен не пустой
+      if (!token || token.trim().length === 0) {
+        throw new Error('Empty JWT token received');
+      }
+
+      // Декодируем header для получения kid
       const decodedHeader = jwt.decode(token, { complete: true })?.header;
 
-      if (!decodedHeader || !decodedHeader.kid) {
-        throw new Error('Invalid JWT token or missing kid');
+      if (!decodedHeader) {
+        throw new Error('Failed to decode JWT header');
+      }
+
+      if (!decodedHeader.kid) {
+        throw new Error('JWT token missing kid in header');
       }
 
       // Получаем публичный ключ
@@ -56,11 +66,12 @@ export class WebhookService {
           {
             algorithms: ['RS256'],
             issuer: 'https://enter.tochka.com',
+            ignoreExpiration: false, // Не игнорируем expiration
           },
           (err, decoded) => {
             if (err) {
-              this.logger.error('JWT verification failed:', err);
-              reject(err);
+              this.logger.error('JWT verification failed:', err.message);
+              reject(new Error(`JWT verification failed: ${err.message}`));
             } else {
               resolve(decoded);
             }
@@ -68,18 +79,18 @@ export class WebhookService {
         );
       });
     } catch (error) {
-      this.logger.error('Token verification error:', error);
+      this.logger.error('Token verification error:', error.message);
       throw error;
     }
   }
 
-  // Альтернативный метод: декодирование без верификации (если нужна отладка)
-  async decodeWebhookToken(token: string): Promise<any> {
+  // Метод для быстрой проверки структуры токена без верификации
+  inspectToken(token: string): any {
     try {
-      return jwt.decode(token);
+      return jwt.decode(token, { complete: true });
     } catch (error) {
-      this.logger.error('Token decoding failed:', error);
-      throw error;
+      this.logger.error('Token inspection failed:', error);
+      return null;
     }
   }
 }

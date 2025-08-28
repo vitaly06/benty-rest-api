@@ -3,9 +3,18 @@ import * as cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestFactory } from '@nestjs/core';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    rawBody: true,
+  });
+
+  app.use('/webhooks/tochka', bodyParser.raw({ type: '*/*' }));
+
+  // Для остальных эндпоинтов используем JSON
+  app.use(bodyParser.json({ limit: '50mb' }));
+
   app.use(cookieParser());
   app.enableCors({
     credentials: true,

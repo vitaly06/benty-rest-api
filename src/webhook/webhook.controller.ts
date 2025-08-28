@@ -1,12 +1,15 @@
 import {
   Controller,
   Post,
-  Body,
   Headers,
   Logger,
-  HttpStatus,
   HttpCode,
+  Get,
+  Head,
+  Req,
+  RawBodyRequest,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { WebhookService } from './webhook.service';
 import { PaymentService } from 'src/payment/payment.service';
 
@@ -19,58 +22,51 @@ export class WebhookController {
     private readonly paymentService: PaymentService,
   ) {}
 
+  // Для проверки доступности URL Точкой
+  @Head('tochka')
+  @Get('tochka')
+  @HttpCode(200)
+  async checkTochkaWebhookAvailability() {
+    this.logger.log('Tochka availability check received');
+    return 'OK';
+  }
+
   @Post('tochka')
   @HttpCode(200)
   async handleTochkaWebhook(
-    @Body() body: string, // Тело вебхука - JWT строка
-    @Headers('x-webhook-signature') signature: string, // Опциональная подпись
+    @Req() req: RawBodyRequest<Request>,
+    @Headers('x-webhook-signature') signature: string,
   ) {
     try {
       this.logger.log('Received webhook from Tochka');
 
+      // Получаем raw body как строку
+      const rawBody = req.rawBody?.toString() || '';
+      this.logger.debug(`Raw body: ${rawBody}`);
+
+      if (!rawBody) {
+        this.logger.warn('Empty webhook body received');
+        return { status: 'accepted', message: 'Empty webhook received' };
+      }
+
       // Верифицируем JWT токен
       const decodedData =
-        await this.webhookVerificationService.verifyWebhookToken(body);
+        await this.webhookVerificationService.verifyWebhookToken(rawBody);
 
       this.logger.log(`Webhook type: ${decodedData.webhookType}`);
       this.logger.debug(`Decoded data: ${JSON.stringify(decodedData)}`);
 
-      // Асинхронно обрабатываем вебхук (после отправки ответа)
-      setTimeout(async () => {
-        try {
-          // Обрабатываем разные типы вебхуков
-          switch (decodedData.webhookType) {
-            case 'incomingPayment':
-              await this.handleIncomingPayment(decodedData);
-              break;
+      // Асинхронно обрабатываем вебхук
+      this.processWebhookAsync(decodedData).catch((error) => {
+        this.logger.error('Async webhook processing error:', error);
+      });
 
-            case 'incomingSbpPayment':
-              await this.handleIncomingSbpPayment(decodedData);
-              break;
-
-            case 'acquiringInternetPayment':
-              await this.handleAcquiringPayment(decodedData);
-              break;
-
-            default:
-              this.logger.warn(
-                `Unknown webhook type: ${decodedData.webhookType}`,
-              );
-          }
-        } catch (error) {
-          this.logger.error('Async webhook processing error:', error);
-        }
-      }, 0);
-
-      // ВАЖНО: Всегда возвращаем 200 OK API Точке немедленно
       return {
         status: 'success',
         message: 'Webhook accepted for processing',
       };
     } catch (error) {
       this.logger.error('Webhook processing error:', error);
-
-      // ВАЖНО: Даже при ошибке возвращаем 200 OK!
       return {
         status: 'accepted',
         message: 'Webhook received (processing may have failed)',
@@ -78,52 +74,81 @@ export class WebhookController {
     }
   }
 
-  // Обработка входящего платежа
+  private async processWebhookAsync(decodedData: any) {
+    try {
+      switch (decodedData.webhookType) {
+        case 'incomingPayment':
+          await this.handleIncomingPayment(decodedData);
+          break;
+
+        case 'incomingSbpPayment':
+          await this.handleIncomingSbpPayment(decodedData);
+          break;
+
+        case 'incomingSbpB2BPayment':
+          await this.handleIncomingSbpB2BPayment(decodedData);
+          break;
+
+        case 'acquiringInternetPayment':
+          await this.handleAcquiringPayment(decodedData);
+          break;
+
+        case 'outgoingPayment':
+          await this.handleOutgoingPayment(decodedData);
+          break;
+
+        default:
+          this.logger.warn(`Unknown webhook type: ${decodedData.webhookType}`);
+      }
+    } catch (error) {
+      this.logger.error('Webhook processing failed:', error);
+    }
+  }
+
   private async handleIncomingPayment(data: any) {
     this.logger.log(`Processing incoming payment: ${data.paymentId}`);
 
-    const {
-      paymentId,
-      amount,
-      purpose,
-      customerCode,
-      SidePayer,
-      SideRecipient,
-      documentNumber,
-      date,
-    } = data;
+    // Ищем платеж по purpose или customerCode
+    let payment;
+    if (data.customerCode) {
+      payment = await this.paymentService.findPaymentByCustomerCode(
+        data.customerCode,
+      );
+    }
 
-    // Ищем платеж по purpose или другим данным
-    const payment = await this.paymentService.findPaymentByPurpose(purpose);
+    if (!payment && data.purpose) {
+      payment = await this.paymentService.findPaymentByPurpose(data.purpose);
+    }
 
     if (payment) {
-      // Обновляем статус платежа
       await this.paymentService.updatePaymentStatus(
         payment.id,
         'executed',
-        paymentId,
-        amount,
+        data.paymentId,
+        data.amount,
+        data.currency || 'RUB',
       );
 
-      // Активируем подписку пользователя
       await this.paymentService.activateUserSubscription(payment.userId);
+      this.logger.log(`Payment ${data.paymentId} processed successfully`);
+    } else {
+      this.logger.warn(`Payment not found for: ${JSON.stringify(data)}`);
     }
-
-    this.logger.log(`Incoming payment processed: ${paymentId}`);
   }
 
-  // Обработка SBP платежа
   private async handleIncomingSbpPayment(data: any) {
     this.logger.log(`Processing SBP payment: ${data.paymentId}`);
-    // Логика обработки SBP платежей
-    // Аналогично handleIncomingPayment
+    await this.handleIncomingPayment(data); // Обрабатываем так же
   }
 
-  // Обработка acquiring платежа
+  private async handleIncomingSbpB2BPayment(data: any) {
+    this.logger.log(`Processing SBP B2B payment: ${data.paymentId}`);
+    await this.handleIncomingPayment(data); // Обрабатываем так же
+  }
+
   private async handleAcquiringPayment(data: any) {
     this.logger.log(`Processing acquiring payment: ${data.paymentId}`);
 
-    // Для интернет-эквайринга ищем по operationId или consumerId
     if (data.operationId) {
       const payment = await this.paymentService.findPaymentByOperationId(
         data.operationId,
@@ -135,10 +160,16 @@ export class WebhookController {
           'executed',
           data.paymentId,
           data.amount,
+          data.currency || 'RUB',
         );
 
         await this.paymentService.activateUserSubscription(payment.userId);
       }
     }
+  }
+
+  private async handleOutgoingPayment(data: any) {
+    this.logger.log(`Processing outgoing payment: ${data.paymentId}`);
+    // Логика для исходящих платежей
   }
 }

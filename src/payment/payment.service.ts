@@ -172,28 +172,44 @@ export class PaymentService {
     });
   }
 
+  async findPaymentByCustomerCode(customerCode: string) {
+    return this.prisma.payment.findFirst({
+      where: {
+        OR: [
+          { orderId: customerCode },
+          { operationId: customerCode },
+          { externalPaymentId: customerCode },
+        ],
+      },
+    });
+  }
+
+  async updatePaymentStatus(
+    paymentId: number,
+    status: string,
+    externalId?: string,
+    amount?: number,
+    currency?: string,
+  ) {
+    const updateData: any = {
+      status,
+      updatedAt: new Date(),
+    };
+
+    if (externalId) updateData.externalPaymentId = externalId;
+    if (amount) updateData.amount = amount;
+    if (currency) updateData.currency = currency;
+
+    return this.prisma.payment.update({
+      where: { id: paymentId },
+      data: updateData,
+    });
+  }
+
   // Поиск платежа по operationId
   async findPaymentByOperationId(operationId: string) {
     return this.prisma.payment.findUnique({
       where: { operationId },
-    });
-  }
-
-  // Обновление статуса платежа
-  async updatePaymentStatus(
-    paymentId: number,
-    status: string,
-    externalPaymentId?: string,
-    amount?: number,
-  ) {
-    return this.prisma.payment.update({
-      where: { id: paymentId },
-      data: {
-        status,
-        externalPaymentId,
-        ...(amount && { amount }),
-        updatedAt: new Date(),
-      },
     });
   }
 
