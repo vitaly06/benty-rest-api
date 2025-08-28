@@ -1,91 +1,59 @@
-version: "3.8"
-
 services:
-  db:
-    image: postgres:13-alpine
-    container_name: db
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: Grinar
-    ports:
-      - "5435:5432"
-    volumes:
-      - ./grinar-rest-api/dumps:/docker-entrypoint-initdb.d
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - app-network
-
-  redis:
-    image: redis:7-alpine
-    container_name: redis
-    hostname: redis
-    ports:
-      - "6380:6379"
-    volumes:
-      - redis_data:/data
-    command: redis-server --bind 0.0.0.0
-    networks:
-      - app-network
-
   app:
     build:
-      context: ./grinar-rest-api
-      dockerfile: Dockerfile
-    container_name: app
+      context: .
+      target: development
     ports:
-      - "3002:3000"
+      - '3000:3000'
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/Grinar?schema=public
+      - REDIS_HOST=redis  
+      - REDIS_PORT=6379
+      - SMTP_HOST=smtp.beget.com
+      - SMTP_PORT=465
+      - SMTP_USER=support@benty.work
+      - SMTP_PASSWORD=S_Be5173
+      - CUSTOMER_CODE="305194149
+      - JWT_TOKEN=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiIxOGFmNDFhMGI0NjRkMzNkN2E2ZDNjNWRhOThjMTBkMSJ9.CyzpK0My-k7EquK3B0cLAb1vN0WpaxSd0bP0WV56kPZ7xIswlweQZLym7OuMeMWRbU3HC_H-yKtIn3gNlNQ97CD-A2oQ631nkQrVZEIldxPkxYEUKrAe2NMEYtGjspi_ISLkhta_cr9Es7tKvxJU2Ev1jrz5ikGU4oBSC6dVsU_dyDkvC1VrCrZzH73T1LRI9LNdYRcVU5fdjcCsr4T-2yF_FwvFQy0XONdIxUi9ulWWhXiIWNDA3iHSG3tu_-ll_1-N4LEMRm4INA5ofaG4MCi3o3SA-lZEqFPsbXZ7777rwcGc1AVCwvH4BOaYa2EVWTH2YdPQgBt9vBPdXClNncSfei1rP47I_tzMH_CaEWTM-6V16wJG74OxGKOcHcf_4Bf0WSwnc3Nbg5MUO6RD0QEkXcThF5igiqlLUiDcweb8Vzx5bH6Bysr_W1GNLX5z-80yrHcDPhRNYkBDuitLXcZhq5pFEgZHiHKgWhwCAHRgqRsZt-VonP2hzwpDRBLf"
+      - CLIENT_ID=18af41a0b464d33d7a6d3c5da98c10d1
     depends_on:
       - db
-      - redis
-    environment:
-      DATABASE_URL: "postgresql://postgres:postgres@db:5432/Grinar?schema=public"
-      REDIS_HOST: "redis"
-      REDIS_PORT: "6379"
-      REDIS_PASSWORD: "your_redis_password"
-      NODE_ENV: production
-      FRONTEND_URL: "https://benty.work"
-      JWT_ACCESS_SECRET: "efb2ab404e27829af97b38f86ad8f4e8ab45e98cdb1bf3024b65b8a3f8dc4073d30ddeb4e5aa5ad0f0d3afd858778409df67e91f9bef50a30c9aab9007bfd6ebd30ce8f902e298ef4d33799f6d8fa99612191fee14066e2c905218e7932b131f"
-      JWT_REFRESH_SECRET: "b2695640c1c6d51031e79021a7198014d2a067959794ec66cc9c0b4d9af59386f1d4b7f861b09f623d71b8f32fb9cf367df21119a05e8bc7bc9d35d7d8cac06c"
-      JWT_ACCESS_EXPIRES_IN: "15m"
-      JWT_REFRESH_EXPIRES_IN: "7d"
-      SMTP_HOST: "smtp.beget.com"
-      SMTP_PORT: 465
-      SMTP_USER: "support@benty.work"
-      SMTP_PASSWORD: "S_Be5173"
-      CUSTOMER_CODE: "305194149"
-      JWT_TOKEN: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiIxOGFmNDFhMGI0NjRkMzNkN2E2ZDNjNWRhOThjMTBkMSJ9.CyzpK0My-k7EquK3B0cLAb1vN0WpaxSd0bP0WV56kPZ7xIswlweQZLym7OuMeMWRbU3HC_H-yKtIn3gNlNQ97CD-A2oQ631nkQrVZEIldxPkxYEUKrAe2NMEYtGjspi_ISLkhta_cr9Es7tKvxJU2Ev1jrz5ikGU4oBSC6dVsU_dyDkvC1VrCrZzH73T1LRI9LNdYRcVU5fdjcCsr4T-2yF_FwvFQy0XONdIxUi9ulWWhXiIWNDA3iHSG3tu_-ll_1-N4LEMRm4INA5ofaG4MCi3o3SA-lZEqFPsbXZ7777rwcGc1AVCwvH4BOaYa2EVWTH2YdPQgBt9vBPdXClNncSfei1rP47I_tzMH_CaEWTM-6V16wJG74OxGKOcHcf_4Bf0WSwnc3Nbg5MUO6RD0QEkXcThF5igiqlLUiDcweb8Vzx5bH6Bysr_W1GNLX5z-80yrHcDPhRNYkBDuitLXcZhq5pFEgZHiHKgWhwCAHRgqRsZt-VonP2hzwpDRBLf"
-      CLIENT_ID: "18af41a0b464d33d7a6d3c5da98c10d1"
+      - redis  
     volumes:
-      - ./grinar-rest-api/prisma:/app/prisma
-    restart: unless-stopped
-    networks:
-      - app-network
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: sh -c "sleep 5 && npx prisma db push --accept-data-loss && nest start --watch"
 
-#  frontend:
- #   build:
-  #    context: ./Grinar
-   #   dockerfile: Dockerfile
-    #container_name: frontend
-   # ports:
-   #   - "5173:80"
-   # depends_on:
-   #   - app
-   # volumes:
-   #   - ./Grinar/dist:/usr/share/nginx/html
-   # environment:
-   #   - VITE_API_URL=/api
-   #   - VITE_DIRECT_API_URL=http://app:3000/api
-   #   - VITE_API_WS_URL=wss://benty.work/api
-   # restart: unless-stopped
-   # networks:
-   #   - app-network
+  db:
+    image: postgres:13-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=Grinar
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./dumps/dump.sql:/docker-entrypoint-initdb.d/dump.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:  # Добавляем сервис Redis
+    image: redis:7-alpine
+    ports:
+      - '6380:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
 volumes:
   postgres_data:
-  redis_data:
-
-networks:
-  app-network:
-    driver: bridge
+  redis_data:  # Volume для Redis
