@@ -10,9 +10,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class PaymentService {
-  private readonly apiUrl =
-    // 'https://enter.tochka.com/uapi/acquiring/v1.0';
-    'https://enter.tochka.com/sandbox/v2/acquiring/v1.0';
+  private readonly apiUrl = 'https://enter.tochka.com/uapi/acquiring/v1.0';
+  // 'https://enter.tochka.com/sandbox/v2/acquiring/v1.0';
   // private readonly merchantId: string;
   private readonly customerCode: string;
   private readonly clientId: string;
@@ -75,9 +74,9 @@ export class PaymentService {
           headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json',
-            // Authorization: `Bearer ${this.jwtToken.trim()}`,
-            // 'X-Client-ID': this.clientId,
-            Authorization: 'Bearer sandbox.jwt.token',
+            Authorization: `Bearer ${this.jwtToken.trim()}`,
+            'X-Client-ID': this.clientId,
+            // Authorization: 'Bearer sandbox.jwt.token',
           },
         })
         .toPromise();
