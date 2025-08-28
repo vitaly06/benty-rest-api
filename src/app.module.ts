@@ -16,6 +16,7 @@ import * as redisStore from 'cache-manager-ioredis';
 import { ChatModule } from './chat/chat.module';
 import { PaymentModule } from './payment/payment.module';
 import { WebhookModule } from './webhook/webhook.module';
+import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { WebhookModule } from './webhook/webhook.module';
     BlogModule,
     PaymentModule,
     WebhookModule,
+    SubscriptionModule,
   ],
   providers: [], // Убрали WebSocketGateway отсюда
 })
