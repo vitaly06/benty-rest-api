@@ -47,7 +47,9 @@ model User {
 
   likedProjects  Project[] @relation("ProjectLikes")
   viewedProjects Project[] @relation("ProjectViews") // проекты, просмотренные пользователем
-  likedBlogs     Blog[]    @relation("BlogLikes")
+
+  likedBlogs  Blog[] @relation("BlogLikes")
+  viewedBlogs Blog[] @relation("BlogViews")
 
   isResetVerified Boolean     @default(false)
   isEmailVerified Boolean     @default(false)
@@ -168,6 +170,8 @@ model Blog {
   userId  Int
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   likedBy User[] @relation("BlogLikes")
+
+  viewedBy User[] @relation("BlogViews")
 
   specializationId Int
   specialization   Specialization @relation(fields: [specializationId], references: [id], onDelete: Cascade)

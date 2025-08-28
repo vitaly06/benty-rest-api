@@ -134,6 +134,7 @@ export class BlogService {
             logoFileName: true,
           },
         },
+        viewedBy: true,
       },
     });
 
@@ -141,23 +142,61 @@ export class BlogService {
       throw new NotFoundException('Блог с таким id не найден');
     }
 
-    // Получаем контент
-    const content = blog.contentPath
-      ? await this.storageService.loadContent(blog.contentPath, 'blogs')
-      : null;
+    if (req.user?.sub) {
+      const checkView = await this.prisma.blog.findFirst({
+        where: {
+          id: blogId,
+          viewedBy: {
+            some: {
+              id: req.user.sub,
+            },
+          },
+        },
+      });
+      if (!checkView) {
+        await this.prisma.blog.update({
+          where: { id: blogId },
+          data: {
+            viewedBy: {
+              connect: { id: req.user.sub },
+            },
+          },
+        });
+      }
 
-    // Форматируем результат
-    const result = {
-      ...blog,
-      likedBy:
-        blog.likedBy.length > 5 ? blog.likedBy.slice(0, 5) : blog.likedBy,
-      isLiked: req.user
-        ? blog.likedBy.some((user) => String(user.id) === String(req.user.sub))
-        : false,
-      content,
-    };
+      // Получаем контент
+      const content = blog.contentPath
+        ? await this.storageService.loadContent(blog.contentPath, 'blogs')
+        : null;
 
-    return result;
+      // Форматируем результат
+      const result = {
+        // ...blog,
+        id: blog.id,
+        name: blog.id,
+        photoName: blog.photoName,
+        contentPath: blog.contentPath,
+        contentSize: blog.contentSize,
+        user: {
+          id: blog.user.id,
+          fullName: blog.user.fullName,
+          login: blog.user.login,
+          logoFileNmae: blog.user.logoFileName,
+          city: blog.user.city,
+        },
+        views: blog.viewedBy.length,
+        likedBy:
+          blog.likedBy.length > 5 ? blog.likedBy.slice(0, 5) : blog.likedBy,
+        isLiked: req.user
+          ? blog.likedBy.some(
+              (user) => String(user.id) === String(req.user.sub),
+            )
+          : false,
+        content,
+      };
+
+      return result;
+    }
   }
 
   async likeBlog(blogId: number, userId: number) {
