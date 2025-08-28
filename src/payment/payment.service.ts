@@ -52,15 +52,14 @@ export class PaymentService {
     console.log(subscription.price);
     const payload = {
       Data: {
-        // customerCode: this.customerCode,
-        customerCode: '1234567ab',
+        customerCode: this.customerCode,
         amount: subscription.price.toFixed(2),
         purpose,
         redirectUrl: 'https://benty.work',
         paymentMode: ['sbp', 'card', 'tinkoff'],
         saveCard: true,
         consumerId: orderId,
-        merchantId: '200000000001056',
+        // merchantId: '200000000001056',
         ttl: 10080,
       },
     };
