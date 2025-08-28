@@ -68,6 +68,8 @@ export class PaymentService {
       // console.log(`Bearer ${this.jwtToken.trim()}`);
       // sandbox.jwt.token
       console.log(this.customerCode);
+
+      console.log(payload);
       const response = await this.httpService
         .post(`${this.apiUrl}/payments`, payload, {
           headers: {
