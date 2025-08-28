@@ -1084,6 +1084,20 @@ export class UserService {
       categories: Array.from(categories),
     };
   }
+
+  async getLogo(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { logoFileName: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    return { logo: user.logoFileName };
+  }
+
   async generateVerifyCode(): Promise<string> {
     return Math.floor(100000 + Math.random() * 900000).toString();
   }

@@ -391,6 +391,13 @@ export class UserController {
   ) {
     return await this.userService.unlikeUser(+userId, req);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('get-logo')
+  async getUserLogo(@Req() req: RequestWithUser) {
+    return await this.userService.getLogo(req.user.sub);
+  }
+
   private setCookies(
     res: Response,
     tokens: { accessToken: string; refreshToken: string },
