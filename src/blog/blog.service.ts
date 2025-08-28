@@ -24,16 +24,35 @@ export class BlogService {
       throw new NotFoundException('Такой специализации не существует');
     }
 
-    // 2. Сначала сохраняем контент в файл (ВНИМАНИЕ: до создания проекта!)
+    // ДЕБАГ: Проверяем, что приходит в content
+    console.log('dto.content type:', typeof dto.content);
+    console.log('dto.content value:', dto.content);
+
+    // Проверяем, что content не null/undefined и не строка "null"
+    if (!dto.content || dto.content === 'null' || dto.content === 'undefined') {
+      throw new NotFoundException('Контент блога не может быть пустым');
+    }
+
+    let parsedContent;
+    try {
+      // Пытаемся распарсить JSON, если это строка
+      parsedContent =
+        typeof dto.content === 'string' ? JSON.parse(dto.content) : dto.content;
+    } catch (error) {
+      console.error('Error parsing blog content:', error);
+      throw new NotFoundException('Неверный формат контента');
+    }
+
+    // 2. Сначала сохраняем контент в файл
     const tempFileName = `temp_${Date.now()}.json`;
     const { path, size, hash } = await this.storageService.saveContent(
       tempFileName,
-      dto.content,
+      parsedContent, // Используем распаршенный контент
       'blogs',
     );
 
     try {
-      // 3. Создаем блог (БЕЗ передачи content в Prisma)
+      // 3. Создаем блог
       const blog = await this.prisma.blog.create({
         data: {
           name: dto.name,
@@ -69,10 +88,19 @@ export class BlogService {
             specializations: true,
           },
         },
+        likedBy: {
+          select: {
+            id: true,
+          },
+        },
+        viewedBy: {
+          select: {
+            id: true,
+          },
+        },
       },
     });
 
-    // Обрабатываем каждый блог асинхронно
     const blogsWithDescription = await Promise.all(
       blogs.map(async (blog) => {
         try {
@@ -80,24 +108,56 @@ export class BlogService {
 
           // Если есть контент, извлекаем текст из него
           if (blog.contentPath) {
-            const content = await this.storageService.loadContent(
-              blog.contentPath,
-              'blogs',
-            );
-            description = this.extractTextFromContent(content).substring(
-              0,
-              280,
-            );
+            try {
+              const content = await this.storageService.loadContent(
+                blog.contentPath,
+                'blogs',
+              );
+
+              // Проверяем, что контент не null
+              if (content && content !== 'null') {
+                const extractedText = this.extractTextFromContent(content);
+                if (extractedText) {
+                  description = extractedText.substring(0, 280);
+                }
+              }
+            } catch (error) {
+              console.error(
+                `Error loading content for blog ${blog.id}:`,
+                error,
+              );
+            }
           }
 
           return {
-            ...this.mapToBlogResponse(blog),
+            id: blog.id,
+            name: blog.name,
+            coverImage: blog.photoName,
+            contentPath: blog.contentPath,
+            author: {
+              id: blog.user.id,
+              name: blog.user.fullName,
+              avatar: blog.user.logoFileName,
+              specializations: blog.user.specializations,
+            },
+            specializationId: blog.specializationId,
+            likes: blog.likedBy.length,
+            views: blog.viewedBy.length,
+            createdAt: blog.createdAt,
+            updatedAt: blog.updatedAt,
             description,
           };
         } catch (error) {
           console.error(`Error processing blog ${blog.id}:`, error);
           return {
-            ...this.mapToBlogResponse(blog),
+            id: blog.id,
+            name: blog.name,
+            coverImage: blog.photoName,
+            author: {
+              id: blog.user.id,
+              name: blog.user.fullName,
+            },
+            createdAt: blog.createdAt,
             description: '',
           };
         }

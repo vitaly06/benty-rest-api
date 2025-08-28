@@ -5,6 +5,7 @@ import {
   Headers,
   Logger,
   HttpStatus,
+  HttpCode,
 } from '@nestjs/common';
 import { WebhookService } from './webhook.service';
 import { PaymentService } from 'src/payment/payment.service';
@@ -19,6 +20,7 @@ export class WebhookController {
   ) {}
 
   @Post('tochka')
+  @HttpCode(200)
   async handleTochkaWebhook(
     @Body() body: string, // Тело вебхука - JWT строка
     @Headers('x-webhook-signature') signature: string, // Опциональная подпись

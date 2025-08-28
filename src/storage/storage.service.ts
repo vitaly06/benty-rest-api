@@ -17,7 +17,27 @@ export class StorageService {
     const storagePath = await this.getStoragePath(type);
     await mkdir(storagePath, { recursive: true });
     const filePath = join(storagePath, fileName);
+
+    // Проверяем, что контент валидный
+    if (content === null || content === undefined) {
+      throw new Error('Контент не может быть null или undefined');
+    }
+
+    // Если это строка "null" или "undefined", выбрасываем ошибку
+    if (
+      typeof content === 'string' &&
+      (content === 'null' || content === 'undefined')
+    ) {
+      throw new Error('Контент не может быть строкой "null" или "undefined"');
+    }
+
     const contentStr = JSON.stringify(content);
+
+    // Проверяем, что после stringify не получилась строка "null"
+    if (contentStr === 'null') {
+      throw new Error('Результат stringify - null, неверные данные');
+    }
+
     await writeFile(filePath, contentStr, 'utf8');
     return {
       path: fileName,
@@ -25,12 +45,23 @@ export class StorageService {
       hash: createHash('sha256').update(contentStr).digest('hex'),
     };
   }
-
   async loadContent(fileName: string, type: string): Promise<any> {
     const storagePath = await this.getStoragePath(type);
     const filePath = join(storagePath, fileName);
     const contentStr = await readFile(filePath, 'utf8');
-    return JSON.parse(contentStr);
+
+    // Проверяем, что файл не содержит строку "null"
+    if (contentStr === 'null' || contentStr === '"null"') {
+      console.warn(`File ${fileName} contains null string`);
+      return null;
+    }
+
+    try {
+      return JSON.parse(contentStr);
+    } catch (error) {
+      console.error(`Error parsing content from file ${fileName}:`, error);
+      return null;
+    }
   }
 
   async renameFile(
