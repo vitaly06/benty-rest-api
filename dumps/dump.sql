@@ -358,6 +358,18 @@ CREATE TABLE public."_BlogLikes" (
 ALTER TABLE public."_BlogLikes" OWNER TO postgres;
 
 --
+-- Name: _BlogViews; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."_BlogViews" (
+    "A" integer NOT NULL,
+    "B" integer NOT NULL
+);
+
+
+ALTER TABLE public."_BlogViews" OWNER TO postgres;
+
+--
 -- Name: _ProjectLikes; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -638,13 +650,13 @@ COPY public."Subscription" (id, name, "ratingBoost", duration, features, price) 
 --
 
 COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "updatedAt", "refreshToken", "isEmailVerified", "isResetVerified", "logoFileName", "fullName", city, about, level, "phoneNumber", telegram, vk, website, experience, "coverFileName", "joinAuthorsNotifications", "weeklySummaryNotifications", "rewardNotifications", "lastLoginUpdate", "blogId", "subscriptionId", status) FROM stdin;
-6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$Gq9LgS.dwDVeK93Th2ASgud7mrP/IRUyYxN5ccMA5DihzzUffUTR.	1	2025-07-03 11:03:00.473	2025-08-23 19:21:26.874	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImxvZ2luIjoidml0YWx5LnNhZGlra292MjIyIiwiaWF0IjoxNzU1OTc0ODc1LCJleHAiOjE3NTY1Nzk2NzV9.BZ5T-sdmsMiVLDc7fowc3Hn0a7GVKr-MDgEsnYKSAg0	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17	\N	2	offline
 16	asdfg	egorskomorohov020606@gmai.com	$2b$10$jVGw8VSh79ZjVUDhEwyxtOl157mzzTZEQSRzSKOtxC79aWjRWSwhi	1	2025-08-11 11:39:09.085	2025-08-11 13:29:22.518	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE2LCJpYXQiOjE3NTQ5MTg5NjIsImV4cCI6MTc1NTUyMzc2Mn0.lW4rOWocikwX1ZvxACDkR_vHweCZ0KqG0eTWz7jS0KI	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline
 8	vital1332y.sadikov	vitaly.sadikov232@yandex.ru	$2b$10$Q3/C/I3NtwH6S65bMLJEM.GN09YQzI1F3UuriuFgZ3CfLX7WoNyJK	1	2025-07-04 08:58:47.464	2025-08-14 16:00:24.431	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjgsImxvZ2luIjoidml0YWwxMzMyeS5zYWRpa292IiwiaWF0IjoxNzU1MTg3MjE5LCJleHAiOjE3NTU3OTIwMTl9.Ktnk0kPXXTAWAUTeggwDuz5-RDlUTf0gW1PGxzeNOmM	f	f	ava3.png	Артур Пирожков	Челябинск	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	online
 7	vital1y.sadikov	vitaly.sadikov2@yandex.ru	$2b$10$IkWiRHyJr0JYr4EsnTrDL.mEvkjoDc3FnwMhQq9mR0Z9eHdzH.0J.	1	2025-07-04 08:55:39.068	2025-08-11 10:05:38.17	\N	f	f	ava2.png	Афанасий Афанасьевич	Москва	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	2	offline
 9	vitaly.sadikov444	vitaly.sadikov133@yandex.ru	$2b$10$7C4aR3bURQjyA1GvX./VSutZ0dmioRNscT3nl/tnhxgpBUh1fDfIC	1	2025-07-07 11:39:00.097	2025-08-11 10:08:27.076	$2b$10$U.g2pY9cUDT0Zai/wGpq.ulKj8rpXM0nVVtw6MZ0wvI/D2Eh.WIUi	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline
 11	tgflk	tgflk_tuv@mail.ru	$2b$10$vzwiWqqrOo6OstA.dWHmJuI8.sY/8OJ6hpAEKCPlA7gB.Yi5mOTA6	1	2025-07-14 18:39:22.108	2025-08-11 10:08:27.076	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjExLCJsb2dpbiI6InRnZmxrIiwiaWF0IjoxNzUyNTE4NDEzLCJleHAiOjE3NTMxMjMyMTN9.kWrY-bIHzM0X04J76hk78SeCvFu_5wcHPuep3ANvrCo	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline
 12	egorchik-pomidorchik	egor.skomorohoff@yandex.ru	$2b$10$EF.Di5n9b8UF869BYLl.MOsvlJeUCz1SzUEALQNe3/PCYuuHHfrze	1	2025-08-06 10:00:39.34	2025-08-11 10:08:27.076	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEyLCJpYXQiOjE3NTQ0ODM4NTUsImV4cCI6MTc1NTA4ODY1NX0.ke0mvfX_vm3zSPQGo_XMd_zg77Z32Qqrw_hNTkgS7WA	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline
+6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$Gq9LgS.dwDVeK93Th2ASgud7mrP/IRUyYxN5ccMA5DihzzUffUTR.	1	2025-07-03 11:03:00.473	2025-08-28 08:10:55.321	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImxvZ2luIjoidml0YWx5LnNhZGlra292MjIyIiwiaWF0IjoxNzU2MzY4NjU1LCJleHAiOjE3NTY5NzM0NTV9.JUHkBKMooVs7ovRGB2UX-6BrKO4_oNvxJ1zhXtAkpCE	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17	\N	2	offline
 \.
 
 
@@ -653,6 +665,15 @@ COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "u
 --
 
 COPY public."_BlogLikes" ("A", "B") FROM stdin;
+\.
+
+
+--
+-- Data for Name: _BlogViews; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."_BlogViews" ("A", "B") FROM stdin;
+1	6
 \.
 
 
@@ -872,6 +893,14 @@ ALTER TABLE ONLY public."_BlogLikes"
 
 
 --
+-- Name: _BlogViews _BlogViews_AB_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_BlogViews"
+    ADD CONSTRAINT "_BlogViews_AB_pkey" PRIMARY KEY ("A", "B");
+
+
+--
 -- Name: _ProjectLikes _ProjectLikes_AB_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1019,6 +1048,13 @@ CREATE INDEX "_BlogLikes_B_index" ON public."_BlogLikes" USING btree ("B");
 
 
 --
+-- Name: _BlogViews_B_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX "_BlogViews_B_index" ON public."_BlogViews" USING btree ("B");
+
+
+--
 -- Name: _ProjectLikes_B_index; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1137,6 +1173,22 @@ ALTER TABLE ONLY public."_BlogLikes"
 
 ALTER TABLE ONLY public."_BlogLikes"
     ADD CONSTRAINT "_BlogLikes_B_fkey" FOREIGN KEY ("B") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: _BlogViews _BlogViews_A_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_BlogViews"
+    ADD CONSTRAINT "_BlogViews_A_fkey" FOREIGN KEY ("A") REFERENCES public."Blog"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: _BlogViews _BlogViews_B_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."_BlogViews"
+    ADD CONSTRAINT "_BlogViews_B_fkey" FOREIGN KEY ("B") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
