@@ -119,6 +119,7 @@ export class BlogService {
         photoName: true,
         contentPath: true,
         contentSize: true,
+        createdAt: true,
         user: {
           select: {
             id: true,
@@ -173,10 +174,11 @@ export class BlogService {
       const result = {
         // ...blog,
         id: blog.id,
-        name: blog.id,
+        name: blog.name,
         photoName: blog.photoName,
         contentPath: blog.contentPath,
         contentSize: blog.contentSize,
+        date: await this.formatDate(blog.createdAt),
         user: {
           id: blog.user.id,
           fullName: blog.user.fullName,
@@ -268,5 +270,15 @@ export class BlogService {
       createdAt: blog.createdAt,
       updatedAt: blog.updatedAt,
     };
+  }
+
+  async formatDate(date: Date) {
+    const pad = (num) => String(num).padStart(2, '0');
+
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+
+    return `${pad(day)}.${pad(month)}.${year}`;
   }
 }
