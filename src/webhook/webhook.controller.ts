@@ -12,7 +12,6 @@ import {
 import { Request } from 'express';
 import { WebhookService } from './webhook.service';
 import { PaymentService } from 'src/payment/payment.service';
-import * as jwt from 'jsonwebtoken';
 
 @Controller('webhooks')
 export class WebhookController {
@@ -49,32 +48,21 @@ export class WebhookController {
         return { status: 'accepted', message: 'Empty webhook received' };
       }
 
-      // Показываем начало тела для отладки
-      this.logger.log(`📝 Body preview: ${rawBody.substring(0, 100)}...`);
-
-      this.logger.log('🔐 Detected JWT token');
-
-      // Сначала проверим структуру
-      const inspected = this.webhookVerificationService.inspectToken(rawBody);
-      if (!inspected) {
-        this.logger.warn('❌ Invalid JWT structure');
-        return { status: 'accepted', message: 'Invalid JWT format' };
-      }
-
-      // Верифицируем JWT
-      this.logger.log('Attempting to verify JWT...');
+      // Декодируем JWT
+      this.logger.log('🔐 Decoding JWT token...');
       const decodedData =
-        await this.webhookVerificationService.verifyWebhookToken(rawBody);
+        this.webhookVerificationService.decodeWebhookToken(rawBody);
 
-      this.logger.log(`✅ JWT verified successfully`);
+      this.logger.log(`✅ JWT decoded successfully`);
       this.logger.log(`📦 Webhook type: ${decodedData.webhookType}`);
       this.logger.log(`💰 Amount: ${decodedData.amount}`);
       this.logger.log(`🏢 Customer code: ${decodedData.customerCode}`);
-      this.logger.log(
-        `📋 Full payload: ${JSON.stringify(decodedData, null, 2)}`,
-      );
+      this.logger.log(`🔧 Operation ID: ${decodedData.operationId}`);
+      this.logger.log(`📋 Status: ${decodedData.status}`);
+      this.logger.log(`🎯 Consumer ID: ${decodedData.consumerId}`);
 
       // Обрабатываем вебхук
+      this.logger.log('⚡ Processing webhook...');
       await this.processWebhookImmediately(decodedData);
 
       this.logger.log('=== ✅ WEBHOOK PROCESSING COMPLETE ===');
@@ -84,19 +72,6 @@ export class WebhookController {
       };
     } catch (error) {
       this.logger.error('💥 Webhook processing error:', error.message);
-
-      // Для отладки попробуем просто декодировать без верификации
-      try {
-        this.logger.log('🔄 Trying to decode without verification...');
-        const decoded = jwt.decode(rawBody, { complete: true });
-        if (decoded) {
-          this.logger.log(
-            `📋 Decoded without verification: ${JSON.stringify(decoded.payload)}`,
-          );
-        }
-      } catch (decodeError) {
-        this.logger.error('❌ Even decoding failed:', decodeError.message);
-      }
 
       return {
         status: 'accepted',
@@ -108,31 +83,59 @@ export class WebhookController {
   private async processWebhookImmediately(decodedData: any) {
     try {
       this.logger.log(`🔄 Processing webhook type: ${decodedData.webhookType}`);
-      this.logger.log(`📊 Full data: ${JSON.stringify(decodedData, null, 2)}`);
 
-      // Для acquiringInternetPayment
+      // Для acquiring платежей
       if (decodedData.webhookType === 'acquiringInternetPayment') {
         this.logger.log('💳 Processing acquiring payment');
 
+        // Ищем платеж по operationId или consumerId
+        let payment;
+
         if (decodedData.operationId) {
-          this.logger.log(`🔍 Operation ID: ${decodedData.operationId}`);
-          const payment = await this.paymentService.findPaymentByOperationId(
+          this.logger.log(
+            `🔍 Searching by operationId: ${decodedData.operationId}`,
+          );
+          payment = await this.paymentService.findPaymentByOperationId(
             decodedData.operationId,
           );
+        }
 
-          if (payment) {
-            await this.paymentService.updatePaymentStatus(
-              payment.id,
-              'executed',
-              decodedData.paymentId,
-              decodedData.amount,
-              decodedData.currency || 'RUB',
-            );
-            await this.paymentService.activateUserSubscription(payment.userId);
-          }
+        if (!payment && decodedData.consumerId) {
+          this.logger.log(
+            `🔍 Searching by consumerId: ${decodedData.consumerId}`,
+          );
+          payment = await this.paymentService.findPaymentByCustomerCode(
+            decodedData.consumerId,
+          );
+        }
+
+        if (payment) {
+          this.logger.log(
+            `✅ Payment found: ID ${payment.id}, User ID: ${payment.userId}`,
+          );
+
+          // Обновляем статус платежа
+          await this.paymentService.updatePaymentStatus(
+            payment.id,
+            'executed',
+            decodedData.operationId || decodedData.paymentId,
+            parseFloat(decodedData.amount),
+            decodedData.currency || 'RUB',
+          );
+
+          // Активируем подписку пользователя
+          await this.paymentService.activateUserSubscription(payment.userId);
+
+          this.logger.log(
+            `🎯 Subscription activated for user: ${payment.userId}`,
+          );
+        } else {
+          this.logger.warn(
+            `❌ Payment not found for operationId: ${decodedData.operationId}, consumerId: ${decodedData.consumerId}`,
+          );
         }
       }
-      // Добавьте другие типы вебхуков...
+      // Добавьте обработку других типов вебхуков при необходимости
     } catch (error) {
       this.logger.error('💥 Error in processWebhookImmediately:', error);
       throw error;

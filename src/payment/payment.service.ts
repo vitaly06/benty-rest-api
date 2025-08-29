@@ -172,18 +172,6 @@ export class PaymentService {
     return payment;
   }
 
-  async findPaymentByCustomerCode(customerCode: string) {
-    return this.prisma.payment.findFirst({
-      where: {
-        OR: [
-          { orderId: customerCode },
-          { operationId: customerCode },
-          { externalPaymentId: customerCode },
-        ],
-      },
-    });
-  }
-
   async updatePaymentStatus(
     paymentId: number,
     status: string,
@@ -206,11 +194,27 @@ export class PaymentService {
     });
   }
 
-  // Поиск платежа по operationId
   async findPaymentByOperationId(operationId: string) {
-    return this.prisma.payment.findUnique({
+    console.log(`🔍 Searching payment by operationId: ${operationId}`);
+    const payment = await this.prisma.payment.findUnique({
       where: { operationId },
     });
+    console.log(`📋 Payment found: ${JSON.stringify(payment)}`);
+    return payment;
+  }
+
+  async findPaymentByCustomerCode(customerCode: string) {
+    console.log(`🔍 Searching payment by customerCode: ${customerCode}`);
+    const payment = await this.prisma.payment.findFirst({
+      where: {
+        OR: [{ orderId: customerCode }, { operationId: customerCode }],
+        status: {
+          not: 'executed',
+        },
+      },
+    });
+    console.log(`📋 Payment found: ${JSON.stringify(payment)}`);
+    return payment;
   }
 
   // Активация подписки пользователя
