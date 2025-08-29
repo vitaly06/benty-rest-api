@@ -647,8 +647,8 @@ COPY public."Specialization" (id, name) FROM stdin;
 
 COPY public."Subscription" (id, name, "ratingBoost", duration, features, price) FROM stdin;
 1	default	0	30	\N	0.000000000000000000000000000000
-2	pro	10	30	\N	0.100000000000000000000000000000
-3	premium	20	30	\N	0.200000000000000000000000000000
+2	pro	10	30	\N	1.000000000000000000000000000000
+3	premium	20	30	\N	1.500000000000000000000000000000
 \.
 
 

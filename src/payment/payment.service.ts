@@ -157,16 +157,19 @@ export class PaymentService {
   }
 
   async findPaymentByPurpose(purpose: string) {
-    return this.prisma.payment.findFirst({
+    console.log(`Searching payment by purpose: ${purpose}`);
+    const payment = await this.prisma.payment.findFirst({
       where: {
         purpose: {
-          contains: purpose, // Ищем частичное совпадение
+          contains: purpose,
         },
         status: {
-          not: 'executed', // Только неоплаченные
+          not: 'executed',
         },
       },
     });
+    console.log(`Payment found: ${JSON.stringify(payment)}`);
+    return payment;
   }
 
   async findPaymentByCustomerCode(customerCode: string) {
