@@ -23,6 +23,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse();
     const accessToken = this.extractAccessToken(request);
+    if (request.url.startsWith('/webhooks/')) {
+      return true; // Пропускаем без аутентификации
+    }
 
     try {
       if (accessToken) {
