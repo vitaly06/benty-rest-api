@@ -120,7 +120,6 @@ export class WebhookController {
             'executed',
             decodedData.operationId || decodedData.paymentId,
             parseFloat(decodedData.amount),
-            decodedData.currency || 'RUB',
           );
 
           // Активируем подписку пользователя
@@ -172,7 +171,6 @@ export class WebhookController {
         'executed',
         data.paymentId,
         data.amount,
-        data.currency || 'RUB',
       );
 
       this.logger.log(
@@ -216,7 +214,6 @@ export class WebhookController {
           'executed',
           data.paymentId,
           data.amount,
-          data.currency || 'RUB',
         );
 
         this.logger.log(

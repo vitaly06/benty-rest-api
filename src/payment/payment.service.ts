@@ -177,23 +177,34 @@ export class PaymentService {
     status: string,
     externalId?: string,
     amount?: number,
-    currency?: string,
+    // currency?: string, // Убираем currency, т.к. его нет в модели
   ) {
-    const updateData: any = {
-      status,
-      updatedAt: new Date(),
-    };
+    try {
+      console.log(
+        `🔄 Updating payment status: ID ${paymentId}, status: ${status}`,
+      );
 
-    if (externalId) updateData.externalPaymentId = externalId;
-    if (amount) updateData.amount = amount;
-    if (currency) updateData.currency = currency;
+      const updateData: any = {
+        status,
+        updatedAt: new Date(),
+      };
 
-    return this.prisma.payment.update({
-      where: { id: paymentId },
-      data: updateData,
-    });
+      if (externalId) updateData.externalPaymentId = externalId;
+      if (amount) updateData.amount = amount;
+      // if (currency) updateData.currency = currency; // Убираем
+
+      const result = await this.prisma.payment.update({
+        where: { id: paymentId },
+        data: updateData,
+      });
+
+      console.log(`✅ Payment ${paymentId} updated to status: ${status}`);
+      return result;
+    } catch (error) {
+      console.error(`❌ Error updating payment ${paymentId}:`, error);
+      throw error;
+    }
   }
-
   async findPaymentByOperationId(operationId: string) {
     console.log(`🔍 Searching payment by operationId: ${operationId}`);
     const payment = await this.prisma.payment.findUnique({
