@@ -7,7 +7,7 @@ import {
   Get,
   Head,
   Req,
-  RawBodyRequest,
+  Body,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { WebhookService } from './webhook.service';
@@ -34,49 +34,43 @@ export class WebhookController {
   @Post('tochka')
   @HttpCode(200)
   async handleTochkaWebhook(
-    @Req() req: RawBodyRequest<Request>,
+    @Body() rawBody: string,
     @Headers('x-webhook-signature') signature: string,
+    @Req() req: Request,
   ) {
     try {
       this.logger.log('=== 🎯 WEBHOOK RECEIVED ===');
       this.logger.log(`📋 Signature: ${signature}`);
-      this.logger.log(`🌐 Headers: ${JSON.stringify(req.headers)}`);
+      this.logger.log(`📏 Raw body length: ${rawBody.length}`);
 
-      // Получаем raw body как строку (это JWT токен)
-      const jwtToken = req.rawBody?.toString() || '';
-      this.logger.log(`📏 JWT token length: ${jwtToken.length}`);
-
-      if (!jwtToken) {
-        this.logger.warn('⚠️ Empty JWT token received');
+      if (!rawBody) {
+        this.logger.warn('⚠️ Empty body received');
         return { status: 'accepted', message: 'Empty webhook received' };
       }
 
-      // Проверяем структуру JWT
-      this.logger.log('🔍 Inspecting JWT structure...');
-      const inspected = this.webhookVerificationService.inspectToken(jwtToken);
+      // Показываем начало и конец тела для отладки
+      this.logger.log(`📝 Body start: ${rawBody.substring(0, 100)}...`);
+      this.logger.log(
+        `📝 Body end: ...${rawBody.substring(rawBody.length - 100)}`,
+      );
 
+      this.logger.log('🔐 Detected JWT token');
+
+      // Сначала проверим структуру
+      const inspected = this.webhookVerificationService.inspectToken(rawBody);
       if (!inspected) {
         this.logger.warn('❌ Invalid JWT structure');
         return { status: 'accepted', message: 'Invalid JWT format' };
       }
 
-      this.logger.log(`📋 JWT header: ${JSON.stringify(inspected.header)}`);
-      this.logger.log(
-        `🔑 JWT payload keys: ${Object.keys(inspected.payload || {}).join(', ')}`,
-      );
-
       // Верифицируем JWT
-      this.logger.log('🔐 Attempting to verify JWT signature...');
       const decodedData =
-        await this.webhookVerificationService.verifyWebhookToken(jwtToken);
-
+        await this.webhookVerificationService.verifyWebhookToken(rawBody);
       this.logger.log(`📦 Webhook type: ${decodedData.webhookType}`);
-      this.logger.log(
-        `📊 Decoded data: ${JSON.stringify(decodedData, null, 2)}`,
-      );
+      this.logger.log(`💰 Amount: ${decodedData.amount}`);
+      this.logger.log(`🏢 Customer code: ${decodedData.customerCode}`);
 
       // Обрабатываем вебхук
-      this.logger.log('⚡ Processing webhook immediately...');
       await this.processWebhookImmediately(decodedData);
 
       this.logger.log('=== ✅ WEBHOOK PROCESSING COMPLETE ===');
@@ -86,7 +80,13 @@ export class WebhookController {
       };
     } catch (error) {
       this.logger.error('💥 Webhook processing error:', error.message);
-      this.logger.error('📋 Error stack:', error.stack);
+
+      // Для отладки покажем больше информации об ошибке
+      if (error.message.includes('signature')) {
+        this.logger.error(
+          '🔐 Signature verification failed - check public key',
+        );
+      }
 
       return {
         status: 'accepted',
@@ -98,33 +98,31 @@ export class WebhookController {
   private async processWebhookImmediately(decodedData: any) {
     try {
       this.logger.log(`🔄 Processing webhook type: ${decodedData.webhookType}`);
+      this.logger.log(`📊 Full data: ${JSON.stringify(decodedData, null, 2)}`);
 
-      switch (decodedData.webhookType) {
-        case 'incomingPayment':
-          await this.handleIncomingPayment(decodedData);
-          break;
+      // Для acquiringInternetPayment
+      if (decodedData.webhookType === 'acquiringInternetPayment') {
+        this.logger.log('💳 Processing acquiring payment');
 
-        case 'incomingSbpPayment':
-          await this.handleIncomingSbpPayment(decodedData);
-          break;
-
-        case 'incomingSbpB2BPayment':
-          await this.handleIncomingSbpB2BPayment(decodedData);
-          break;
-
-        case 'acquiringInternetPayment':
-          await this.handleAcquiringPayment(decodedData);
-          break;
-
-        case 'outgoingPayment':
-          await this.handleOutgoingPayment(decodedData);
-          break;
-
-        default:
-          this.logger.warn(
-            `❓ Unknown webhook type: ${decodedData.webhookType}`,
+        if (decodedData.operationId) {
+          this.logger.log(`🔍 Operation ID: ${decodedData.operationId}`);
+          const payment = await this.paymentService.findPaymentByOperationId(
+            decodedData.operationId,
           );
+
+          if (payment) {
+            await this.paymentService.updatePaymentStatus(
+              payment.id,
+              'executed',
+              decodedData.paymentId,
+              decodedData.amount,
+              decodedData.currency || 'RUB',
+            );
+            await this.paymentService.activateUserSubscription(payment.userId);
+          }
+        }
       }
+      // Добавьте другие типы вебхуков...
     } catch (error) {
       this.logger.error('💥 Error in processWebhookImmediately:', error);
       throw error;

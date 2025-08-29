@@ -10,7 +10,7 @@ async function bootstrap() {
     rawBody: true,
   });
 
-  app.use('/webhooks/tochka', bodyParser.raw({ type: 'text/plain' }));
+  app.use('/webhooks', bodyParser.text({ type: 'text/plain' }));
 
   // Для остальных эндпоинтов используем JSON
   app.use(bodyParser.json({ limit: '50mb' }));
