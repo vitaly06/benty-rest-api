@@ -12,6 +12,7 @@ import {
 import { Request } from 'express';
 import { WebhookService } from './webhook.service';
 import { PaymentService } from 'src/payment/payment.service';
+import * as jwt from 'jsonwebtoken';
 
 @Controller('webhooks')
 export class WebhookController {
@@ -48,11 +49,8 @@ export class WebhookController {
         return { status: 'accepted', message: 'Empty webhook received' };
       }
 
-      // Показываем начало и конец тела для отладки
-      this.logger.log(`📝 Body start: ${rawBody.substring(0, 100)}...`);
-      this.logger.log(
-        `📝 Body end: ...${rawBody.substring(rawBody.length - 100)}`,
-      );
+      // Показываем начало тела для отладки
+      this.logger.log(`📝 Body preview: ${rawBody.substring(0, 100)}...`);
 
       this.logger.log('🔐 Detected JWT token');
 
@@ -64,11 +62,17 @@ export class WebhookController {
       }
 
       // Верифицируем JWT
+      this.logger.log('Attempting to verify JWT...');
       const decodedData =
         await this.webhookVerificationService.verifyWebhookToken(rawBody);
+
+      this.logger.log(`✅ JWT verified successfully`);
       this.logger.log(`📦 Webhook type: ${decodedData.webhookType}`);
       this.logger.log(`💰 Amount: ${decodedData.amount}`);
       this.logger.log(`🏢 Customer code: ${decodedData.customerCode}`);
+      this.logger.log(
+        `📋 Full payload: ${JSON.stringify(decodedData, null, 2)}`,
+      );
 
       // Обрабатываем вебхук
       await this.processWebhookImmediately(decodedData);
@@ -81,11 +85,17 @@ export class WebhookController {
     } catch (error) {
       this.logger.error('💥 Webhook processing error:', error.message);
 
-      // Для отладки покажем больше информации об ошибке
-      if (error.message.includes('signature')) {
-        this.logger.error(
-          '🔐 Signature verification failed - check public key',
-        );
+      // Для отладки попробуем просто декодировать без верификации
+      try {
+        this.logger.log('🔄 Trying to decode without verification...');
+        const decoded = jwt.decode(rawBody, { complete: true });
+        if (decoded) {
+          this.logger.log(
+            `📋 Decoded without verification: ${JSON.stringify(decoded.payload)}`,
+          );
+        }
+      } catch (decodeError) {
+        this.logger.error('❌ Even decoding failed:', decodeError.message);
       }
 
       return {

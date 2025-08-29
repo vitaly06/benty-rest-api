@@ -1,18 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
-import * as jwksClient from 'jwks-rsa';
 
 @Injectable()
 export class WebhookService {
   private readonly logger = new Logger(WebhookService.name);
-  private readonly client: jwksClient.JwksClient;
-
-  constructor() {
-    this.client = jwksClient({
-      jwksUri: 'https://enter.tochka.com/uapi/.well-known/jwks.json',
-      timeout: 30000,
-    });
-  }
 
   async verifyWebhookToken(jwtToken: string): Promise<any> {
     try {
@@ -26,21 +17,9 @@ export class WebhookService {
       }
 
       this.logger.log(`📋 JWT Header: ${JSON.stringify(decoded.header)}`);
-      this.logger.log(
-        `🔑 JWT Payload keys: ${Object.keys(decoded.payload || {}).join(', ')}`,
-      );
 
-      // Если нет kid, используем дефолтный ключ или статический ключ
-      let publicKey: string;
-
-      if (decoded.header.kid) {
-        this.logger.log(`🔑 Kid from header: ${decoded.header.kid}`);
-        const key = await this.client.getSigningKey(decoded.header.kid);
-        publicKey = key.getPublicKey();
-      } else {
-        this.logger.log('⚠️ No kid in header, using static public key');
-        // Статический публичный ключ Точки
-        publicKey = `-----BEGIN PUBLIC KEY-----
+      // Используем статический публичный ключ в правильном формате
+      const publicKey = `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAraJQJyBXIgS1YzYFkmQG
 q5XtadLVvMcx5u+guR2r5ZgSb+HGUG7HF5NM+NJeL9YrVtjjGf8VNLpwGbeejsS9
 LRniPfKkCYaVqV1DSGOZ6RTOtqN3jKW1W86cVb+LffrQo3eFhPX5V464uduPu9Ro
@@ -51,7 +30,6 @@ E914aESFZ8jEheQv+4kZ81F0qk02k2mJ4C7AasGhbzC4F8YQ7nbr49v1n/j8udNZ
 ZXA8vI2hacG517A66+uvEHIxXRUo/gIcubR+vdbJbaK/k8JRLJNmdf4B9HchJ6VD
 9aGjMT0GYfhQ8jf16E1L/U4G4XLB5cnb0h88PD2MaMGP
 -----END PUBLIC KEY-----`;
-      }
 
       // Верифицируем JWT
       return new Promise((resolve, reject) => {
@@ -83,7 +61,13 @@ ZXA8vI2hacG517A66+uvEHIxXRUo/gIcubR+vdbJbaK/k8JRLJNmdf4B9HchJ6VD
   inspectToken(token: string): any {
     try {
       const decoded = jwt.decode(token, { complete: true });
-      this.logger.log('🔍 Token inspection - has kid:', !!decoded?.header?.kid);
+      this.logger.log('🔍 Token inspection successful');
+      if (decoded) {
+        this.logger.log(`📋 Header: ${JSON.stringify(decoded.header)}`);
+        this.logger.log(
+          `🔑 Payload keys: ${Object.keys(decoded.payload || {}).join(', ')}`,
+        );
+      }
       return decoded;
     } catch (error) {
       this.logger.error('❌ Token inspection failed:', error);
