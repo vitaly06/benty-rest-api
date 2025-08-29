@@ -11,85 +11,65 @@ export class WebhookService {
     this.client = jwksClient({
       jwksUri: 'https://enter.tochka.com/uapi/.well-known/jwks.json',
       timeout: 30000,
-      cache: true,
-      cacheMaxEntries: 5,
-      cacheMaxAge: 600000, // 10 минут
     });
   }
 
-  private getKey(header: any): Promise<string> {
-    return new Promise((resolve, reject) => {
-      this.client.getSigningKey(header.kid, (err, key) => {
-        if (err) {
-          this.logger.error('Error getting signing key:', err);
-          reject(new Error(`Failed to get signing key: ${err.message}`));
-          return;
-        }
-
-        try {
-          const signingKey = key.getPublicKey();
-          resolve(signingKey);
-        } catch (error) {
-          this.logger.error('Error extracting public key:', error);
-          reject(new Error('Failed to extract public key'));
-        }
-      });
-    });
-  }
-
-  async verifyWebhookToken(token: string): Promise<any> {
+  async verifyWebhookToken(jwtToken: string): Promise<any> {
     try {
-      // Проверяем, что токен не пустой
-      if (!token || token.trim().length === 0) {
-        throw new Error('Empty JWT token received');
-      }
+      this.logger.log('🔐 Verifying JWT token...');
+      this.logger.log(`📏 Token length: ${jwtToken.length}`);
 
-      // Декодируем header для получения kid
-      const decodedHeader = jwt.decode(token, { complete: true })?.header;
+      // Декодируем header чтобы получить kid
+      const decodedHeader = jwt.decode(jwtToken, { complete: true })?.header;
 
       if (!decodedHeader) {
         throw new Error('Failed to decode JWT header');
       }
 
       if (!decodedHeader.kid) {
-        throw new Error('JWT token missing kid in header');
+        throw new Error('No kid found in JWT header');
       }
 
-      // Получаем публичный ключ
-      const publicKey = await this.getKey(decodedHeader);
+      this.logger.log(`🔑 Kid from header: ${decodedHeader.kid}`);
 
-      // Верифицируем токен
+      // Получаем публичный ключ
+      const key = await this.client.getSigningKey(decodedHeader.kid);
+      const publicKey = key.getPublicKey();
+
+      // Верифицируем JWT
       return new Promise((resolve, reject) => {
         jwt.verify(
-          token,
+          jwtToken,
           publicKey,
           {
             algorithms: ['RS256'],
             issuer: 'https://enter.tochka.com',
-            ignoreExpiration: false, // Не игнорируем expiration
+            ignoreExpiration: false,
           },
           (err, decoded) => {
             if (err) {
-              this.logger.error('JWT verification failed:', err.message);
-              reject(new Error(`JWT verification failed: ${err.message}`));
+              this.logger.error('❌ JWT verification failed:', err.message);
+              reject(err);
             } else {
+              this.logger.log('✅ JWT verified successfully');
               resolve(decoded);
             }
           },
         );
       });
     } catch (error) {
-      this.logger.error('Token verification error:', error.message);
+      this.logger.error('💥 Token verification error:', error.message);
       throw error;
     }
   }
 
-  // Метод для быстрой проверки структуры токена без верификации
   inspectToken(token: string): any {
     try {
-      return jwt.decode(token, { complete: true });
+      const decoded = jwt.decode(token, { complete: true });
+      this.logger.log('🔍 Token inspection result:', !!decoded);
+      return decoded;
     } catch (error) {
-      this.logger.error('Token inspection failed:', error);
+      this.logger.error('❌ Token inspection failed:', error);
       return null;
     }
   }
