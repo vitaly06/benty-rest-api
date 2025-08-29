@@ -107,7 +107,7 @@ export class WebhookController {
 
   private async handleIncomingPayment(data: any) {
     this.logger.log(`Processing incoming payment: ${data.paymentId}`);
-
+    console.log(3);
     // Ищем платеж по purpose или customerCode
     let payment;
     if (data.customerCode) {
@@ -137,6 +137,7 @@ export class WebhookController {
   }
 
   private async handleIncomingSbpPayment(data: any) {
+    console.log(2);
     this.logger.log(`Processing SBP payment: ${data.paymentId}`);
     await this.handleIncomingPayment(data); // Обрабатываем так же
   }
@@ -147,6 +148,7 @@ export class WebhookController {
   }
 
   private async handleAcquiringPayment(data: any) {
+    console.log(1);
     this.logger.log(`Processing acquiring payment: ${data.paymentId}`);
 
     if (data.operationId) {
