@@ -607,6 +607,13 @@ COPY public."Payment" (id, amount, purpose, "orderId", "userId", "operationId", 
 1	1200	Оплата подписки: pro	sub_2_user_6_1755950000573	6	6a8061f4-38ca-4482-bf01-49c5d773029e	\N	https://merch.tochka.com/order/?uuid=6a8061f4-38ca-4482-bf01-49c5d773029e	pending	2025-08-30 11:53:21.332	2025-08-23 11:53:21.335	2025-08-23 11:53:21.335
 2	1200	Оплата подписки: pro	sub_2_user_6_1755952063582	6	f2da8688-ac1d-44db-8534-e1a87801dc03	\N	https://merch.tochka.com/order/?uuid=f2da8688-ac1d-44db-8534-e1a87801dc03	pending	2025-08-30 12:27:45.383	2025-08-23 12:27:45.384	2025-08-23 12:27:45.384
 3	1200	Оплата подписки: pro	sub_2_user_6_1755975119494	6	e08aa797-3d6d-3834-b8d4-8a90d8fd1244	\N	https://merch.example.com/order/?uuid=e08aa797-3d6d-3834-b8d4-8a90d8fd1244	APPROVED	2025-08-30 18:51:59.911	2025-08-23 18:51:59.912	2025-08-23 19:21:26.864
+4	1	Оплата подписки: premium	sub_3_user_6_1756382049039	6	1fd1997c-a353-4144-84fb-72682fc253b2	\N	https://merch.tochka.com/order/?uuid=1fd1997c-a353-4144-84fb-72682fc253b2	pending	2025-09-04 11:54:09.564	2025-08-28 11:54:09.565	2025-08-28 11:54:09.565
+5	1	Оплата подписки: pro	sub_2_user_6_1756384083363	6	78f5ce9e-b73f-42bb-abd5-c670859e42af	\N	https://merch.tochka.com/order/?uuid=78f5ce9e-b73f-42bb-abd5-c670859e42af	pending	2025-09-04 12:28:04.21	2025-08-28 12:28:04.211	2025-08-28 12:28:04.211
+6	1	Оплата подписки: pro	sub_2_user_6_1756385238991	6	ff87def2-9379-4b98-9141-aa5a62e0fe8a	\N	https://merch.tochka.com/order/?uuid=ff87def2-9379-4b98-9141-aa5a62e0fe8a	pending	2025-09-04 12:47:19.509	2025-08-28 12:47:19.51	2025-08-28 12:47:19.51
+7	1	Оплата подписки: pro	sub_2_user_6_1756456090232	6	6416e13d-c584-4f65-8820-0de0be4bd300	\N	https://merch.tochka.com/order/?uuid=6416e13d-c584-4f65-8820-0de0be4bd300	pending	2025-09-05 08:28:11.062	2025-08-29 08:28:11.063	2025-08-29 08:28:11.063
+8	1	Оплата подписки: pro	sub_2_user_6_1756456093562	6	fe58b845-c982-4ed3-b05f-acd39dace04e	\N	https://merch.tochka.com/order/?uuid=fe58b845-c982-4ed3-b05f-acd39dace04e	pending	2025-09-05 08:28:14	2025-08-29 08:28:14.001	2025-08-29 08:28:14.001
+9	1	Оплата подписки: pro	sub_2_user_6_1756456101732	6	47a66475-36f2-4769-9ae7-bf30f7c149ac	\N	https://merch.tochka.com/order/?uuid=47a66475-36f2-4769-9ae7-bf30f7c149ac	pending	2025-09-05 08:28:22.188	2025-08-29 08:28:22.189	2025-08-29 08:28:22.189
+10	1	Оплата подписки: pro	sub_2_user_6_1756456138994	6	df65ab06-4d76-4b0b-b9a5-4afba1a51758	\N	https://merch.tochka.com/order/?uuid=df65ab06-4d76-4b0b-b9a5-4afba1a51758	pending	2025-09-05 08:28:59.574	2025-08-29 08:28:59.575	2025-08-29 08:28:59.575
 \.
 
 
@@ -640,8 +647,8 @@ COPY public."Specialization" (id, name) FROM stdin;
 
 COPY public."Subscription" (id, name, "ratingBoost", duration, features, price) FROM stdin;
 1	default	0	30	\N	0.000000000000000000000000000000
-2	pro	10	30	\N	1200.000000000000000000000000000000
-3	premium	20	30	\N	2000.000000000000000000000000000000
+2	pro	10	30	\N	1.000000000000000000000000000000
+3	premium	20	30	\N	1.000000000000000000000000000000
 \.
 
 
@@ -656,7 +663,7 @@ COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "u
 9	vitaly.sadikov444	vitaly.sadikov133@yandex.ru	$2b$10$7C4aR3bURQjyA1GvX./VSutZ0dmioRNscT3nl/tnhxgpBUh1fDfIC	1	2025-07-07 11:39:00.097	2025-08-11 10:08:27.076	$2b$10$U.g2pY9cUDT0Zai/wGpq.ulKj8rpXM0nVVtw6MZ0wvI/D2Eh.WIUi	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline
 11	tgflk	tgflk_tuv@mail.ru	$2b$10$vzwiWqqrOo6OstA.dWHmJuI8.sY/8OJ6hpAEKCPlA7gB.Yi5mOTA6	1	2025-07-14 18:39:22.108	2025-08-11 10:08:27.076	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjExLCJsb2dpbiI6InRnZmxrIiwiaWF0IjoxNzUyNTE4NDEzLCJleHAiOjE3NTMxMjMyMTN9.kWrY-bIHzM0X04J76hk78SeCvFu_5wcHPuep3ANvrCo	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline
 12	egorchik-pomidorchik	egor.skomorohoff@yandex.ru	$2b$10$EF.Di5n9b8UF869BYLl.MOsvlJeUCz1SzUEALQNe3/PCYuuHHfrze	1	2025-08-06 10:00:39.34	2025-08-11 10:08:27.076	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEyLCJpYXQiOjE3NTQ0ODM4NTUsImV4cCI6MTc1NTA4ODY1NX0.ke0mvfX_vm3zSPQGo_XMd_zg77Z32Qqrw_hNTkgS7WA	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline
-6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$Gq9LgS.dwDVeK93Th2ASgud7mrP/IRUyYxN5ccMA5DihzzUffUTR.	1	2025-07-03 11:03:00.473	2025-08-28 08:10:55.321	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImxvZ2luIjoidml0YWx5LnNhZGlra292MjIyIiwiaWF0IjoxNzU2MzY4NjU1LCJleHAiOjE3NTY5NzM0NTV9.JUHkBKMooVs7ovRGB2UX-6BrKO4_oNvxJ1zhXtAkpCE	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17	\N	2	offline
+6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$Gq9LgS.dwDVeK93Th2ASgud7mrP/IRUyYxN5ccMA5DihzzUffUTR.	1	2025-07-03 11:03:00.473	2025-08-29 08:28:05.403	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImlhdCI6MTc1NjQ1NjA4NSwiZXhwIjoxNzU3MDYwODg1fQ.hwQHryq_7O3wRoHZLXVMBvQEJ6GF_qQL7HKF7KZE3z0	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17	\N	2	offline
 \.
 
 
@@ -674,6 +681,9 @@ COPY public."_BlogLikes" ("A", "B") FROM stdin;
 
 COPY public."_BlogViews" ("A", "B") FROM stdin;
 1	6
+4	6
+2	6
+3	6
 \.
 
 
@@ -782,7 +792,7 @@ SELECT pg_catalog.setval('public."Message_id_seq"', 5, true);
 -- Name: Payment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Payment_id_seq"', 3, true);
+SELECT pg_catalog.setval('public."Payment_id_seq"', 10, true);
 
 
 --

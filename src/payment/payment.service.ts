@@ -34,6 +34,7 @@ export class PaymentService {
     const subscription = await this.prisma.subscription.findUnique({
       where: { id: subscriptionId },
     });
+    console.log(this.apiUrl);
 
     if (!subscription) {
       throw new BadRequestException('Данной подписки не существует');
@@ -63,6 +64,8 @@ export class PaymentService {
         ttl: 10080,
       },
     };
+
+    console.log(payload);
 
     try {
       // console.log(`Bearer ${this.jwtToken.trim()}`);
