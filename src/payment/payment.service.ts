@@ -212,37 +212,53 @@ export class PaymentService {
 
   // Активация подписки пользователя
   async activateUserSubscription(userId: number) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      include: { Payment: true },
-    });
-
-    if (user) {
-      // Находим последний успешный платеж
-      const successfulPayment = user.Payment.find(
-        (p) => p.status === 'executed',
-      );
-
-      if (successfulPayment) {
-        // Активируем подписку на 30 дней
-        // const subscriptionEnd = new Date();
-        // subscriptionEnd.setDate(subscriptionEnd.getDate() + 30);
-        const subscription = await this.prisma.subscription.findFirst({
-          where: { price: +successfulPayment.amount },
-        });
-
-        await this.prisma.user.update({
-          where: { id: userId },
-          data: {
-            // isSubscribed: true,
-            // subscriptionEnd,
-            // subscriptionType: 'premium', // или другой тип
-            subscriptionId: subscription.id,
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+          Payment: {
+            where: { status: 'executed' },
+            orderBy: { createdAt: 'desc' },
+            take: 1,
           },
-        });
+        },
+      });
 
-        // this.logger.log(`Subscription activated for user ${userId}`);
+      if (!user) {
+        console.log(`User ${userId} not found`);
+        return;
       }
+
+      if (!user.Payment || user.Payment.length === 0) {
+        console.log(`No executed payments found for user ${userId}`);
+        return;
+      }
+
+      const successfulPayment = user.Payment[0];
+
+      // Находим подписку по цене
+      const subscription = await this.prisma.subscription.findFirst({
+        where: { price: successfulPayment.amount },
+      });
+
+      if (!subscription) {
+        console.log(`Subscription not found`);
+        return;
+      }
+
+      // Обновляем подписку пользователя
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          subscriptionId: subscription.id,
+        },
+      });
+
+      console.log(
+        `Subscription activated for user ${userId}: ${subscription.name}`,
+      );
+    } catch (error) {
+      console.log(`Error activating subscription for user ${userId}:`, error);
     }
   }
 }

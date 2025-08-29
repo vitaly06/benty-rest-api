@@ -98,29 +98,38 @@ export class WebhookController {
           break;
 
         default:
-          this.logger.warn(`Unknown webhook type: ${decodedData.webhookType}`);
+          console.log(`Unknown webhook type: ${decodedData.webhookType}`);
       }
     } catch (error) {
-      this.logger.error('Webhook processing failed:', error);
+      console.log('Webhook processing failed:', error);
     }
   }
 
   private async handleIncomingPayment(data: any) {
-    this.logger.log(`Processing incoming payment: ${data.paymentId}`);
-    console.log(3);
-    // Ищем платеж по purpose или customerCode
+    console.log(`Processing incoming payment: ${JSON.stringify(data)}`);
+
     let payment;
     if (data.customerCode) {
       payment = await this.paymentService.findPaymentByCustomerCode(
         data.customerCode,
       );
+      console.log(
+        `Search by customerCode ${data.customerCode}: ${payment ? 'found' : 'not found'}`,
+      );
     }
 
     if (!payment && data.purpose) {
       payment = await this.paymentService.findPaymentByPurpose(data.purpose);
+      console.log(
+        `Search by purpose ${data.purpose}: ${payment ? 'found' : 'not found'}`,
+      );
     }
 
     if (payment) {
+      console.log(
+        `Payment found: ID ${payment.id}, User ID: ${payment.userId}`,
+      );
+
       await this.paymentService.updatePaymentStatus(
         payment.id,
         'executed',
@@ -130,26 +139,24 @@ export class WebhookController {
       );
 
       await this.paymentService.activateUserSubscription(payment.userId);
-      this.logger.log(`Payment ${data.paymentId} processed successfully`);
+      console.log(`Payment ${data.paymentId} processed successfully`);
     } else {
-      this.logger.warn(`Payment not found for: ${JSON.stringify(data)}`);
+      console.log(`Payment not found for: ${JSON.stringify(data)}`);
     }
   }
 
   private async handleIncomingSbpPayment(data: any) {
-    console.log(2);
-    this.logger.log(`Processing SBP payment: ${data.paymentId}`);
+    console.log(`Processing SBP payment: ${data.paymentId}`);
     await this.handleIncomingPayment(data); // Обрабатываем так же
   }
 
   private async handleIncomingSbpB2BPayment(data: any) {
-    this.logger.log(`Processing SBP B2B payment: ${data.paymentId}`);
+    console.log(`Processing SBP B2B payment: ${data.paymentId}`);
     await this.handleIncomingPayment(data); // Обрабатываем так же
   }
 
   private async handleAcquiringPayment(data: any) {
-    console.log(1);
-    this.logger.log(`Processing acquiring payment: ${data.paymentId}`);
+    console.log(`Processing acquiring payment: ${data.paymentId}`);
 
     if (data.operationId) {
       const payment = await this.paymentService.findPaymentByOperationId(
