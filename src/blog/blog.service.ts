@@ -296,19 +296,31 @@ export class BlogService {
       },
     });
   }
-
+  // blog.service.ts
   private extractTextFromContent(content: any): string {
     if (!content || !Array.isArray(content)) return '';
 
     let text = '';
 
-    // Рекурсивная функция для обхода структуры Slate.js
+    // Рекурсивная функция для обхода структуры Slate.js с сохранением стилей
     const traverseNodes = (nodes: any[]) => {
       nodes.forEach((node) => {
         if (node.text) {
-          text += node.text + ' ';
+          // Добавляем текст с учетом стилей
+          let styledText = node.text;
+
+          if (node.bold) styledText = `**${styledText}**`;
+          if (node.italic) styledText = `*${styledText}*`;
+          if (node.underline) styledText = `__${styledText}__`;
+
+          text += styledText + ' ';
         } else if (node.children) {
           traverseNodes(node.children);
+        }
+
+        // Для элементов добавляем перенос строки
+        if (node.type === 'paragraph' || node.type === 'heading') {
+          text += '\n\n';
         }
       });
     };

@@ -93,7 +93,14 @@ export class ProjectController {
   })
   @Post('create-projects')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('coverImage'))
+  @UseInterceptors(
+    FileInterceptor('coverImage', {
+      limits: {
+        fileSize: 50 * 1024 * 1024, // 50MB для изображений
+        fieldSize: 100 * 1024 * 1024, // 100MB для полей (особенно content)
+      },
+    }),
+  )
   async createProject(
     @Body() createProjectDto: CreateProjectDto,
     @Req() req: RequestWithUser,

@@ -1,0 +1,26 @@
+[
+  {
+    "type": "title",
+    "children": [
+      {
+        "text": "tetsttwtswtswtsw"
+      }
+    ]
+  },
+  {
+    "type": "description",
+    "children": [
+      {
+        "text": "xxbnbzxxbznxbznxbnzbxnbxnzbxnzxbzbxnz",
+        "bold": true,
+        "color": "#00d7ff",
+        "fontSize": 18,
+        "fontFamily": "Trebuchet MS, sans-serif"
+      }
+    ],
+    "align": "center"
+  },
+  null,
+  null,
+  null
+]

@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestFactory } from '@nestjs/core';
 import * as bodyParser from 'body-parser';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -13,7 +14,10 @@ async function bootstrap() {
   app.use('/webhooks', bodyParser.text({ type: 'text/plain' }));
 
   // Для остальных эндпоинтов используем JSON
-  app.use(bodyParser.json({ limit: '50mb' }));
+  app.use(bodyParser.json({ limit: '100mb' }));
+
+  app.use(json({ limit: '150mb' }));
+  app.use(urlencoded({ extended: true, limit: '100mb' }));
 
   app.use(cookieParser());
   app.enableCors({

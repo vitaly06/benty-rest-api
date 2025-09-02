@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { StorageService } from 'src/storage/storage.service';
@@ -11,32 +15,68 @@ export class ProjectService {
     private readonly storageService: StorageService,
   ) {}
 
+  // project.service.ts
   async createProject(
     dto: CreateProjectDto,
     userId: number,
     coverImage?: Express.Multer.File,
   ) {
-    // 1. Проверяем существование связанных сущностей
+    // В ProjectService перед сохранением
+    console.log('Raw content received:', typeof dto.content);
+    console.log(
+      'Content length:',
+      typeof dto.content === 'string'
+        ? dto.content.length
+        : JSON.stringify(dto.content).length,
+    );
+
+    // 1. Валидация контента
+    let parsedContent;
+    try {
+      parsedContent =
+        typeof dto.content === 'string' ? JSON.parse(dto.content) : dto.content;
+
+      if (!Array.isArray(parsedContent)) {
+        throw new Error('Content must be an array');
+      }
+
+      console.log(
+        'Parsed content type:',
+        Array.isArray(parsedContent) ? 'array' : typeof parsedContent,
+      );
+      console.log('Parsed content length:', parsedContent.length);
+
+      // Глубокий анализ структуры
+      this.analyzeSlateStructure(parsedContent);
+
+      // Дополнительная валидация Slate структуры
+      this.validateSlateContent(parsedContent);
+    } catch (error) {
+      throw new BadRequestException(`Invalid content format: ${error.message}`);
+    }
+
+    // 2. Проверяем существование связанных сущностей
     const [category, specialization] = await Promise.all([
       this.prisma.category.findUnique({ where: { id: +dto.categoryId } }),
       this.prisma.specialization.findUnique({
         where: { id: +dto.specializationId },
       }),
     ]);
+
     if (!category) throw new NotFoundException('Category not found');
     if (!specialization)
       throw new NotFoundException('Specialization not found');
 
-    // 2. Сначала сохраняем контент в файл (ВНИМАНИЕ: до создания проекта!)
+    // 3. Сохраняем контент
     const tempFileName = `temp_${Date.now()}.json`;
     const { path, size, hash } = await this.storageService.saveContent(
       tempFileName,
-      dto.content,
+      parsedContent, // Используем уже parsed content
       'projects',
     );
 
     try {
-      // 3. Создаем проект (БЕЗ передачи content в Prisma)
+      // 4. Создаем проект
       const project = await this.prisma.project.create({
         data: {
           name: dto.name,
@@ -53,7 +93,7 @@ export class ProjectService {
         },
       });
 
-      // 4. Переименовываем файл с учетом ID проекта
+      // 5. Переименовываем файл
       const newFileName = `project_${project.id}.json`;
       await this.storageService.renameFile(path, newFileName, 'projects');
 
@@ -63,11 +103,89 @@ export class ProjectService {
         include: { user: true, category: true, specialization: true },
       });
     } catch (error) {
-      // Удаляем временный файл при ошибке
       await this.storageService
         .deleteFile(path, 'projects')
         .catch(console.error);
       throw error;
+    }
+  }
+
+  private analyzeSlateStructure(content: any[]): void {
+    console.log('=== SLATE STRUCTURE ANALYSIS ===');
+
+    const countNodes = (
+      nodes: any[],
+      level = 0,
+    ): { elements: number; texts: number } => {
+      let elements = 0;
+      let texts = 0;
+
+      for (const node of nodes) {
+        if (node.text !== undefined) {
+          texts++;
+          console.log(
+            `${'  '.repeat(level)}Text: "${node.text}"`,
+            node.bold ? 'BOLD' : '',
+            node.italic ? 'ITALIC' : '',
+            node.color ? `Color: ${node.color}` : '',
+          );
+        } else if (node.type) {
+          elements++;
+          console.log(`${'  '.repeat(level)}Element: ${node.type}`);
+          if (node.children && Array.isArray(node.children)) {
+            const childCount = countNodes(node.children, level + 1);
+            elements += childCount.elements;
+            texts += childCount.texts;
+          }
+        }
+      }
+
+      return { elements, texts };
+    };
+
+    const counts = countNodes(content);
+    console.log(
+      `Total elements: ${counts.elements}, Text nodes: ${counts.texts}`,
+    );
+    console.log('=== END ANALYSIS ===');
+  }
+
+  // Добавьте метод валидации
+  private validateSlateContent(content: any[]): void {
+    if (!content || !Array.isArray(content)) {
+      throw new Error('Content must be a non-empty array');
+    }
+
+    for (const node of content) {
+      this.validateSlateNode(node);
+    }
+  }
+
+  private validateSlateNode(node: any): void {
+    if (!node || typeof node !== 'object') {
+      throw new Error('Node must be an object');
+    }
+
+    // Text node
+    if (node.text !== undefined) {
+      if (typeof node.text !== 'string') {
+        throw new Error('Text node must have string text property');
+      }
+      return;
+    }
+
+    // Element node
+    if (!node.type || typeof node.type !== 'string') {
+      throw new Error('Element node must have a string type property');
+    }
+
+    if (!node.children || !Array.isArray(node.children)) {
+      throw new Error('Element node must have children array');
+    }
+
+    // Рекурсивно валидируем children
+    for (const child of node.children) {
+      this.validateSlateNode(child);
     }
   }
 

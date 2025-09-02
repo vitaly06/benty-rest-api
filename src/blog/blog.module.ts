@@ -24,9 +24,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         },
       }),
       limits: {
-        fileSize: 1024 * 1024 * 50, // 50 mb
-        files: 1024 * 1024 * 50,
-        fieldSize: 1024 * 1024 * 50,
+        fileSize: 1024 * 1024 * 100, // 100 mb
+        files: 1024 * 1024 * 100,
+        fieldSize: 1024 * 1024 * 150,
       },
     }),
     JwtModule.registerAsync({

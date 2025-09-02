@@ -73,5 +73,5 @@ export class CreateProjectDto {
     required: true,
   })
   @IsNotEmpty({ message: 'Контент проекта обязателен' })
-  content: any;
+  content: string | any[];
 }

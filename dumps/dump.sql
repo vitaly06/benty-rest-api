@@ -555,10 +555,11 @@ ALTER TABLE ONLY public.projects ALTER COLUMN id SET DEFAULT nextval('public.pro
 --
 
 COPY public."Blog" (id, name, "photoName", "contentPath", "contentSize", "contentHash", "userId", "specializationId", "createdAt", "updatedAt") FROM stdin;
-1	Половина россиян не доверяет вопросы управления своими финансами искусственному интеллекту.	1755088308795-535682405.png	blog_1.json	6	f072cbec3bf8841871d4284230c5e983dc211a56837aed862487148f947d1a1f	6	1	2025-08-13 12:31:48.805	2025-08-13 12:31:48.81
-4	Как сделать логотип: основные принципы и правила	1755088833390-86462156.png	blog_4.json	6	f072cbec3bf8841871d4284230c5e983dc211a56837aed862487148f947d1a1f	6	5	2025-08-13 12:40:33.396	2025-08-13 12:40:33.402
-2	Доверяете ли​ вы финан­совым советам нейро­сетей? Расскажите о своем опыте	1755088539406-813092294.png	blog_2.json	6	f072cbec3bf8841871d4284230c5e983dc211a56837aed862487148f947d1a1f	7	4	2025-08-13 12:35:39.418	2025-08-13 12:43:22.275
-3	Лучшие нейросети 2026	1755088710648-904717871.png	blog_3.json	6	f072cbec3bf8841871d4284230c5e983dc211a56837aed862487148f947d1a1f	8	3	2025-08-13 12:38:30.659	2025-08-13 12:43:22.275
+7	Развитие ИИ	1756802828946-776830475.png	blog_7.json	2206558	d45a930b55fbb8f30abf7f7ad149394b10075356ebafd63d20a367b8f45be302	6	1	2025-09-02 08:47:09.281	2025-09-02 08:47:09.288
+8	Топ нейросетей	1756802939114-579001551.png	blog_8.json	585847	938c946eecce0fe1a0ea81f61b514f1434218828e91a224614deb6ad679c12ef	6	2	2025-09-02 08:48:59.17	2025-09-02 08:48:59.174
+9	Как создать логотип?	1756803085179-722277273.png	blog_9.json	7658	cf34630bda8c2535914acaab4777f891ea5b63afaa86a0ddbe06fd78702d9390	6	4	2025-09-02 08:51:25.19	2025-09-02 08:51:25.218
+10	ИИ и финансы	1756803190496-894177888.png	blog_10.json	3933311	728ad8ae5168c6c919ed128ccd67624f18c901e3d97842eab126805fa1fea231	6	6	2025-09-02 08:53:11.035	2025-09-02 08:53:11.039
+11	ИИ и экономия бюджета	1756803375817-356496814.png	blog_11.json	2833923	ee4191849b4f1b3954372ff45f1fcbf7fc7ae3b3464f545c39abe60e3d3b6a2c	6	5	2025-09-02 08:56:16.17	2025-09-02 08:56:16.175
 \.
 
 
@@ -647,8 +648,8 @@ COPY public."Specialization" (id, name) FROM stdin;
 
 COPY public."Subscription" (id, name, "ratingBoost", duration, features, price) FROM stdin;
 1	default	0	30	\N	0.000000000000000000000000000000
-2	pro	10	30	\N	1.000000000000000000000000000000
-3	premium	20	30	\N	1.500000000000000000000000000000
+2	pro	10	30	\N	1200.000000000000000000000000000000
+3	premium	20	30	\N	2000.000000000000000000000000000000
 \.
 
 
@@ -663,7 +664,7 @@ COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "u
 9	vitaly.sadikov444	vitaly.sadikov133@yandex.ru	$2b$10$7C4aR3bURQjyA1GvX./VSutZ0dmioRNscT3nl/tnhxgpBUh1fDfIC	1	2025-07-07 11:39:00.097	2025-08-11 10:08:27.076	$2b$10$U.g2pY9cUDT0Zai/wGpq.ulKj8rpXM0nVVtw6MZ0wvI/D2Eh.WIUi	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline
 11	tgflk	tgflk_tuv@mail.ru	$2b$10$vzwiWqqrOo6OstA.dWHmJuI8.sY/8OJ6hpAEKCPlA7gB.Yi5mOTA6	1	2025-07-14 18:39:22.108	2025-08-11 10:08:27.076	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjExLCJsb2dpbiI6InRnZmxrIiwiaWF0IjoxNzUyNTE4NDEzLCJleHAiOjE3NTMxMjMyMTN9.kWrY-bIHzM0X04J76hk78SeCvFu_5wcHPuep3ANvrCo	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline
 12	egorchik-pomidorchik	egor.skomorohoff@yandex.ru	$2b$10$EF.Di5n9b8UF869BYLl.MOsvlJeUCz1SzUEALQNe3/PCYuuHHfrze	1	2025-08-06 10:00:39.34	2025-08-11 10:08:27.076	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEyLCJpYXQiOjE3NTQ0ODM4NTUsImV4cCI6MTc1NTA4ODY1NX0.ke0mvfX_vm3zSPQGo_XMd_zg77Z32Qqrw_hNTkgS7WA	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline
-6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$Gq9LgS.dwDVeK93Th2ASgud7mrP/IRUyYxN5ccMA5DihzzUffUTR.	1	2025-07-03 11:03:00.473	2025-08-29 08:28:05.403	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImlhdCI6MTc1NjQ1NjA4NSwiZXhwIjoxNzU3MDYwODg1fQ.hwQHryq_7O3wRoHZLXVMBvQEJ6GF_qQL7HKF7KZE3z0	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17	\N	2	offline
+6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$Gq9LgS.dwDVeK93Th2ASgud7mrP/IRUyYxN5ccMA5DihzzUffUTR.	1	2025-07-03 11:03:00.473	2025-09-02 08:43:53.059	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImlhdCI6MTc1NjgwMjYzMywiZXhwIjoxNzU3NDA3NDMzfQ.XYdhk67PKrD4imINlc7neRu3-MlPXgkyPotnOdlD5OM	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17	\N	2	offline
 \.
 
 
@@ -680,10 +681,9 @@ COPY public."_BlogLikes" ("A", "B") FROM stdin;
 --
 
 COPY public."_BlogViews" ("A", "B") FROM stdin;
-1	6
-4	6
-2	6
-3	6
+7	6
+8	6
+9	6
 \.
 
 
@@ -703,6 +703,10 @@ COPY public."_ProjectLikes" ("A", "B") FROM stdin;
 COPY public."_ProjectViews" ("A", "B") FROM stdin;
 7	16
 9	6
+16	6
+10	6
+7	6
+8	6
 \.
 
 
@@ -771,7 +775,7 @@ COPY public.projects (id, name, description, "photoName", "firstLink", "secondLi
 -- Name: Blog_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Blog_id_seq"', 4, true);
+SELECT pg_catalog.setval('public."Blog_id_seq"', 11, true);
 
 
 --
@@ -827,7 +831,7 @@ SELECT pg_catalog.setval('public."User_id_seq"', 16, true);
 -- Name: projects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.projects_id_seq', 18, true);
+SELECT pg_catalog.setval('public.projects_id_seq', 24, true);
 
 
 --
