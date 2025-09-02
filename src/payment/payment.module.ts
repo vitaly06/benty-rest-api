@@ -4,10 +4,12 @@ import { PaymentController } from './payment.controller';
 import { HttpModule } from '@nestjs/axios';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { SubscriptionModule } from 'src/subscription/subscription.module';
 
 @Module({
   imports: [
     HttpModule,
+    SubscriptionModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

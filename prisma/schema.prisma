@@ -59,8 +59,10 @@ model User {
   status String @default("offline") // для чата
 
   // Подписка
-  subscriptionId Int           @default(1)
-  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+  subscriptionId      Int           @default(1)
+  subscription        Subscription? @relation(fields: [subscriptionId], references: [id])
+  subscriptionStartAt DateTime? // Дата начала подписки
+  subscriptionEndAt   DateTime? // Дата окончания подписки
 
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -112,6 +114,7 @@ model Subscription {
   name        String   @unique
   price       Decimal  @default(0)
   duration    Int      @default(30) // длительность в днях
+  isDefault   Boolean  @default(true) // флаг для базовой подписки
   ratingBoost Int? // процент буста рейтинга
   features    String[] // массив фич подписки
   User        User[]

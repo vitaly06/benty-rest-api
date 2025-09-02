@@ -301,32 +301,41 @@ export class BlogService {
     if (!content || !Array.isArray(content)) return '';
 
     let text = '';
+    let isFirstTitle = true; // Флаг для пропуска первого заголовка
 
-    // Рекурсивная функция для обхода структуры Slate.js с сохранением стилей
+    // Рекурсивная функция для обхода структуры Slate.js
     const traverseNodes = (nodes: any[]) => {
-      nodes.forEach((node) => {
+      for (const node of nodes) {
+        // Пропускаем первый заголовок (где "Здесь может быть заголовок")
+        if (node.type === 'title' && isFirstTitle) {
+          isFirstTitle = false;
+          continue; // Пропускаем первый заголовок
+        }
+
         if (node.text) {
-          // Добавляем текст с учетом стилей
-          let styledText = node.text;
-
-          if (node.bold) styledText = `**${styledText}**`;
-          if (node.italic) styledText = `*${styledText}*`;
-          if (node.underline) styledText = `__${styledText}__`;
-
-          text += styledText + ' ';
-        } else if (node.children) {
+          // Добавляем только чистый текст без стилей
+          text += node.text + ' ';
+        } else if (node.children && Array.isArray(node.children)) {
           traverseNodes(node.children);
         }
 
-        // Для элементов добавляем перенос строки
-        if (node.type === 'paragraph' || node.type === 'heading') {
+        // Добавляем переносы строк для абзацев и заголовков (кроме пропущенного первого)
+        if (
+          (node.type === 'paragraph' || node.type === 'heading') &&
+          !(node.type === 'title' && isFirstTitle)
+        ) {
           text += '\n\n';
         }
-      });
+      }
     };
 
     traverseNodes(content);
-    return text.trim();
+
+    // Очищаем текст от лишних пробелов и переносов
+    return text
+      .replace(/\s+/g, ' ') // Заменяем множественные пробелы на один
+      .replace(/\n\s*\n/g, '\n\n') // Очищаем переносы строк
+      .trim();
   }
 
   private mapToBlogResponse(blog: any) {

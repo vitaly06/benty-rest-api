@@ -7,27 +7,24 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { SubscriptionService } from 'src/subscription/subscription.service';
 
 @Injectable()
 export class PaymentService {
   private readonly apiUrl = 'https://enter.tochka.com/uapi/acquiring/v1.0';
-  // 'https://enter.tochka.com/sandbox/v2/acquiring/v1.0';
-  // private readonly merchantId: string;
   private readonly customerCode: string;
   private readonly clientId: string;
-  // private readonly frontendUrl: string;
   private readonly jwtToken: string;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
+    private readonly subscriptionService: SubscriptionService,
   ) {
     this.customerCode = this.configService.get('CUSTOMER_CODE');
     this.jwtToken = this.configService.get('JWT_TOKEN');
     this.clientId = this.configService.get('CLIENT_ID');
-    // this.token = this.configService.get('TOCHKA_API_TOKEN');
-    // this.merchantId = this.configService.get('TOCHKA_MERCHANT_ID');
   }
 
   async createLink(userId: number, subscriptionId: number) {
@@ -58,15 +55,11 @@ export class PaymentService {
         paymentMode: ['sbp', 'card', 'tinkoff'],
         saveCard: true,
         consumerId: orderId,
-        // merchantId: '200000000001056',
         ttl: 10080,
       },
     };
 
     try {
-      // console.log(`Bearer ${this.jwtToken.trim()}`);
-      // sandbox.jwt.token
-
       const response = await this.httpService
         .post(`${this.apiUrl}/payments`, payload, {
           headers: {
@@ -74,7 +67,6 @@ export class PaymentService {
             Accept: 'application/json',
             Authorization: `Bearer ${this.jwtToken.trim()}`,
             'X-Client-ID': this.clientId,
-            // Authorization: 'Bearer sandbox.jwt.token',
           },
         })
         .toPromise();
@@ -177,7 +169,6 @@ export class PaymentService {
     status: string,
     externalId?: string,
     amount?: number,
-    // currency?: string, // Убираем currency, т.к. его нет в модели
   ) {
     try {
       console.log(
@@ -264,13 +255,11 @@ export class PaymentService {
         return;
       }
 
-      // Обновляем подписку пользователя
-      await this.prisma.user.update({
-        where: { id: userId },
-        data: {
-          subscriptionId: subscription.id,
-        },
-      });
+      // Используем сервис подписок для активации
+      await this.subscriptionService.activateUserSubscription(
+        userId,
+        subscription.id,
+      );
 
       console.log(
         `Subscription activated for user ${userId}: ${subscription.name}`,
