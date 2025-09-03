@@ -96,8 +96,8 @@ export class ProjectController {
   @UseInterceptors(
     FileInterceptor('coverImage', {
       limits: {
-        fileSize: 50 * 1024 * 1024, // 50MB для изображений
-        fieldSize: 100 * 1024 * 1024, // 100MB для полей (особенно content)
+        fileSize: 100 * 1024 * 1024, // 50MB для изображений
+        fieldSize: 150 * 1024 * 1024, // 100MB для полей (особенно content)
       },
     }),
   )

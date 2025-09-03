@@ -29,9 +29,22 @@ import { SubscriptionModule } from './subscription/subscription.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    // ✅ Обновите ServeStaticModule для Docker
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads',
+      serveStaticOptions: {
+        index: false,
+        redirect: false,
+      },
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'storage'),
+      serveRoot: '/storage',
+      serveStaticOptions: {
+        index: false,
+        redirect: false,
+      },
     }),
     SpecializationModule,
     PhotoModule,
@@ -50,6 +63,6 @@ import { SubscriptionModule } from './subscription/subscription.module';
     WebhookModule,
     SubscriptionModule,
   ],
-  providers: [], // Убрали WebSocketGateway отсюда
+  providers: [],
 })
 export class AppModule {}
