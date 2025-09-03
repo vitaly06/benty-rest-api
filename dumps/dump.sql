@@ -43,6 +43,7 @@ ALTER TABLE public."Blog" OWNER TO postgres;
 --
 -- Name: Blog_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
+-- pashalka
 
 CREATE SEQUENCE public."Blog_id_seq"
     AS integer
