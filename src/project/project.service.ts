@@ -2,9 +2,11 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProjectDto } from './dto/create-project.dto';
+import { UpdateProjectDto } from './dto/update-project.dto';
 import { StorageService } from 'src/storage/storage.service';
 import { Request } from 'express';
 
@@ -15,13 +17,11 @@ export class ProjectService {
     private readonly storageService: StorageService,
   ) {}
 
-  // project.service.ts
   async createProject(
     dto: CreateProjectDto,
     userId: number,
     coverImage?: Express.Multer.File,
   ) {
-    // В ProjectService перед сохранением
     console.log('Raw content received:', typeof dto.content);
     console.log(
       'Content length:',
@@ -30,7 +30,6 @@ export class ProjectService {
         : JSON.stringify(dto.content).length,
     );
 
-    // 1. Валидация контента
     let parsedContent;
     try {
       parsedContent =
@@ -46,16 +45,12 @@ export class ProjectService {
       );
       console.log('Parsed content length:', parsedContent.length);
 
-      // Глубокий анализ структуры
       this.analyzeSlateStructure(parsedContent);
-
-      // Дополнительная валидация Slate структуры
       this.validateSlateContent(parsedContent);
     } catch (error) {
       throw new BadRequestException(`Invalid content format: ${error.message}`);
     }
 
-    // 2. Проверяем существование связанных сущностей
     const [category, specialization] = await Promise.all([
       this.prisma.category.findUnique({ where: { id: +dto.categoryId } }),
       this.prisma.specialization.findUnique({
@@ -67,16 +62,14 @@ export class ProjectService {
     if (!specialization)
       throw new NotFoundException('Specialization not found');
 
-    // 3. Сохраняем контент
     const tempFileName = `temp_${Date.now()}.json`;
     const { path, size, hash } = await this.storageService.saveContent(
       tempFileName,
-      parsedContent, // Используем уже parsed content
+      parsedContent,
       'projects',
     );
 
     try {
-      // 4. Создаем проект
       const project = await this.prisma.project.create({
         data: {
           name: dto.name,
@@ -93,7 +86,6 @@ export class ProjectService {
         },
       });
 
-      // 5. Переименовываем файл
       const newFileName = `project_${project.id}.json`;
       await this.storageService.renameFile(path, newFileName, 'projects');
 
@@ -108,6 +100,162 @@ export class ProjectService {
         .catch(console.error);
       throw error;
     }
+  }
+
+  async updateProject(
+    projectId: number,
+    dto: UpdateProjectDto,
+    userId: number,
+    coverImage?: Express.Multer.File,
+  ) {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: {
+        userId: true,
+        photoName: true,
+        contentPath: true,
+        contentHash: true,
+        contentSize: true,
+      },
+    });
+
+    if (!project) {
+      throw new NotFoundException('Project not found');
+    }
+
+    if (project.userId !== userId) {
+      throw new ForbiddenException(
+        'You are not authorized to update this project',
+      );
+    }
+
+    let parsedContent;
+    if (dto.content) {
+      try {
+        parsedContent =
+          typeof dto.content === 'string'
+            ? JSON.parse(dto.content)
+            : dto.content;
+
+        if (!Array.isArray(parsedContent)) {
+          throw new Error('Content must be an array');
+        }
+
+        this.analyzeSlateStructure(parsedContent);
+        this.validateSlateContent(parsedContent);
+      } catch (error) {
+        throw new BadRequestException(
+          `Invalid content format: ${error.message}`,
+        );
+      }
+    }
+
+    if (dto.categoryId) {
+      const category = await this.prisma.category.findUnique({
+        where: { id: +dto.categoryId },
+      });
+      if (!category) throw new NotFoundException('Category not found');
+    }
+
+    if (dto.specializationId) {
+      const specialization = await this.prisma.specialization.findUnique({
+        where: { id: +dto.specializationId },
+      });
+      if (!specialization)
+        throw new NotFoundException('Specialization not found');
+    }
+
+    let newContentPath = project.contentPath;
+    let newContentSize = project.contentSize;
+    let newContentHash = project.contentHash;
+
+    if (parsedContent) {
+      const tempFileName = `temp_${Date.now()}.json`;
+      const { path, size, hash } = await this.storageService.saveContent(
+        tempFileName,
+        parsedContent,
+        'projects',
+      );
+
+      const newFileName = `project_${projectId}.json`;
+      await this.storageService.renameFile(path, newFileName, 'projects');
+
+      if (project.contentPath) {
+        await this.storageService
+          .deleteFile(project.contentPath, 'projects')
+          .catch(console.error);
+      }
+
+      newContentPath = newFileName;
+      newContentSize = size;
+      newContentHash = hash;
+    }
+
+    let newPhotoName = project.photoName;
+    if (coverImage) {
+      if (project.photoName) {
+        await this.storageService
+          .deleteFile(project.photoName, 'projects')
+          .catch(console.error);
+      }
+      newPhotoName = coverImage.filename;
+    }
+
+    return this.prisma.project.update({
+      where: { id: projectId },
+      data: {
+        name: dto.name,
+        description: dto.description || null,
+        categoryId: dto.categoryId ? +dto.categoryId : undefined,
+        specializationId: dto.specializationId
+          ? +dto.specializationId
+          : undefined,
+        firstLink: dto.firstLink || null,
+        secondLink: dto.secondLink || null,
+        photoName: newPhotoName,
+        contentPath: newContentPath,
+        contentSize: newContentSize,
+        contentHash: newContentHash,
+      },
+      include: { user: true, category: true, specialization: true },
+    });
+  }
+
+  async deleteProject(projectId: number, userId: number) {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: {
+        userId: true,
+        photoName: true,
+        contentPath: true,
+      },
+    });
+
+    if (!project) {
+      throw new NotFoundException('Project not found');
+    }
+
+    if (project.userId !== userId) {
+      throw new ForbiddenException(
+        'You are not authorized to delete this project',
+      );
+    }
+
+    if (project.photoName) {
+      await this.storageService
+        .deleteFile(project.photoName, 'projects')
+        .catch(console.error);
+    }
+
+    if (project.contentPath) {
+      await this.storageService
+        .deleteFile(project.contentPath, 'projects')
+        .catch(console.error);
+    }
+
+    return this.prisma.project.delete({
+      where: { id: projectId },
+    });
   }
 
   private analyzeSlateStructure(content: any[]): void {
@@ -150,7 +298,6 @@ export class ProjectService {
     console.log('=== END ANALYSIS ===');
   }
 
-  // Добавьте метод валидации
   private validateSlateContent(content: any[]): void {
     if (!content || !Array.isArray(content)) {
       throw new Error('Content must be a non-empty array');
@@ -166,7 +313,6 @@ export class ProjectService {
       throw new Error('Node must be an object');
     }
 
-    // Text node
     if (node.text !== undefined) {
       if (typeof node.text !== 'string') {
         throw new Error('Text node must have string text property');
@@ -174,7 +320,6 @@ export class ProjectService {
       return;
     }
 
-    // Element node
     if (!node.type || typeof node.type !== 'string') {
       throw new Error('Element node must have a string type property');
     }
@@ -183,7 +328,6 @@ export class ProjectService {
       throw new Error('Element node must have children array');
     }
 
-    // Рекурсивно валидируем children
     for (const child of node.children) {
       this.validateSlateNode(child);
     }
@@ -222,11 +366,11 @@ export class ProjectService {
       throw new Error(`Failed to get popular projects: ${error.message}`);
     }
   }
+
   async getProjectWithContent(
     projectId: number,
     req: Request & { user?: { sub: number } },
   ) {
-    // Получаем проект
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
       select: {
@@ -261,19 +405,17 @@ export class ProjectService {
       throw new NotFoundException('Проект с таким id не найден');
     }
 
-    // Получаем контент
     const content = project.contentPath
       ? await this.storageService.loadContent(project.contentPath, 'projects')
       : null;
 
-    // Дополнительно проекты пользователя
     const anotherProjects = await this.getUserProjects(project.user.id);
     console.log('Current user sub:', req.user?.sub);
     console.log(
       'LikedBy users:',
       project.likedBy.map((u) => u.id),
     );
-    // Форматируем результат
+
     const result = {
       ...project,
       likedBy:
@@ -291,6 +433,7 @@ export class ProjectService {
           : anotherProjects.slice(0, 6),
       content,
     };
+
     if (req.user?.sub) {
       const checkView = await this.prisma.project.findFirst({
         where: {
@@ -314,28 +457,7 @@ export class ProjectService {
       }
     }
 
-    // if (req.user) {
-    //   result['isLiked'] = project.likedBy.some(
-    //     (user) => user.id == req.user.sub,
-    //   );
-    // } else {
-    //   result['isLiked'] = false;
-    // }
-
     return result;
-  }
-
-  async deleteProject(projectId: number) {
-    const project = await this.prisma.project.findUnique({
-      where: { id: projectId },
-      select: { contentPath: true },
-    });
-
-    if (project?.contentPath) {
-      await this.storageService.deleteFile(project.contentPath, 'projects');
-    }
-
-    return this.prisma.project.delete({ where: { id: projectId } });
   }
 
   async getProjectsForMainPage() {
@@ -380,7 +502,7 @@ export class ProjectService {
       id: project.id,
       name: project.name,
       coverImage: project.photoName,
-      contentPath: project.contentPath, // Теперь возвращаем путь к контенту
+      contentPath: project.contentPath,
       author: {
         id: project.user.id,
         name: project.user.fullName,

@@ -1,6 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
+import { UpdateBlogDto } from './dto/update-blog.dto';
 import { StorageService } from 'src/storage/storage.service';
 import { Request } from 'express';
 
@@ -24,35 +30,33 @@ export class BlogService {
       throw new NotFoundException('Такой специализации не существует');
     }
 
-    // ДЕБАГ: Проверяем, что приходит в content
     console.log('dto.content type:', typeof dto.content);
     console.log('dto.content value:', dto.content);
 
-    // Проверяем, что content не null/undefined и не строка "null"
     if (!dto.content || dto.content === 'null' || dto.content === 'undefined') {
-      throw new NotFoundException('Контент блога не может быть пустым');
+      throw new BadRequestException('Контент блога не может быть пустым');
     }
 
     let parsedContent;
     try {
-      // Пытаемся распарсить JSON, если это строка
       parsedContent =
         typeof dto.content === 'string' ? JSON.parse(dto.content) : dto.content;
+      if (!Array.isArray(parsedContent)) {
+        throw new Error('Контент должен быть массивом');
+      }
     } catch (error) {
-      console.error('Error parsing blog content:', error);
-      throw new NotFoundException('Неверный формат контента');
+      console.error('Ошибка при парсинге контента блога:', error);
+      throw new BadRequestException('Неверный формат контента');
     }
 
-    // 2. Сначала сохраняем контент в файл
     const tempFileName = `temp_${Date.now()}.json`;
     const { path, size, hash } = await this.storageService.saveContent(
       tempFileName,
-      parsedContent, // Используем распаршенный контент
+      parsedContent,
       'blogs',
     );
 
     try {
-      // 3. Создаем блог
       const blog = await this.prisma.blog.create({
         data: {
           name: dto.name,
@@ -65,7 +69,6 @@ export class BlogService {
         },
       });
 
-      // 4. Переименовываем файл с учетом ID проекта
       const newFileName = `blog_${blog.id}.json`;
       await this.storageService.renameFile(path, newFileName, 'blogs');
 
@@ -78,6 +81,147 @@ export class BlogService {
       await this.storageService.deleteFile(path, 'blogs').catch(console.error);
       throw error;
     }
+  }
+
+  async updateBlog(
+    blogId: number,
+    dto: UpdateBlogDto,
+    userId: number,
+    coverImage?: Express.Multer.File,
+  ) {
+    const blog = await this.prisma.blog.findUnique({
+      where: { id: blogId },
+      select: {
+        userId: true,
+        photoName: true,
+        contentPath: true,
+        contentHash: true,
+        contentSize: true,
+      },
+    });
+
+    if (!blog) {
+      throw new NotFoundException('Блог с таким ID не найден');
+    }
+
+    if (blog.userId !== userId) {
+      throw new ForbiddenException(
+        'Вы не авторизованы для обновления этого блога',
+      );
+    }
+
+    let parsedContent;
+    if (dto.content) {
+      try {
+        parsedContent =
+          typeof dto.content === 'string'
+            ? JSON.parse(dto.content)
+            : dto.content;
+        if (!Array.isArray(parsedContent)) {
+          throw new Error('Контент должен быть массивом');
+        }
+      } catch (error) {
+        throw new BadRequestException(
+          `Неверный формат контента: ${error.message}`,
+        );
+      }
+    }
+
+    if (dto.specializationId) {
+      const specialization = await this.prisma.specialization.findUnique({
+        where: { id: +dto.specializationId },
+      });
+      if (!specialization)
+        throw new NotFoundException('Специализация не найдена');
+    }
+
+    let newContentPath = blog.contentPath;
+    let newContentSize = blog.contentSize;
+    let newContentHash = blog.contentHash;
+
+    if (parsedContent) {
+      const tempFileName = `temp_${Date.now()}.json`;
+      const { path, size, hash } = await this.storageService.saveContent(
+        tempFileName,
+        parsedContent,
+        'blogs',
+      );
+
+      const newFileName = `blog_${blogId}.json`;
+      await this.storageService.renameFile(path, newFileName, 'blogs');
+
+      if (blog.contentPath) {
+        await this.storageService
+          .deleteFile(blog.contentPath, 'blogs')
+          .catch(console.error);
+      }
+
+      newContentPath = newFileName;
+      newContentSize = size;
+      newContentHash = hash;
+    }
+
+    let newPhotoName = blog.photoName;
+    if (coverImage) {
+      if (blog.photoName) {
+        await this.storageService
+          .deleteFile(blog.photoName, 'blogs')
+          .catch(console.error);
+      }
+      newPhotoName = coverImage.filename;
+    }
+
+    return this.prisma.blog.update({
+      where: { id: blogId },
+      data: {
+        name: dto.name,
+        specializationId: dto.specializationId
+          ? +dto.specializationId
+          : undefined,
+        photoName: newPhotoName,
+        contentPath: newContentPath,
+        contentSize: newContentSize,
+        contentHash: newContentHash,
+      },
+      include: { user: true, specialization: true },
+    });
+  }
+
+  async deleteBlog(blogId: number, userId: number) {
+    const blog = await this.prisma.blog.findUnique({
+      where: { id: blogId },
+      select: {
+        userId: true,
+        photoName: true,
+        contentPath: true,
+      },
+    });
+
+    if (!blog) {
+      throw new NotFoundException('Блог с таким ID не найден');
+    }
+
+    if (blog.userId !== userId) {
+      throw new ForbiddenException(
+        'Вы не авторизованы для удаления этого блога',
+      );
+    }
+
+    if (blog.photoName) {
+      await this.storageService
+        .deleteFile(blog.photoName, 'blogs')
+        .catch(console.error);
+    }
+
+    if (blog.contentPath) {
+      await this.storageService
+        .deleteFile(blog.contentPath, 'blogs')
+        .catch(console.error);
+    }
+
+    return this.prisma.blog.delete({
+      where: { id: blogId },
+    });
   }
 
   async getAllBlogs() {
@@ -106,7 +250,6 @@ export class BlogService {
         try {
           let description = '';
 
-          // Если есть контент, извлекаем текст из него
           if (blog.contentPath) {
             try {
               const content = await this.storageService.loadContent(
@@ -114,7 +257,6 @@ export class BlogService {
                 'blogs',
               );
 
-              // Проверяем, что контент не null
               if (content && content !== 'null') {
                 const extractedText = this.extractTextFromContent(content);
                 if (extractedText) {
@@ -123,7 +265,7 @@ export class BlogService {
               }
             } catch (error) {
               console.error(
-                `Error loading content for blog ${blog.id}:`,
+                `Ошибка при загрузке контента для блога ${blog.id}:`,
                 error,
               );
             }
@@ -148,7 +290,7 @@ export class BlogService {
             description,
           };
         } catch (error) {
-          console.error(`Error processing blog ${blog.id}:`, error);
+          console.error(`Ошибка при обработке блога ${blog.id}:`, error);
           return {
             id: blog.id,
             name: blog.name,
@@ -200,7 +342,7 @@ export class BlogService {
     });
 
     if (!blog) {
-      throw new NotFoundException('Блог с таким id не найден');
+      throw new NotFoundException('Блог с таким ID не найден');
     }
 
     if (req.user?.sub) {
@@ -224,41 +366,36 @@ export class BlogService {
           },
         });
       }
-
-      // Получаем контент
-      const content = blog.contentPath
-        ? await this.storageService.loadContent(blog.contentPath, 'blogs')
-        : null;
-
-      // Форматируем результат
-      const result = {
-        // ...blog,
-        id: blog.id,
-        name: blog.name,
-        photoName: blog.photoName,
-        contentPath: blog.contentPath,
-        contentSize: blog.contentSize,
-        date: await this.formatDate(blog.createdAt),
-        user: {
-          id: blog.user.id,
-          fullName: blog.user.fullName,
-          login: blog.user.login,
-          logoFileName: blog.user.logoFileName,
-          city: blog.user.city,
-        },
-        views: blog.viewedBy.length,
-        likedBy:
-          blog.likedBy.length > 5 ? blog.likedBy.slice(0, 5) : blog.likedBy,
-        isLiked: req.user
-          ? blog.likedBy.some(
-              (user) => String(user.id) === String(req.user.sub),
-            )
-          : false,
-        content,
-      };
-
-      return result;
     }
+
+    const content = blog.contentPath
+      ? await this.storageService.loadContent(blog.contentPath, 'blogs')
+      : null;
+
+    const result = {
+      id: blog.id,
+      name: blog.name,
+      photoName: blog.photoName,
+      contentPath: blog.contentPath,
+      contentSize: blog.contentSize,
+      date: await this.formatDate(blog.createdAt),
+      user: {
+        id: blog.user.id,
+        fullName: blog.user.fullName,
+        login: blog.user.login,
+        logoFileName: blog.user.logoFileName,
+        city: blog.user.city,
+      },
+      views: blog.viewedBy.length,
+      likedBy:
+        blog.likedBy.length > 5 ? blog.likedBy.slice(0, 5) : blog.likedBy,
+      isLiked: req.user
+        ? blog.likedBy.some((user) => String(user.id) === String(req.user.sub))
+        : false,
+      content,
+    };
+
+    return result;
   }
 
   async likeBlog(blogId: number, userId: number) {
@@ -266,7 +403,7 @@ export class BlogService {
       where: { id: blogId },
     });
     if (!blog) {
-      throw new NotFoundException('Данного блога не существуте');
+      throw new NotFoundException('Данного блога не существует');
     }
 
     return this.prisma.blog.update({
@@ -284,7 +421,7 @@ export class BlogService {
       where: { id: blogId },
     });
     if (!blog) {
-      throw new NotFoundException('Данного блога не существуте');
+      throw new NotFoundException('Данного блога не существует');
     }
 
     return this.prisma.blog.update({
@@ -296,30 +433,26 @@ export class BlogService {
       },
     });
   }
-  // blog.service.ts
+
   private extractTextFromContent(content: any): string {
     if (!content || !Array.isArray(content)) return '';
 
     let text = '';
-    let isFirstTitle = true; // Флаг для пропуска первого заголовка
+    let isFirstTitle = true;
 
-    // Рекурсивная функция для обхода структуры Slate.js
     const traverseNodes = (nodes: any[]) => {
       for (const node of nodes) {
-        // Пропускаем первый заголовок (где "Здесь может быть заголовок")
         if (node.type === 'title' && isFirstTitle) {
           isFirstTitle = false;
-          continue; // Пропускаем первый заголовок
+          continue;
         }
 
         if (node.text) {
-          // Добавляем только чистый текст без стилей
           text += node.text + ' ';
         } else if (node.children && Array.isArray(node.children)) {
           traverseNodes(node.children);
         }
 
-        // Добавляем переносы строк для абзацев и заголовков (кроме пропущенного первого)
         if (
           (node.type === 'paragraph' || node.type === 'heading') &&
           !(node.type === 'title' && isFirstTitle)
@@ -331,10 +464,9 @@ export class BlogService {
 
     traverseNodes(content);
 
-    // Очищаем текст от лишних пробелов и переносов
     return text
-      .replace(/\s+/g, ' ') // Заменяем множественные пробелы на один
-      .replace(/\n\s*\n/g, '\n\n') // Очищаем переносы строк
+      .replace(/\s+/g, ' ')
+      .replace(/\n\s*\n/g, '\n\n')
       .trim();
   }
 

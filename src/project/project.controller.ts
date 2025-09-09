@@ -3,6 +3,8 @@ import {
   Controller,
   Get,
   Post,
+  Put,
+  Delete,
   UploadedFile,
   UseInterceptors,
   HttpStatus,
@@ -13,6 +15,7 @@ import {
 import { Express, Request } from 'express';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
+import { UpdateProjectDto } from './dto/update-project.dto';
 import {
   ApiBody,
   ApiConsumes,
@@ -111,6 +114,107 @@ export class ProjectController {
       req.user.sub,
       coverImage,
     );
+  }
+
+  @ApiOperation({
+    summary: 'Update a project',
+    description:
+      'Updates an existing project with new content and optional cover image',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Project successfully updated',
+    type: ProjectResponseDto,
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Project data for update with optional cover image',
+    schema: {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          example: 'Updated Дизайн для мобильного приложения',
+          description: 'Project name',
+        },
+        description: {
+          type: 'string',
+          example: 'Updated description',
+          description: 'Project description',
+        },
+        specializationId: {
+          type: 'number',
+          example: 1,
+          description: 'Specialization ID',
+        },
+        categoryId: {
+          type: 'number',
+          example: 3,
+          description: 'Category ID',
+        },
+        content: {
+          type: 'string',
+          description: 'JSON stringified array of Slate.js content',
+          example:
+            '[{"type":"paragraph","children":[{"text":"Updated content"}]}]',
+        },
+        firstLink: {
+          type: 'string',
+          example: 'figma.com/my-updated-project',
+          description: 'First project link',
+        },
+        secondLink: {
+          type: 'string',
+          example: 'figma.com/my-updated-second-project',
+          description: 'Second project link',
+        },
+        coverImage: {
+          type: 'string',
+          format: 'binary',
+          description: 'Project cover image',
+        },
+      },
+    },
+  })
+  @Put('update-project/:projectId')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileInterceptor('coverImage', {
+      limits: {
+        fileSize: 100 * 1024 * 1024,
+        fieldSize: 150 * 1024 * 1024,
+      },
+    }),
+  )
+  async updateProject(
+    @Param('projectId') projectId: string,
+    @Body() updateProjectDto: UpdateProjectDto,
+    @Req() req: RequestWithUser,
+    @UploadedFile() coverImage?: Express.Multer.File,
+  ) {
+    return this.projectService.updateProject(
+      +projectId,
+      updateProjectDto,
+      req.user.sub,
+      coverImage,
+    );
+  }
+
+  @ApiOperation({
+    summary: 'Delete a project',
+    description: 'Deletes a project and its associated files',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Project successfully deleted',
+  })
+  @Delete('delete-project/:projectId')
+  @UseGuards(JwtAuthGuard)
+  async deleteProject(
+    @Param('projectId') projectId: string,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.projectService.deleteProject(+projectId, req.user.sub);
   }
 
   @ApiOperation({
