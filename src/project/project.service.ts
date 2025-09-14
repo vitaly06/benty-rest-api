@@ -221,6 +221,55 @@ export class ProjectService {
     });
   }
 
+  async getProjectContentForEdit(projectId: number, userId: number) {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      include: {
+        user: true,
+        category: true,
+        specialization: true,
+      },
+    });
+
+    if (!project) {
+      throw new NotFoundException('Проект с таким id не найден');
+    }
+
+    if (project.userId !== userId) {
+      throw new ForbiddenException('Вы не можете редактировать этот проект');
+    }
+
+    const content = project.contentPath
+      ? await this.storageService.loadContent(project.contentPath, 'projects')
+      : null;
+
+    let parsedContent;
+    if (content) {
+      try {
+        parsedContent = JSON.parse(content);
+        if (!Array.isArray(parsedContent)) {
+          throw new Error('Content must be an array');
+        }
+      } catch (error) {
+        throw new BadRequestException(
+          `Ошибка парсинга контента: ${error.message}`,
+        );
+      }
+    }
+
+    return {
+      id: project.id,
+      name: project.name,
+      description: project.description || null,
+      specializationId: project.specializationId,
+      categoryId: project.categoryId,
+      firstLink: project.firstLink || null,
+      secondLink: project.secondLink || null,
+      content: parsedContent, // Возвращаем парсированный JSON для редактирования
+      photoName: project.photoName || null,
+    };
+  }
+
   async deleteProject(projectId: number, userId: number) {
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },

@@ -99,8 +99,8 @@ export class ProjectController {
   @UseInterceptors(
     FileInterceptor('coverImage', {
       limits: {
-        fileSize: 100 * 1024 * 1024, // 50MB для изображений
-        fieldSize: 150 * 1024 * 1024, // 100MB для полей (особенно content)
+        fileSize: 100 * 1024 * 1024, // 100MB для изображений
+        fieldSize: 150 * 1024 * 1024, // 150MB для полей (особенно content)
       },
     }),
   )
@@ -197,6 +197,28 @@ export class ProjectController {
       updateProjectDto,
       req.user.sub,
       coverImage,
+    );
+  }
+
+  @ApiOperation({
+    summary: 'Get project content for editing',
+    description:
+      'Retrieves the full project with content for editing (owner only)',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Project content for editing',
+    type: ProjectResponseDto,
+  })
+  @Get('edit-content/:projectId')
+  @UseGuards(JwtAuthGuard)
+  async getProjectContentForEdit(
+    @Param('projectId') projectId: string,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.projectService.getProjectContentForEdit(
+      +projectId,
+      req.user.sub,
     );
   }
 
