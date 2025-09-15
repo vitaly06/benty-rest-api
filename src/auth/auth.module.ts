@@ -11,6 +11,7 @@ import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { CustomMailerModule } from 'src/mailer.module';
 import { ProjectModule } from 'src/project/project.module';
+import { BlogModule } from 'src/blog/blog.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ProjectModule } from 'src/project/project.module';
     ConfigModule,
     PassportModule,
     ProjectModule,
+    BlogModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

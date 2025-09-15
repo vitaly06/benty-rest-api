@@ -24,6 +24,7 @@ import { ChangePhoneRequest } from './dto/change-phone.dto';
 import { ChangePasswordRequest } from './dto/change-password';
 import { ProjectService } from 'src/project/project.service';
 import { Request } from 'express';
+import { BlogService } from 'src/blog/blog.service';
 
 @Injectable()
 export class UserService {
@@ -32,6 +33,7 @@ export class UserService {
     private readonly mailerService: MailerService,
     private readonly jwtService: JwtService,
     private readonly projectService: ProjectService,
+    private readonly blogService: BlogService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -811,6 +813,7 @@ export class UserService {
           )
         : false,
       projects: [],
+      blogs: [],
       info: {
         phoneNumber: currentUser.phoneNumber || null,
         email: currentUser.email,
@@ -832,6 +835,8 @@ export class UserService {
     result['projects'] = await this.projectService.getUserProjects(
       currentUser.id,
     );
+
+    result['blogs'] = await this.blogService.getUserBlogs(currentUser.id);
 
     return result;
   }

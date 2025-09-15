@@ -9,6 +9,7 @@ import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { StorageService } from 'src/storage/storage.service';
 import { Request } from 'express';
+import { Blog } from '@prisma/client';
 
 @Injectable()
 export class BlogService {
@@ -224,6 +225,7 @@ export class BlogService {
     });
   }
 
+  // Страница со всеми блогами
   async getAllBlogs() {
     const blogs = await this.prisma.blog.findMany({
       include: {
@@ -245,6 +247,38 @@ export class BlogService {
       },
     });
 
+    return await this.mapToBlogResponse(blogs);
+  }
+
+  // Проекты пользователя
+  async getUserBlogs(userId: number) {
+    const blogs = await this.prisma.blog.findMany({
+      where: {
+        userId,
+      },
+      include: {
+        user: {
+          include: {
+            specializations: true,
+          },
+        },
+        likedBy: {
+          select: {
+            id: true,
+          },
+        },
+        viewedBy: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    return await this.mapToBlogResponse(blogs);
+  }
+
+  async mapToBlogResponse(blogs: any) {
     const blogsWithDescription = await Promise.all(
       blogs.map(async (blog) => {
         try {
@@ -468,21 +502,6 @@ export class BlogService {
       .replace(/\s+/g, ' ')
       .replace(/\n\s*\n/g, '\n\n')
       .trim();
-  }
-
-  private mapToBlogResponse(blog: any) {
-    return {
-      id: blog.id,
-      name: blog.name,
-      coverImage: blog.photoName,
-      contentPath: blog.contentPath,
-      author: {
-        id: blog.user.id,
-        name: blog.user.fullName,
-      },
-      createdAt: blog.createdAt,
-      updatedAt: blog.updatedAt,
-    };
   }
 
   async formatDate(date: Date) {

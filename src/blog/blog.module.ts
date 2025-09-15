@@ -48,5 +48,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     JwtRefreshStrategy,
     StorageService,
   ],
+  exports: [BlogService],
 })
 export class BlogModule {}
