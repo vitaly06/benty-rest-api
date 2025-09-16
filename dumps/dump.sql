@@ -2,12 +2,15 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 14.18 (Ubuntu 14.18-0ubuntu0.22.04.1)
--- Dumped by pg_dump version 14.18 (Ubuntu 14.18-0ubuntu0.22.04.1)
+\restrict gbMDy3YBy1mubl5r3RjBfXHnHAeiaGisurgV5zrKlTaPlx1Fky3FEHWVdCGqhRT
+
+-- Dumped from database version 17.6
+-- Dumped by pg_dump version 17.6
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -43,7 +46,6 @@ ALTER TABLE public."Blog" OWNER TO postgres;
 --
 -- Name: Blog_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
--- pashalka
 
 CREATE SEQUENCE public."Blog_id_seq"
     AS integer
@@ -54,7 +56,7 @@ CREATE SEQUENCE public."Blog_id_seq"
     CACHE 1;
 
 
-ALTER TABLE public."Blog_id_seq" OWNER TO postgres;
+ALTER SEQUENCE public."Blog_id_seq" OWNER TO postgres;
 
 --
 -- Name: Blog_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -88,7 +90,7 @@ CREATE SEQUENCE public."Category_id_seq"
     CACHE 1;
 
 
-ALTER TABLE public."Category_id_seq" OWNER TO postgres;
+ALTER SEQUENCE public."Category_id_seq" OWNER TO postgres;
 
 --
 -- Name: Category_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -127,7 +129,7 @@ CREATE SEQUENCE public."Message_id_seq"
     CACHE 1;
 
 
-ALTER TABLE public."Message_id_seq" OWNER TO postgres;
+ALTER SEQUENCE public."Message_id_seq" OWNER TO postgres;
 
 --
 -- Name: Message_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -171,7 +173,7 @@ CREATE SEQUENCE public."Payment_id_seq"
     CACHE 1;
 
 
-ALTER TABLE public."Payment_id_seq" OWNER TO postgres;
+ALTER SEQUENCE public."Payment_id_seq" OWNER TO postgres;
 
 --
 -- Name: Payment_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -205,7 +207,7 @@ CREATE SEQUENCE public."ProfileType_id_seq"
     CACHE 1;
 
 
-ALTER TABLE public."ProfileType_id_seq" OWNER TO postgres;
+ALTER SEQUENCE public."ProfileType_id_seq" OWNER TO postgres;
 
 --
 -- Name: ProfileType_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -239,7 +241,7 @@ CREATE SEQUENCE public."Specialization_id_seq"
     CACHE 1;
 
 
-ALTER TABLE public."Specialization_id_seq" OWNER TO postgres;
+ALTER SEQUENCE public."Specialization_id_seq" OWNER TO postgres;
 
 --
 -- Name: Specialization_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -278,7 +280,7 @@ CREATE SEQUENCE public."Subscription_id_seq"
     CACHE 1;
 
 
-ALTER TABLE public."Subscription_id_seq" OWNER TO postgres;
+ALTER SEQUENCE public."Subscription_id_seq" OWNER TO postgres;
 
 --
 -- Name: Subscription_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -340,7 +342,7 @@ CREATE SEQUENCE public."User_id_seq"
     CACHE 1;
 
 
-ALTER TABLE public."User_id_seq" OWNER TO postgres;
+ALTER SEQUENCE public."User_id_seq" OWNER TO postgres;
 
 --
 -- Name: User_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -482,7 +484,7 @@ CREATE SEQUENCE public.projects_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.projects_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.projects_id_seq OWNER TO postgres;
 
 --
 -- Name: projects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -668,7 +670,7 @@ COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "u
 9	vitaly.sadikov444	vitaly.sadikov133@yandex.ru	$2b$10$7C4aR3bURQjyA1GvX./VSutZ0dmioRNscT3nl/tnhxgpBUh1fDfIC	1	2025-07-07 11:39:00.097	2025-08-11 10:08:27.076	$2b$10$U.g2pY9cUDT0Zai/wGpq.ulKj8rpXM0nVVtw6MZ0wvI/D2Eh.WIUi	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N
 11	tgflk	tgflk_tuv@mail.ru	$2b$10$vzwiWqqrOo6OstA.dWHmJuI8.sY/8OJ6hpAEKCPlA7gB.Yi5mOTA6	1	2025-07-14 18:39:22.108	2025-08-11 10:08:27.076	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjExLCJsb2dpbiI6InRnZmxrIiwiaWF0IjoxNzUyNTE4NDEzLCJleHAiOjE3NTMxMjMyMTN9.kWrY-bIHzM0X04J76hk78SeCvFu_5wcHPuep3ANvrCo	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N
 12	egorchik-pomidorchik	egor.skomorohoff@yandex.ru	$2b$10$EF.Di5n9b8UF869BYLl.MOsvlJeUCz1SzUEALQNe3/PCYuuHHfrze	1	2025-08-06 10:00:39.34	2025-08-11 10:08:27.076	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEyLCJpYXQiOjE3NTQ0ODM4NTUsImV4cCI6MTc1NTA4ODY1NX0.ke0mvfX_vm3zSPQGo_XMd_zg77Z32Qqrw_hNTkgS7WA	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N
-6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$Gq9LgS.dwDVeK93Th2ASgud7mrP/IRUyYxN5ccMA5DihzzUffUTR.	1	2025-07-03 11:03:00.473	2025-09-02 10:31:17.899	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImlhdCI6MTc1NjgwOTA3NywiZXhwIjoxNzU3NDEzODc3fQ.k3WemlH3ofrBEfig9f3SwO3tL8H277XUEjCpOqolpC8	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17	\N	2	offline	\N	\N
+6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$Gq9LgS.dwDVeK93Th2ASgud7mrP/IRUyYxN5ccMA5DihzzUffUTR.	1	2025-07-03 11:03:00.473	2025-09-16 11:14:25.094	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImlhdCI6MTc1ODAyMTI2NSwiZXhwIjoxNzU4NjI2MDY1fQ.WeR9F2Ao8a8mJkdLP7ph2cbqQAR2Nbhob5RFP46fkTM	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17	\N	2	offline	\N	\N
 \.
 
 
@@ -711,6 +713,8 @@ COPY public."_ProjectViews" ("A", "B") FROM stdin;
 10	6
 7	6
 8	6
+13	6
+25	6
 \.
 
 
@@ -760,11 +764,6 @@ COPY public."_UserStarred" ("A", "B") FROM stdin;
 --
 
 COPY public.projects (id, name, description, "photoName", "firstLink", "secondLink", "categoryId", "userId", "specializationId", "updatedAt", "createdAt", "contentHash", "contentPath", "contentSize") FROM stdin;
-10	Брендинг SunVault Eco Energy	Брендинг SunVault Eco Energy	1754412145355-208180517.png	\N	\N	3	6	1	2025-08-05 16:42:25.385	2025-08-05 16:42:25.381	1672dc072e12893d09780f69b9b7e65d83fe74fd8c4c1e8bc12bdf0f97403c14	project_10.json	1076968
-13	Тематическое исследование: Дизайн музыкального приложения	Тематическое исследование: Дизайн музыкального приложения	1754413001865-271176779.png	\N	\N	3	6	1	2025-08-05 16:56:42.191	2025-08-05 16:56:42.103	08b4e412ebf605eec21b5d946d62cbda5a004aa3c2a2379a62aec8c2f8670594	project_13.json	714484
-16	Syncfine Fintech Branding	Syncfine Fintech Branding	1754413784532-993438299.png	\N	\N	3	6	1	2025-08-05 17:09:44.553	2025-08-05 17:09:44.549	c8fb82d51a176a906bade3b01f2af61d8000f150d0377d12cf1a14d7364180f2	project_16.json	651047
-7	Брендинг недвижимости Homotiq	Дизайн для недвижимости Homotiq	1751622214349-830472717.png	\N	\N	3	6	1	2025-08-05 17:17:44.498	2025-08-05 16:24:58.467	682af7867ce883803c1c287ae8fe0a921fc678c8f428ed1dd82b2ec0896230c1	project_7.json	1071317
-8	Syncfine Fintech Branding	Lorem Ipsum Syncfine Fintech Branding	1751622474871-653089185.png	\N	\N	3	7	1	2025-08-05 17:18:55.388	2025-08-05 16:35:41.2	6ac587d50b8b34209427b3c8dcb275c92c105d03328bd16e2f35c2243fa292c1	project_8.json	1260812
 9	Брендинг недвижимости Homotiq	Брендинг недвижимости Homotiq	1754411991004-100043934.png	\N	\N	3	8	1	2025-08-05 17:18:55.388	2025-08-05 16:39:51.028	7340edbb49de60163bd284279e2c1fe209f466e1ec1e26a9314b39dd963f7025	project_9.json	628044
 11	Брендинг фестиваля Visiou	Брендинг фестиваля Visiou\r\n	1754412366025-570242612.png	\N	\N	3	7	1	2025-08-05 17:18:55.388	2025-08-05 16:46:06.071	282e17d903c7d7b50127f1a37edba4846c5f6a05935e20ae4f886798305c7eaa	project_11.json	1215879
 12	Nexus — Visual identity	Nexus — Visual identity	1754412588868-395124168.png	\N	\N	3	8	1	2025-08-05 17:18:55.388	2025-08-05 16:49:48.893	6a420a6f690973e041bcd7ca7175ee5a95d46e989b2e94caf4707dbeca8d8cf1	project_12.json	800862
@@ -772,6 +771,12 @@ COPY public.projects (id, name, description, "photoName", "firstLink", "secondLi
 15	Брендинг Monly	Брендинг Monly	1754413612709-508022081.png	\N	\N	3	8	1	2025-08-05 17:18:55.388	2025-08-05 17:06:52.719	e27af2a257019d082127a221c19166c168e5e35102de11b1ef29f14b44a5f239	project_15.json	651158
 17	Брендинг недвижимости Homotiq	Брендинг недвижимости Homotiq	1754413983781-291074898.png	\N	\N	3	7	1	2025-08-05 17:18:55.388	2025-08-05 17:13:03.806	35ea067a9d942d1a393c4ab3f8a13cb8e573e5b456aa215a93b31b9529bf3270	project_17.json	160225
 18	Брендинг SunVault Eco Energy	Брендинг SunVault Eco Energy	1754414109948-902939597.png	\N	\N	3	8	1	2025-08-05 17:18:55.388	2025-08-05 17:15:09.986	a75662d579cb6f3eb6c966f3ae90e3d6cc4fc814204d378b577b6e58c9a9d7c1	project_18.json	1163107
+10	Брендинг SunVault Eco Energy	Брендинг SunVault Eco Energy	1754412145355-208180517.png	\N	\N	3	6	1	2025-09-15 10:33:49.293	2025-08-05 16:42:25.381	2e3e2f92d76e0ef086a863ea1dfda79306707a4c36e565c4fc822246991be38b	project_10.json	1077117
+7	check test	Дизайн для недвижимости Homotiq	1751622214349-830472717.png	\N	\N	3	6	1	2025-09-16 08:29:58.057	2025-08-05 16:24:58.467	82bd0fc3ee8931d84fd95e2aeb370d6cd1ff1b04387a8d939f9823cb081322f0	project_7.json	1071476
+8	iaiaiaiaia	Lorem Ipsum Syncfine Fintech Branding	1751622474871-653089185.png	\N	\N	3	7	1	2025-09-16 08:32:00.835	2025-08-05 16:35:41.2	6ac587d50b8b34209427b3c8dcb275c92c105d03328bd16e2f35c2243fa292c1	project_8.json	1260812
+16	iaiaiaiaia	Syncfine Fintech Branding	1754413784532-993438299.png	\N	\N	3	6	1	2025-09-16 08:46:17.093	2025-08-05 17:09:44.549	83ed824930cc2586fcea3feb4eabca3337b78da1b26cbda604cf98ee1624ba11	project_16.json	651253
+13	Тематическое исследование: Дизайн музыкального приложения	Тематическое исследование: Дизайн музыкального приложенияпвпа	1758012470357-577256096.png	\N	\N	14	6	3	2025-09-16 08:47:50.422	2025-08-05 16:56:42.103	daed73690c78b979165bee72a162362ae044add5599ecd24e38fbac55f9abf6d	project_13.json	18375
+25	пвапавпвапвапвапвапвапав	апвапавпавп	1758017092176-634685505.png	\N	\N	16	6	1	2025-09-16 10:04:52.26	2025-09-16 10:04:52.216	1bda19dbab8ebb74948c95815f61eb92e7c7d6c883c36cec27f25801c1fc8b2e	project_25.json	18384
 \.
 
 
@@ -835,7 +840,7 @@ SELECT pg_catalog.setval('public."User_id_seq"', 16, true);
 -- Name: projects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.projects_id_seq', 24, true);
+SELECT pg_catalog.setval('public.projects_id_seq', 25, true);
 
 
 --
@@ -1332,4 +1337,6 @@ ALTER TABLE ONLY public.projects
 --
 -- PostgreSQL database dump complete
 --
+
+\unrestrict gbMDy3YBy1mubl5r3RjBfXHnHAeiaGisurgV5zrKlTaPlx1Fky3FEHWVdCGqhRT
 
