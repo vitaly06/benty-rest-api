@@ -176,6 +176,55 @@ export class BlogController {
 
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
+    summary: 'Получить контент блога для редактирования',
+    description:
+      'Возвращает данные блога для редактирования, включая контент в формате Slate.js',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Данные блога успешно возвращены',
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'number', example: 25 },
+        name: { type: 'string', example: 'Тестовая статья' },
+        specializationId: { type: 'number', example: 1 },
+        content: {
+          type: 'array',
+          items: {
+            type: 'object',
+            description: 'Slate.js контент',
+            example: [
+              { type: 'paragraph', children: [{ text: 'Blog content' }] },
+            ],
+          },
+        },
+        photoName: {
+          type: 'string',
+          example: 'blog_25_cover.png',
+          nullable: true,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Блог с таким ID не найден',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Вы не можете редактировать этот блог',
+  })
+  @Get('edit-content/:blogId')
+  async getBlogContentForEdit(
+    @Param('blogId') blogId: string,
+    @Req() req: RequestWithUser,
+  ) {
+    return await this.blogService.getBlogContentForEdit(+blogId, req.user.sub);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
     summary: 'Лайкнуть блог',
   })
   @Post('like-blog/:blogId')

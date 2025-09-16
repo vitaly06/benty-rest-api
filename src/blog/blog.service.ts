@@ -40,7 +40,6 @@ export class BlogService {
 
     let parsedContent;
     try {
-      // Проверяем, является ли dto.content строкой или объектом
       if (typeof dto.content === 'string') {
         if (dto.content.startsWith('[object Obj')) {
           throw new Error(
@@ -55,7 +54,7 @@ export class BlogService {
       if (!Array.isArray(parsedContent)) {
         throw new Error('Контент должен быть массивом');
       }
-      this.validateSlateContent(parsedContent); // Добавляем валидацию Slate-контента
+      this.validateSlateContent(parsedContent);
     } catch (error) {
       console.error(
         'Ошибка при парсинге контента блога:',
@@ -151,7 +150,7 @@ export class BlogService {
         if (!Array.isArray(parsedContent)) {
           throw new Error('Контент должен быть массивом');
         }
-        this.validateSlateContent(parsedContent); // Добавляем валидацию Slate-контента
+        this.validateSlateContent(parsedContent);
       } catch (error) {
         console.error(
           'Ошибка при парсинге контента блога:',
@@ -173,7 +172,7 @@ export class BlogService {
         console.error('Контент должен быть массивом, получено:', parsedContent);
         throw new BadRequestException('Контент должен быть массивом');
       }
-      this.validateSlateContent(parsedContent); // Добавляем валидацию Slate-контента
+      this.validateSlateContent(parsedContent);
     }
 
     if (dto.specializationId) {
@@ -336,7 +335,7 @@ export class BlogService {
                 'blogs',
               );
               if (content && content !== 'null') {
-                this.validateSlateContent(content); // Добавляем валидацию Slate-контента
+                this.validateSlateContent(content);
                 const extractedText = this.extractTextFromContent(content);
                 if (extractedText) {
                   description = extractedText.substring(0, 280);
@@ -433,7 +432,7 @@ export class BlogService {
           'blogs',
         );
         if (content) {
-          this.validateSlateContent(content); // Добавляем валидацию Slate-контента
+          this.validateSlateContent(content);
           console.log('Загруженный контент:', JSON.stringify(content, null, 2));
         } else {
           console.warn(`Файл ${blog.contentPath} пуст или содержит null`);
@@ -495,6 +494,59 @@ export class BlogService {
     };
 
     return result;
+  }
+
+  async getBlogContentForEdit(blogId: number, userId: number) {
+    console.log(
+      `Получение контента для редактирования блога ${blogId}, userId: ${userId}`,
+    );
+
+    const blog = await this.prisma.blog.findUnique({
+      where: { id: blogId },
+      include: {
+        user: true,
+        specialization: true,
+      },
+    });
+
+    if (!blog) {
+      throw new NotFoundException(`Блог с id ${blogId} не найден`);
+    }
+
+    if (blog.userId !== userId) {
+      throw new ForbiddenException('Вы не можете редактировать этот блог');
+    }
+
+    let content: any[] | null = null;
+    if (blog.contentPath) {
+      try {
+        content = await this.storageService.loadContent(
+          blog.contentPath,
+          'blogs',
+        );
+        if (content) {
+          this.validateSlateContent(content);
+          console.log('Загруженный контент:', JSON.stringify(content, null, 2));
+        } else {
+          console.warn(`Файл ${blog.contentPath} пуст или содержит null`);
+        }
+      } catch (error) {
+        console.error(
+          `Ошибка загрузки или валидации контента для блога ${blogId}: ${error.message}`,
+        );
+        content = null;
+      }
+    } else {
+      console.warn(`Контент отсутствует для блога ${blogId}`);
+    }
+
+    return {
+      id: blog.id,
+      name: blog.name,
+      specializationId: blog.specializationId,
+      content,
+      photoName: blog.photoName || null,
+    };
   }
 
   async likeBlog(blogId: number, userId: number) {
@@ -572,7 +624,6 @@ export class BlogService {
     if (!Array.isArray(content)) {
       throw new Error('Контент должен быть массивом');
     }
-    // Разрешаем пустой массив, если это допустимо
     for (const node of content) {
       this.validateSlateNode(node);
     }
@@ -583,12 +634,10 @@ export class BlogService {
       throw new Error('Узел должен быть объектом');
     }
     if (node.text !== undefined) {
-      // Текстовый узел
       if (typeof node.text !== 'string') {
         throw new Error('Поле text узла должно быть строкой');
       }
     } else {
-      // Элементный узел
       if (!node.type || typeof node.type !== 'string') {
         throw new Error('Узел должен иметь поле type (строка)');
       }
