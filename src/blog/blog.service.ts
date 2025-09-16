@@ -40,14 +40,31 @@ export class BlogService {
 
     let parsedContent;
     try {
-      parsedContent =
-        typeof dto.content === 'string' ? JSON.parse(dto.content) : dto.content;
+      // Проверяем, является ли dto.content строкой и валидным JSON
+      if (typeof dto.content === 'string') {
+        if (dto.content.startsWith('[object Obj')) {
+          throw new Error(
+            'Контент содержит некорректную строку: [object Object]',
+          );
+        }
+        parsedContent = JSON.parse(dto.content);
+      } else {
+        parsedContent = dto.content;
+      }
+
       if (!Array.isArray(parsedContent)) {
         throw new Error('Контент должен быть массивом');
       }
     } catch (error) {
-      console.error('Ошибка при парсинге контента блога:', error);
-      throw new BadRequestException('Неверный формат контента');
+      console.error(
+        'Ошибка при парсинге контента блога:',
+        error.message,
+        'dto.content:',
+        dto.content,
+      );
+      throw new BadRequestException(
+        `Неверный формат контента: ${error.message}`,
+      );
     }
 
     const fileName = `blog_${Date.now()}.json`; // Уникальное имя для создания
@@ -111,6 +128,11 @@ export class BlogService {
       );
     }
 
+    console.log(
+      'Получен DTO для обновления блога:',
+      JSON.stringify(dto, null, 2),
+    );
+
     let parsedContent;
     if (
       dto.content &&
@@ -119,15 +141,35 @@ export class BlogService {
       dto.content !== 'undefined'
     ) {
       try {
+        if (dto.content.startsWith('[object Obj')) {
+          throw new Error(
+            'Контент содержит некорректную строку: [object Object]',
+          );
+        }
         parsedContent = JSON.parse(dto.content);
         if (!Array.isArray(parsedContent)) {
           throw new Error('Контент должен быть массивом');
         }
       } catch (error) {
-        console.error('Ошибка при парсинге контента блога:', error);
+        console.error(
+          'Ошибка при парсинге контента блога:',
+          error.message,
+          'dto.content:',
+          dto.content,
+        );
         throw new BadRequestException(
           `Неверный формат контента: ${error.message}`,
         );
+      }
+    } else if (dto.content) {
+      console.log(
+        'Контент не является строкой, проверяем как объект:',
+        dto.content,
+      );
+      parsedContent = dto.content;
+      if (!Array.isArray(parsedContent)) {
+        console.error('Контент должен быть массивом, получено:', parsedContent);
+        throw new BadRequestException('Контент должен быть массивом');
       }
     } else {
       console.log(

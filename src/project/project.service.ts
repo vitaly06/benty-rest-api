@@ -131,20 +131,34 @@ export class ProjectService {
     }
 
     let parsedContent;
-    if (
-      dto.content &&
-      typeof dto.content === 'string' &&
-      dto.content !== 'null' &&
-      dto.content !== 'undefined'
-    ) {
+    if (dto.content) {
       try {
-        parsedContent = JSON.parse(dto.content);
-        if (!Array.isArray(parsedContent)) {
+        // Если контент уже объект - используем его как есть
+        // Если контент строка - парсим JSON
+        if (typeof dto.content === 'string') {
+          if (dto.content === 'null' || dto.content === 'undefined') {
+            parsedContent = null;
+          } else {
+            parsedContent = JSON.parse(dto.content);
+          }
+        } else if (
+          typeof dto.content === 'object' &&
+          Array.isArray(dto.content)
+        ) {
+          // Контент уже является объектом (массивом)
+          parsedContent = dto.content;
+        } else {
+          throw new Error('Content must be an array or a JSON string');
+        }
+
+        if (parsedContent && !Array.isArray(parsedContent)) {
           throw new Error('Content must be an array');
         }
 
-        this.analyzeSlateStructure(parsedContent);
-        this.validateSlateContent(parsedContent);
+        if (parsedContent) {
+          this.analyzeSlateStructure(parsedContent);
+          this.validateSlateContent(parsedContent);
+        }
       } catch (error) {
         throw new BadRequestException(
           `Invalid content format: ${error.message}`,
