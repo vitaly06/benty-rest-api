@@ -62,9 +62,9 @@ export class ProjectService {
     if (!specialization)
       throw new NotFoundException('Specialization not found');
 
-    const tempFileName = `temp_${Date.now()}.json`;
+    const fileName = `project_${Date.now()}.json`; // Используем уникальное имя для создания
     const { path, size, hash } = await this.storageService.saveContent(
-      tempFileName,
+      fileName,
       parsedContent,
       'projects',
     );
@@ -108,14 +108,15 @@ export class ProjectService {
     userId: number,
     coverImage?: Express.Multer.File,
   ) {
+    console.log(`project id: ${projectId}`);
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
       select: {
         userId: true,
         photoName: true,
         contentPath: true,
-        contentHash: true,
         contentSize: true,
+        contentHash: true,
       },
     });
 
@@ -130,13 +131,14 @@ export class ProjectService {
     }
 
     let parsedContent;
-    if (dto.content) {
+    if (
+      dto.content &&
+      typeof dto.content === 'string' &&
+      dto.content !== 'null' &&
+      dto.content !== 'undefined'
+    ) {
       try {
-        parsedContent =
-          typeof dto.content === 'string'
-            ? JSON.parse(dto.content)
-            : dto.content;
-
+        parsedContent = JSON.parse(dto.content);
         if (!Array.isArray(parsedContent)) {
           throw new Error('Content must be an array');
         }
@@ -148,6 +150,10 @@ export class ProjectService {
           `Invalid content format: ${error.message}`,
         );
       }
+    } else {
+      console.log(
+        'Контент не передан или некорректен, сохраняем существующий контент',
+      );
     }
 
     if (dto.categoryId) {
@@ -170,23 +176,18 @@ export class ProjectService {
     let newContentHash = project.contentHash;
 
     if (parsedContent) {
-      const tempFileName = `temp_${Date.now()}.json`;
+      // Используем существующий путь или создаём новый
+      const fileName = project.contentPath || `project_${projectId}.json`;
+      console.log(`Перезапись контента в файл: ${fileName}`);
+
+      // Перезаписываем файл контента
       const { path, size, hash } = await this.storageService.saveContent(
-        tempFileName,
+        fileName,
         parsedContent,
         'projects',
       );
 
-      const newFileName = `project_${projectId}.json`;
-      await this.storageService.renameFile(path, newFileName, 'projects');
-
-      if (project.contentPath) {
-        await this.storageService
-          .deleteFile(project.contentPath, 'projects')
-          .catch(console.error);
-      }
-
-      newContentPath = newFileName;
+      newContentPath = path;
       newContentSize = size;
       newContentHash = hash;
     }
@@ -194,17 +195,25 @@ export class ProjectService {
     let newPhotoName = project.photoName;
     if (coverImage) {
       if (project.photoName) {
+        console.log(`Удаление старого изображения: ${project.photoName}`);
         await this.storageService
           .deleteFile(project.photoName, 'projects')
-          .catch(console.error);
+          .catch((err) =>
+            console.error(
+              `Ошибка удаления старого изображения: ${err.message}`,
+            ),
+          );
       }
       newPhotoName = coverImage.filename;
     }
 
+    console.log(
+      `Обновление проекта ${projectId} с contentPath: ${newContentPath}`,
+    );
     return this.prisma.project.update({
       where: { id: projectId },
       data: {
-        name: dto.name,
+        name: dto.name ?? undefined,
         description: dto.description || null,
         categoryId: dto.categoryId ? +dto.categoryId : undefined,
         specializationId: dto.specializationId
@@ -265,7 +274,7 @@ export class ProjectService {
       categoryId: project.categoryId,
       firstLink: project.firstLink || null,
       secondLink: project.secondLink || null,
-      content: parsedContent, // Возвращаем парсированный JSON для редактирования
+      content: parsedContent,
       photoName: project.photoName || null,
     };
   }

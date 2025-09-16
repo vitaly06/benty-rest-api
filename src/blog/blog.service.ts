@@ -50,9 +50,9 @@ export class BlogService {
       throw new BadRequestException('Неверный формат контента');
     }
 
-    const tempFileName = `temp_${Date.now()}.json`;
+    const fileName = `blog_${Date.now()}.json`; // Уникальное имя для создания
     const { path, size, hash } = await this.storageService.saveContent(
-      tempFileName,
+      fileName,
       parsedContent,
       'blogs',
     );
@@ -96,8 +96,8 @@ export class BlogService {
         userId: true,
         photoName: true,
         contentPath: true,
-        contentHash: true,
         contentSize: true,
+        contentHash: true,
       },
     });
 
@@ -112,20 +112,27 @@ export class BlogService {
     }
 
     let parsedContent;
-    if (dto.content) {
+    if (
+      dto.content &&
+      typeof dto.content === 'string' &&
+      dto.content !== 'null' &&
+      dto.content !== 'undefined'
+    ) {
       try {
-        parsedContent =
-          typeof dto.content === 'string'
-            ? JSON.parse(dto.content)
-            : dto.content;
+        parsedContent = JSON.parse(dto.content);
         if (!Array.isArray(parsedContent)) {
           throw new Error('Контент должен быть массивом');
         }
       } catch (error) {
+        console.error('Ошибка при парсинге контента блога:', error);
         throw new BadRequestException(
           `Неверный формат контента: ${error.message}`,
         );
       }
+    } else {
+      console.log(
+        'Контент не передан или некорректен, сохраняем существующий контент',
+      );
     }
 
     if (dto.specializationId) {
@@ -141,23 +148,18 @@ export class BlogService {
     let newContentHash = blog.contentHash;
 
     if (parsedContent) {
-      const tempFileName = `temp_${Date.now()}.json`;
+      // Используем существующий путь или создаём новый
+      const fileName = blog.contentPath || `blog_${blogId}.json`;
+      console.log(`Перезапись контента в файл: ${fileName}`);
+
+      // Перезаписываем файл контента
       const { path, size, hash } = await this.storageService.saveContent(
-        tempFileName,
+        fileName,
         parsedContent,
         'blogs',
       );
 
-      const newFileName = `blog_${blogId}.json`;
-      await this.storageService.renameFile(path, newFileName, 'blogs');
-
-      if (blog.contentPath) {
-        await this.storageService
-          .deleteFile(blog.contentPath, 'blogs')
-          .catch(console.error);
-      }
-
-      newContentPath = newFileName;
+      newContentPath = path;
       newContentSize = size;
       newContentHash = hash;
     }
@@ -165,17 +167,23 @@ export class BlogService {
     let newPhotoName = blog.photoName;
     if (coverImage) {
       if (blog.photoName) {
+        console.log(`Удаление старого изображения: ${blog.photoName}`);
         await this.storageService
           .deleteFile(blog.photoName, 'blogs')
-          .catch(console.error);
+          .catch((err) =>
+            console.error(
+              `Ошибка удаления старого изображения: ${err.message}`,
+            ),
+          );
       }
       newPhotoName = coverImage.filename;
     }
 
+    console.log(`Обновление блога ${blogId} с contentPath: ${newContentPath}`);
     return this.prisma.blog.update({
       where: { id: blogId },
       data: {
-        name: dto.name,
+        name: dto.name ?? undefined,
         specializationId: dto.specializationId
           ? +dto.specializationId
           : undefined,
@@ -225,7 +233,6 @@ export class BlogService {
     });
   }
 
-  // Страница со всеми блогами
   async getAllBlogs() {
     const blogs = await this.prisma.blog.findMany({
       include: {
@@ -250,7 +257,6 @@ export class BlogService {
     return await this.mapToBlogResponse(blogs);
   }
 
-  // Проекты пользователя
   async getUserBlogs(userId: number) {
     const blogs = await this.prisma.blog.findMany({
       where: {
