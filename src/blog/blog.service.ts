@@ -40,7 +40,7 @@ export class BlogService {
 
     let parsedContent;
     try {
-      // Проверяем, является ли dto.content строкой и валидным JSON
+      // Проверяем, является ли dto.content строкой или объектом
       if (typeof dto.content === 'string') {
         if (dto.content.startsWith('[object Obj')) {
           throw new Error(
@@ -55,6 +55,7 @@ export class BlogService {
       if (!Array.isArray(parsedContent)) {
         throw new Error('Контент должен быть массивом');
       }
+      this.validateSlateContent(parsedContent); // Добавляем валидацию Slate-контента
     } catch (error) {
       console.error(
         'Ошибка при парсинге контента блога:',
@@ -67,7 +68,7 @@ export class BlogService {
       );
     }
 
-    const fileName = `blog_${Date.now()}.json`; // Уникальное имя для создания
+    const fileName = `blog_${Date.now()}.json`;
     const { path, size, hash } = await this.storageService.saveContent(
       fileName,
       parsedContent,
@@ -150,6 +151,7 @@ export class BlogService {
         if (!Array.isArray(parsedContent)) {
           throw new Error('Контент должен быть массивом');
         }
+        this.validateSlateContent(parsedContent); // Добавляем валидацию Slate-контента
       } catch (error) {
         console.error(
           'Ошибка при парсинге контента блога:',
@@ -161,7 +163,7 @@ export class BlogService {
           `Неверный формат контента: ${error.message}`,
         );
       }
-    } else if (dto.content) {
+    } else if (dto.content && typeof dto.content !== 'string') {
       console.log(
         'Контент не является строкой, проверяем как объект:',
         dto.content,
@@ -171,10 +173,7 @@ export class BlogService {
         console.error('Контент должен быть массивом, получено:', parsedContent);
         throw new BadRequestException('Контент должен быть массивом');
       }
-    } else {
-      console.log(
-        'Контент не передан или некорректен, сохраняем существующий контент',
-      );
+      this.validateSlateContent(parsedContent); // Добавляем валидацию Slate-контента
     }
 
     if (dto.specializationId) {
@@ -190,11 +189,9 @@ export class BlogService {
     let newContentHash = blog.contentHash;
 
     if (parsedContent) {
-      // Используем существующий путь или создаём новый
       const fileName = blog.contentPath || `blog_${blogId}.json`;
       console.log(`Перезапись контента в файл: ${fileName}`);
 
-      // Перезаписываем файл контента
       const { path, size, hash } = await this.storageService.saveContent(
         fileName,
         parsedContent,
@@ -338,8 +335,8 @@ export class BlogService {
                 blog.contentPath,
                 'blogs',
               );
-
               if (content && content !== 'null') {
+                this.validateSlateContent(content); // Добавляем валидацию Slate-контента
                 const extractedText = this.extractTextFromContent(content);
                 if (extractedText) {
                   description = extractedText.substring(0, 280);
@@ -347,8 +344,7 @@ export class BlogService {
               }
             } catch (error) {
               console.error(
-                `Ошибка при загрузке контента для блога ${blog.id}:`,
-                error,
+                `Ошибка при загрузке или валидации контента для блога ${blog.id}: ${error.message}`,
               );
             }
           }
@@ -372,7 +368,9 @@ export class BlogService {
             description,
           };
         } catch (error) {
-          console.error(`Ошибка при обработке блога ${blog.id}:`, error);
+          console.error(
+            `Ошибка при обработке блога ${blog.id}: ${error.message}`,
+          );
           return {
             id: blog.id,
             name: blog.name,
@@ -427,7 +425,30 @@ export class BlogService {
       throw new NotFoundException('Блог с таким ID не найден');
     }
 
-    if (req.user?.sub) {
+    let content: any[] | null = null;
+    if (blog.contentPath) {
+      try {
+        content = await this.storageService.loadContent(
+          blog.contentPath,
+          'blogs',
+        );
+        if (content) {
+          this.validateSlateContent(content); // Добавляем валидацию Slate-контента
+          console.log('Загруженный контент:', JSON.stringify(content, null, 2));
+        } else {
+          console.warn(`Файл ${blog.contentPath} пуст или содержит null`);
+        }
+      } catch (error) {
+        console.error(
+          `Ошибка загрузки или валидации контента для блога ${blogId}: ${error.message}`,
+        );
+        content = null;
+      }
+    } else {
+      console.warn(`Контент отсутствует для блога ${blogId}`);
+    }
+
+    if (req?.user?.sub) {
       const checkView = await this.prisma.blog.findFirst({
         where: {
           id: blogId,
@@ -450,10 +471,6 @@ export class BlogService {
       }
     }
 
-    const content = blog.contentPath
-      ? await this.storageService.loadContent(blog.contentPath, 'blogs')
-      : null;
-
     const result = {
       id: blog.id,
       name: blog.name,
@@ -471,7 +488,7 @@ export class BlogService {
       views: blog.viewedBy.length,
       likedBy:
         blog.likedBy.length > 5 ? blog.likedBy.slice(0, 5) : blog.likedBy,
-      isLiked: req.user
+      isLiked: req?.user
         ? blog.likedBy.some((user) => String(user.id) === String(req.user.sub))
         : false,
       content,
@@ -545,20 +562,50 @@ export class BlogService {
     };
 
     traverseNodes(content);
-
     return text
       .replace(/\s+/g, ' ')
       .replace(/\n\s*\n/g, '\n\n')
       .trim();
   }
 
+  private validateSlateContent(content: any[]): void {
+    if (!Array.isArray(content)) {
+      throw new Error('Контент должен быть массивом');
+    }
+    // Разрешаем пустой массив, если это допустимо
+    for (const node of content) {
+      this.validateSlateNode(node);
+    }
+  }
+
+  private validateSlateNode(node: any): void {
+    if (!node || typeof node !== 'object') {
+      throw new Error('Узел должен быть объектом');
+    }
+    if (node.text !== undefined) {
+      // Текстовый узел
+      if (typeof node.text !== 'string') {
+        throw new Error('Поле text узла должно быть строкой');
+      }
+    } else {
+      // Элементный узел
+      if (!node.type || typeof node.type !== 'string') {
+        throw new Error('Узел должен иметь поле type (строка)');
+      }
+      if (!Array.isArray(node.children)) {
+        throw new Error('Узел должен иметь массив children');
+      }
+      for (const child of node.children) {
+        this.validateSlateNode(child);
+      }
+    }
+  }
+
   async formatDate(date: Date) {
     const pad = (num) => String(num).padStart(2, '0');
-
     const day = date.getDate();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
-
     return `${pad(day)}.${pad(month)}.${year}`;
   }
 }

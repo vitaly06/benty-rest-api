@@ -1,0 +1,23 @@
+[
+  { "type": "title", "children": [{ "text": "ппавпапавпавпва" }] },
+  {
+    "type": "description",
+    "children": [
+      {
+        "text": "павпавпвапвапвапвапвап",
+        "fontSize": 18,
+        "color": "#ff0000",
+        "bold": true,
+        "italic": true,
+        "underline": true
+      }
+    ]
+  },
+  { "type": "description", "children": [{ "text": "" }] },
+  {
+    "type": "image",
+    "url": "data:image/png;base64,...",
+    "children": [{ "text": "" }]
+  },
+  { "type": "paragraph", "children": [{ "text": "" }] }
+]
