@@ -26,7 +26,6 @@ model User {
 
   password      String
   refreshToken  String?
-  profileTypeId Int
 
   logoFileName               String?
   coverFileName              String?
