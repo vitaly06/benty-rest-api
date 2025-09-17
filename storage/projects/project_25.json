@@ -3,7 +3,7 @@
     "type": "title",
     "children": [
       {
-        "text": "папапапвапвава"
+        "text": "ппавпапавпавпва"
       }
     ]
   },
@@ -11,20 +11,19 @@
     "type": "description",
     "children": [
       {
-        "text": "пвапавпавпавпавпав",
+        "text": "павпавпвапвапвапвапвап",
+        "fontSize": 18,
+        "color": "#ff0000",
         "bold": true,
-        "color": "#ff0000"
+        "italic": true,
+        "underline": true
       }
-    ],
-    "align": "right"
+    ]
   },
   {
     "type": "description",
-    "align": "right",
     "children": [
       {
-        "bold": true,
-        "color": "#ff0000",
         "text": ""
       }
     ]
