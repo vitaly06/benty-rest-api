@@ -2,7 +2,6 @@
 -- PostgreSQL database dump
 --
 
-\restrict gbMDy3YBy1mubl5r3RjBfXHnHAeiaGisurgV5zrKlTaPlx1Fky3FEHWVdCGqhRT
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.6
@@ -10,7 +9,6 @@
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
-SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -180,40 +178,6 @@ ALTER SEQUENCE public."Payment_id_seq" OWNER TO postgres;
 --
 
 ALTER SEQUENCE public."Payment_id_seq" OWNED BY public."Payment".id;
-
-
---
--- Name: ProfileType; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public."ProfileType" (
-    id integer NOT NULL,
-    name text NOT NULL
-);
-
-
-ALTER TABLE public."ProfileType" OWNER TO postgres;
-
---
--- Name: ProfileType_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public."ProfileType_id_seq"
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public."ProfileType_id_seq" OWNER TO postgres;
-
---
--- Name: ProfileType_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public."ProfileType_id_seq" OWNED BY public."ProfileType".id;
 
 
 --
@@ -522,13 +486,6 @@ ALTER TABLE ONLY public."Payment" ALTER COLUMN id SET DEFAULT nextval('public."P
 
 
 --
--- Name: ProfileType id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public."ProfileType" ALTER COLUMN id SET DEFAULT nextval('public."ProfileType_id_seq"'::regclass);
-
-
---
 -- Name: Specialization id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -625,16 +582,6 @@ COPY public."Payment" (id, amount, purpose, "orderId", "userId", "operationId", 
 
 
 --
--- Data for Name: ProfileType; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public."ProfileType" (id, name) FROM stdin;
-1	Личный
-2	Компания
-\.
-
-
---
 -- Data for Name: Specialization; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -670,7 +617,7 @@ COPY public."User" (id, login, email, password, "profileTypeId", "createdAt", "u
 9	vitaly.sadikov444	vitaly.sadikov133@yandex.ru	$2b$10$7C4aR3bURQjyA1GvX./VSutZ0dmioRNscT3nl/tnhxgpBUh1fDfIC	1	2025-07-07 11:39:00.097	2025-08-11 10:08:27.076	$2b$10$U.g2pY9cUDT0Zai/wGpq.ulKj8rpXM0nVVtw6MZ0wvI/D2Eh.WIUi	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N
 11	tgflk	tgflk_tuv@mail.ru	$2b$10$vzwiWqqrOo6OstA.dWHmJuI8.sY/8OJ6hpAEKCPlA7gB.Yi5mOTA6	1	2025-07-14 18:39:22.108	2025-08-11 10:08:27.076	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjExLCJsb2dpbiI6InRnZmxrIiwiaWF0IjoxNzUyNTE4NDEzLCJleHAiOjE3NTMxMjMyMTN9.kWrY-bIHzM0X04J76hk78SeCvFu_5wcHPuep3ANvrCo	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N
 12	egorchik-pomidorchik	egor.skomorohoff@yandex.ru	$2b$10$EF.Di5n9b8UF869BYLl.MOsvlJeUCz1SzUEALQNe3/PCYuuHHfrze	1	2025-08-06 10:00:39.34	2025-08-11 10:08:27.076	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEyLCJpYXQiOjE3NTQ0ODM4NTUsImV4cCI6MTc1NTA4ODY1NX0.ke0mvfX_vm3zSPQGo_XMd_zg77Z32Qqrw_hNTkgS7WA	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N
-6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$Gq9LgS.dwDVeK93Th2ASgud7mrP/IRUyYxN5ccMA5DihzzUffUTR.	1	2025-07-03 11:03:00.473	2025-09-16 11:14:25.094	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImlhdCI6MTc1ODAyMTI2NSwiZXhwIjoxNzU4NjI2MDY1fQ.WeR9F2Ao8a8mJkdLP7ph2cbqQAR2Nbhob5RFP46fkTM	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	\N	f	f	f	2025-07-09 07:06:03.17	\N	2	offline	\N	\N
+6	vitaly.sadikkov222	vitaly.sadikov1@yandex.ru	$2b$10$Gq9LgS.dwDVeK93Th2ASgud7mrP/IRUyYxN5ccMA5DihzzUffUTR.	1	2025-07-03 11:03:00.473	2025-09-17 09:27:40.477	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImlhdCI6MTc1ODEwMTI2MCwiZXhwIjoxNzU4NzA2MDYwfQ.CPsI0w3Rl5W_PRo6esRH0Jr-pg0SONkF_lPhFYa91rU	t	f	ava1.png	Садиков Виталий	Оренбург	Я backend разработчик, пишу код на NestJs и учусь.	Middle	+79860271933	@ciganit	vk.com/sobaka	best-backend.ru	Менее года	1758100333347-542240690.jpg	f	f	f	2025-07-09 07:06:03.17	\N	2	offline	\N	\N
 \.
 
 
@@ -809,13 +756,6 @@ SELECT pg_catalog.setval('public."Payment_id_seq"', 10, true);
 
 
 --
--- Name: ProfileType_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public."ProfileType_id_seq"', 2, true);
-
-
---
 -- Name: Specialization_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -873,14 +813,6 @@ ALTER TABLE ONLY public."Message"
 
 ALTER TABLE ONLY public."Payment"
     ADD CONSTRAINT "Payment_pkey" PRIMARY KEY (id);
-
-
---
--- Name: ProfileType ProfileType_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public."ProfileType"
-    ADD CONSTRAINT "ProfileType_pkey" PRIMARY KEY (id);
 
 
 --
@@ -1029,13 +961,6 @@ CREATE INDEX "Payment_status_idx" ON public."Payment" USING btree (status);
 
 
 --
--- Name: ProfileType_name_key; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE UNIQUE INDEX "ProfileType_name_key" ON public."ProfileType" USING btree (name);
-
-
---
 -- Name: Specialization_name_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1164,14 +1089,6 @@ ALTER TABLE ONLY public."Message"
 
 ALTER TABLE ONLY public."Payment"
     ADD CONSTRAINT "Payment_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
---
--- Name: User User_profileTypeId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public."User"
-    ADD CONSTRAINT "User_profileTypeId_fkey" FOREIGN KEY ("profileTypeId") REFERENCES public."ProfileType"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 --
@@ -1338,5 +1255,4 @@ ALTER TABLE ONLY public.projects
 -- PostgreSQL database dump complete
 --
 
-\unrestrict gbMDy3YBy1mubl5r3RjBfXHnHAeiaGisurgV5zrKlTaPlx1Fky3FEHWVdCGqhRT
 

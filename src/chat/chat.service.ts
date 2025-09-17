@@ -177,7 +177,7 @@ export class ChatService {
         }
       }
     });
-    return Array.from(chatsMap.values());
+    return Array.from(chatsMap.values()) || null;
   }
 
   async registerUserSocket(userId: number, socketId: string) {

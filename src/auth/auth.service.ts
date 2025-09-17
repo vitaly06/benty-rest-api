@@ -30,14 +30,7 @@ export class AuthService {
   ) {}
 
   async signUp(dto: signUpRequest) {
-    const { profileTypeId, login, email, password, repassword } = { ...dto };
-
-    const checkProfileType = await this.prisma.profileType.findUnique({
-      where: { id: profileTypeId },
-    });
-    if (!checkProfileType) {
-      throw new BadRequestException('Типа профиля с таким id не существует');
-    }
+    const { login, email, password, repassword } = { ...dto };
 
     const checkUser =
       (await this.userService.findByEmail(email)) ||
@@ -62,7 +55,6 @@ export class AuthService {
       login,
       email,
       password: hashedPassword,
-      profileTypeId,
       isEmailVerified: true,
       subscriptionId: subscription.id,
     };

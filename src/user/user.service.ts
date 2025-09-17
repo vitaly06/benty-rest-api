@@ -779,11 +779,6 @@ export class UserService {
         vk: true,
         telegram: true,
         experience: true,
-        profileType: {
-          select: {
-            name: true,
-          },
-        },
         createdAt: true,
         about: true,
         following: true,
@@ -822,7 +817,6 @@ export class UserService {
         telegram: currentUser.telegram || null,
         city: currentUser.city,
         experience: currentUser.experience || null,
-        type: currentUser.profileType?.name || 'Тип не указан',
         createdAt: await this.formatDateTimePeriod(
           currentUser.createdAt.toString(),
         ),

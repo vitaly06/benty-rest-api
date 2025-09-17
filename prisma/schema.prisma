@@ -53,8 +53,6 @@ model User {
 
   isResetVerified Boolean     @default(false)
   isEmailVerified Boolean     @default(false)
-  // Тип профиля
-  profileType     ProfileType @relation(fields: [profileTypeId], references: [id])
 
   status String @default("offline") // для чата
 
@@ -120,11 +118,7 @@ model Subscription {
   User        User[]
 }
 
-model ProfileType {
-  id   Int    @id @default(autoincrement())
-  name String @unique
-  User User[]
-}
+
 
 model Specialization {
   id      Int       @id @default(autoincrement())

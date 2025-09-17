@@ -12,15 +12,6 @@ import {
 
 export class signUpRequest {
   @ApiProperty({
-    description: 'profileTypeId',
-    example: 1,
-    type: Number,
-  })
-  @IsNumber({}, { message: 'Id типа профиля должен быть числом' })
-  @IsPositive({ message: 'Id типа профиля должен быть положительным числом' })
-  @IsInt({ message: 'Id типа профиля должен быть целым числом' })
-  profileTypeId: number;
-  @ApiProperty({
     description: 'login',
     example: 'vitaly.sadikov',
   })

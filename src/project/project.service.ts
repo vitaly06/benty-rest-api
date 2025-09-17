@@ -674,11 +674,6 @@ export class ProjectService {
             select: {
               fullName: true,
               logoFileName: true,
-              profileType: {
-                select: {
-                  name: true,
-                },
-              },
             },
           },
         },
@@ -691,7 +686,6 @@ export class ProjectService {
         category: project.category?.name || 'Категория не указана',
         userLogo: project.user?.logoFileName,
         fullName: project.user?.fullName,
-        profileType: project.user?.profileType?.name || 'Тип не указан',
       }));
     } catch (error) {
       console.error('Ошибка получения проектов пользователя:', error.message);
