@@ -683,6 +683,7 @@ export class ProjectService {
         id: project.id,
         name: project.name,
         photoName: project.photoName,
+
         category: project.category?.name || 'Категория не указана',
         userLogo: project.user?.logoFileName,
         fullName: project.user?.fullName,

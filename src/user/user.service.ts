@@ -800,7 +800,7 @@ export class UserService {
       logoFileName: currentUser.logoFileName || null,
       coverFileName: currentUser.coverFileName || null,
       favorited: currentUser.favoritedBy?.length || 0,
-      likes: currentUser.likedBy?.length || 0,
+      // likes: currentUser.likedBy?.length || 0,
       followers: currentUser.followers?.length || 0,
       isFollow: req?.user
         ? currentUser.followers.some(
@@ -829,8 +829,23 @@ export class UserService {
     result['projects'] = await this.projectService.getUserProjects(
       currentUser.id,
     );
+    const likedBy = await this.prisma.project.findMany({
+      where: { userId: currentUser.id },
+      include: {
+        likedBy: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
 
     result['blogs'] = await this.blogService.getUserBlogs(currentUser.id);
+
+    result['likes'] =
+      result['blogs'].reduce(async (sum, blog) => (sum += blog.likes), 0) +
+        likedBy.reduce((sum, project) => (sum += project.likedBy.length), 0) ||
+      0;
 
     return result;
   }
