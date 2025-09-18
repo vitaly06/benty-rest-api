@@ -843,10 +843,8 @@ export class UserService {
     result['blogs'] = await this.blogService.getUserBlogs(currentUser.id);
 
     result['likes'] =
-      result['blogs'].reduce(async (sum, blog) => (sum += blog.likes), 0) +
-        likedBy.reduce((sum, project) => (sum += project.likedBy.length), 0) ||
-      0;
-
+      result['blogs'].reduce((sum, blog) => (sum += blog.likes), 0) +
+      likedBy.reduce((sum, project) => (sum += project.likedBy.length), 0);
     return result;
   }
 
