@@ -132,6 +132,7 @@ export class UserController {
   })
   @ApiTags('Настройки оформления')
   @Delete('delete-avatar')
+  @UseGuards(JwtAuthGuard)
   async deleteAvatar(@Req() req: RequestWithUser) {
     return await this.userService.deleteAvatar(req);
   }
@@ -141,6 +142,7 @@ export class UserController {
   })
   @ApiTags('Настройки оформления')
   @Delete('delete-cover')
+  @UseGuards(JwtAuthGuard)
   async deleteCover(@Req() req: RequestWithUser) {
     return await this.userService.deleteCover(req);
   }
