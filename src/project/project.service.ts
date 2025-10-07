@@ -755,6 +755,7 @@ export class ProjectService {
         'bold',
         'italic',
         'underline',
+        'fontFamily',
       ];
       for (const key of Object.keys(node)) {
         if (!validTextProps.includes(key)) {

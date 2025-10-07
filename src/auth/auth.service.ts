@@ -30,7 +30,7 @@ export class AuthService {
   ) {}
 
   async signUp(dto: signUpRequest) {
-    const { login, email, password, repassword } = { ...dto };
+    const { login, email, password, repassword, promocode } = { ...dto };
 
     const checkUser =
       (await this.userService.findByEmail(email)) ||
@@ -46,10 +46,31 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Подписка обычная
-    const subscription = await this.prisma.subscription.findUnique({
-      where: { name: 'default' },
-    });
+    // Проверка промокода и выбор подписки
+    let subscription;
+    let subscriptionStartAt = null;
+    let subscriptionEndAt = null;
+
+    if (promocode && promocode.toUpperCase() === 'BENTY90') {
+      subscription = await this.prisma.subscription.findUnique({
+        where: { name: 'premium' },
+      });
+      if (!subscription) {
+        throw new BadRequestException('Premium подписка не найдена');
+      }
+      subscriptionStartAt = new Date();
+      subscriptionEndAt = new Date();
+      subscriptionEndAt.setDate(subscriptionEndAt.getDate() + 90);
+    } else {
+      // Обычная подписка по умолчанию
+      subscription = await this.prisma.subscription.findUnique({
+        where: { name: 'default' },
+      });
+      if (!subscription) {
+        throw new BadRequestException('Подписка по умолчанию не найдена');
+      }
+    }
+
     console.log(code);
     const cachedData = {
       login,
@@ -57,6 +78,8 @@ export class AuthService {
       password: hashedPassword,
       isEmailVerified: true,
       subscriptionId: subscription.id,
+      subscriptionStartAt,
+      subscriptionEndAt,
     };
 
     await this.cacheManager.set(

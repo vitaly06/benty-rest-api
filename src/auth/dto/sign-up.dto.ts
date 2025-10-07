@@ -4,6 +4,7 @@ import {
   IsInt,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsPositive,
   IsString,
   Length,
@@ -44,4 +45,13 @@ export class signUpRequest {
   @MinLength(6, { message: 'Минимальная длина пароля - 6 символов' })
   @IsNotEmpty({ message: 'Повтор пароля обязателен для заполнения' })
   repassword: string;
+
+  @IsString({ message: 'Промокод должен быть строкой' })
+  @IsOptional()
+  @ApiProperty({
+    description: 'promocode',
+    example: 'PROMO123',
+    required: false,
+  })
+  promocode?: string;
 }
