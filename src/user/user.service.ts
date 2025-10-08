@@ -211,7 +211,7 @@ export class UserService {
       });
     }
 
-    return result;
+    return result.sort((a, b) => b.info.rating - a.info.rating);
   }
 
   async getMainSettings(req: RequestWithUser) {

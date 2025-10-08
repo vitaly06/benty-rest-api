@@ -30,6 +30,7 @@ export class AuthService {
   ) {}
 
   async signUp(dto: signUpRequest) {
+    console.log(dto);
     const { login, email, password, repassword, promocode } = { ...dto };
 
     const checkUser =
@@ -50,6 +51,9 @@ export class AuthService {
     let subscription;
     let subscriptionStartAt = null;
     let subscriptionEndAt = null;
+    if (promocode) {
+      console.log(promocode);
+    }
 
     if (promocode && promocode.toUpperCase() === 'BENTY90') {
       subscription = await this.prisma.subscription.findUnique({
