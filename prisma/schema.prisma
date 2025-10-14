@@ -69,8 +69,8 @@ model User {
   blogId          Int?
 
   // Сообщения
-  sentMessages     Message[] @relation("Sender") // Сообщения, отправленные пользователем
-  receivedMessages Message[] @relation("Receiver") // Сообщения, полученные пользователем
+  sentMessages     Message[] @relation("Sender") // Убрано onDelete отсюда
+  receivedMessages Message[] @relation("Receiver") // Убрано onDelete отсюда
   Payment          Payment[]
 }
 
@@ -79,11 +79,11 @@ model Message {
   senderId   Int
   receiverId Int
   content    String?
-  filePath   String? // Новое поле для хранения пути к файлу
+  filePath   String?
   createdAt  DateTime @default(now())
   isRead     Boolean  @default(false)
-  sender     User     @relation("Sender", fields: [senderId], references: [id])
-  receiver   User     @relation("Receiver", fields: [receiverId], references: [id])
+  sender     User     @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade) // onDelete только здесь
+  receiver   User     @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade) // onDelete только здесь
 }
 
 model Payment {
@@ -92,9 +92,9 @@ model Payment {
   purpose           String
   orderId           String   @unique
   userId            Int
-  user              User     @relation(fields: [userId], references: [id])
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade) // onDelete остается здесь
   operationId       String   @unique
-  externalPaymentId String? // ID платежа из Точки
+  externalPaymentId String?
   paymentLink       String
   status            String   @default("pending")
   expiresAt         DateTime
@@ -110,14 +110,12 @@ model Subscription {
   id          Int      @id @default(autoincrement())
   name        String   @unique
   price       Decimal  @default(0)
-  duration    Int      @default(30) // длительность в днях
-  isDefault   Boolean  @default(true) // флаг для базовой подписки
-  ratingBoost Int? // процент буста рейтинга
-  features    String[] // массив фич подписки
+  duration    Int      @default(30)
+  isDefault   Boolean  @default(true)
+  ratingBoost Int?
+  features    String[]
   User        User[]
 }
-
-
 
 model Specialization {
   id      Int       @id @default(autoincrement())
@@ -127,7 +125,6 @@ model Specialization {
   Blog    Blog[]
 }
 
-// Проект
 model Project {
   id          Int     @id @default(autoincrement())
   name        String
@@ -176,7 +173,6 @@ model Blog {
   updatedAt DateTime @updatedAt
 }
 
-// Категория проекта
 model Category {
   id       Int       @id @default(autoincrement())
   name     String    @unique
