@@ -17,6 +17,7 @@ import { ChatModule } from './chat/chat.module';
 import { PaymentModule } from './payment/payment.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { SubscriptionModule } from './subscription/subscription.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
     PaymentModule,
     WebhookModule,
     SubscriptionModule,
+    AdminModule,
   ],
   providers: [],
 })
