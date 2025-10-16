@@ -101,7 +101,7 @@ export class AdminService {
     };
   }
 
-  async banUser(id: number) {
+  async banUser(id: number, reason: string) {
     const checkUser = await this.prisma.user.findUnique({
       where: { id },
     });
@@ -114,6 +114,7 @@ export class AdminService {
       where: { id },
       data: {
         isBanned: true,
+        banReason: reason,
       },
     });
 

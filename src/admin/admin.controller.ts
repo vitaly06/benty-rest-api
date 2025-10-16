@@ -1,6 +1,15 @@
-import { Controller, Delete, Get, Param, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { ApiOperation } from '@nestjs/swagger';
+import { BanUserDto } from './dto/ban-user.dto';
 
 @Controller('admin')
 export class AdminController {
@@ -37,8 +46,8 @@ export class AdminController {
     summary: 'Блокировка пользователя',
   })
   @Put('ban-user/:id')
-  async banUser(@Param('id') id: string) {
-    return await this.adminService.banUser(+id);
+  async banUser(@Param('id') id: string, @Body() body: BanUserDto) {
+    return await this.adminService.banUser(+id, body.reason);
   }
 
   @ApiOperation({
