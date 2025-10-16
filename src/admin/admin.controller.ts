@@ -27,7 +27,7 @@ export class AdminController {
     summary: 'Удаление пользователя',
   })
   @Delete('delete-user/:id')
-  async deleteUser(id: string) {
+  async deleteUser(@Param('id') id: string) {
     return await this.adminService.deleteUser(+id);
   }
 

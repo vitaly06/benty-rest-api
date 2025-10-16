@@ -303,6 +303,7 @@ CREATE TABLE public."User" (
     status text DEFAULT 'offline'::text NOT NULL,
     "subscriptionEndAt" timestamp(3) without time zone,
     "subscriptionStartAt" timestamp(3) without time zone,
+    "banReason" text,
     "isBanned" boolean DEFAULT false NOT NULL
 );
 
@@ -534,7 +535,6 @@ ALTER TABLE ONLY public.projects ALTER COLUMN id SET DEFAULT nextval('public.pro
 --
 
 COPY public."Blog" (id, name, "photoName", "contentPath", "contentSize", "contentHash", "userId", "specializationId", "createdAt", "updatedAt") FROM stdin;
-78	SMM в 2025: Переход от вирального контента к стратегии роста. Пошаговое руководство	1758708361323-915051351.jpg	blog_78.json	13172	904a0992e669f70b7f0d4d24fcb336094066557b90e1e03554a44e453fdd5803	51	1	2025-09-24 10:06:02.366	2025-09-24 10:06:02.448
 45	Как ускорить работу сайта на Tilda	1758455809606-398488944.png	blog_45.json	970156	2da727c55d5a5bdb719e81486ee83fb13d65995436a25333628d9755759ae380	18	5	2025-09-21 11:56:49.681	2025-09-26 10:13:51.488
 \.
 
@@ -614,32 +614,33 @@ COPY public."Subscription" (id, name, "ratingBoost", duration, features, price, 
 -- Data for Name: User; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."User" (id, login, email, password, "createdAt", "updatedAt", "refreshToken", "isEmailVerified", "isResetVerified", "logoFileName", "fullName", city, about, level, "phoneNumber", telegram, vk, website, experience, "coverFileName", "joinAuthorsNotifications", "weeklySummaryNotifications", "rewardNotifications", "lastLoginUpdate", "blogId", "subscriptionId", status, "subscriptionEndAt", "subscriptionStartAt", "isBanned") FROM stdin;
-84	Younni	yummy022007@gmail.com	$2b$10$zMvCMGjLn4cL44uekjb7zOFhsR9k0H9Zasp/I8bHlaJZyFqNcJjFS	2025-10-04 10:02:40.578	2025-10-04 10:03:46.52	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjg0LCJsb2dpbiI6IllvdW5uaSIsImlhdCI6MTc1OTU3MjE2MCwiZXhwIjoxNzYwMTc2OTYwfQ.1qgQsQe05BPCOp5EWreMBRbHqeC8EpQHwzageENJn4o	t	f	\N	Ион Хиким					@younni			1-3 года	\N	f	f	f	\N	\N	1	offline	\N	\N	f
-117	sdeverley	bristolllf@gmail.com	$2b$10$p80GtBsQMV7XKdkdlCReteVGM4RdF1fMi5mLCrGMshAcmHK/VY0AG	2025-10-06 08:06:57.422	2025-10-06 08:12:33.311	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjExNywibG9naW4iOiJzZGV2ZXJsZXkiLCJpYXQiOjE3NTk3MzgwMTcsImV4cCI6MTc2MDM0MjgxN30._CkMaeJg1lDknzt9OJ_C-UwLjCQz8IyhOHYdP0qFcAA	t	f	\N	Svetlana Kopaneva	Нижний Новгород	В настоящее время я работаю в Т-Банке стажером в отделе социальных сетей на позиции SMM-менеджера. Моя стажировка заканчивается 17 декабря, и, к сожалению, продолжить работу в компании не получится, так как в штате нет открытых вакансий на позицию SMM-менеджера. Поэтому я ищу команду, где смогу применить полученный опыт и продолжить расти.\n\nВ Т-Банке я создаю контент для Telegram-канала, ВКонтакте и Пульс: пишу тексты о вакансиях и карьерных возможностях, принимаю участие в создании и запуске спецпроекта, готовлю ТЗ для дизайнеров, составляю контент-план и работаю с аналитикой в LiveDune. Благодаря этому я научилась воспринимать соцсети не как набор постов, а как инструмент, который помогает бизнесу и команде находить своих людей.\n\nСейчас я параллельно прохожу профессиональную переподготовку по специальности «Маркетолог», чтобы глубже изучить стратегическое планирование и современные методы продвижения.\n\nХочу быть частью команды, где можно экспериментировать с форматами, искать креативные решения и видеть, как результат моей работы напрямую влияет на отклик аудитории.	Junior	9867264131	sdeverley			Менее года	\N	f	f	f	\N	\N	1	offline	\N	\N	f
-118	eskoej	dkasanova449@gmail.com	$2b$10$UedmuecQh4ns4XHWyiHE2u5WsmmnhAH2ulTTlTwGNEEI.8rvnePie	2025-10-06 08:09:23.149	2025-10-06 08:40:13.666	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjExOCwiaWF0IjoxNzU5NzQwMDEzLCJleHAiOjE3NjAzNDQ4MTN9.99zh_obtjAFdbLJPNhAWTuqU1RpS-wsAeUa5_PhNIiY	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	f
-18	epica	alexeev230704@gmail.com	$2b$10$QbyOuNYkwlDTXmJtxRGiF.g/TtbqbDKi1Yalg5O7UCu.zGNurrB6S	2025-09-17 10:51:56.966	2025-10-12 21:59:29.256	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE4LCJpYXQiOjE3NjAzMDYzNjksImV4cCI6MTc2MDkxMTE2OX0.L9SRe5ZB-ZlnF6X5juJeMZy7dyMhXY0Y0arz5F55x3k	t	f	1758134936838-389670038.png	Александр Алексеев	Москва							3-6 лет	1758106460249-127038363.png	f	f	f	\N	\N	1	offline	\N	\N	f
-51	stanislavd491	stanislavd491@gmail.com	$2b$10$BhwyctgYGYjeHAyVHvO5XOvnCB9mv4zPtYhmLgKTsvhzpg.aVtA3y	2025-09-24 09:57:02.823	2025-09-24 12:19:40.808	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjUxLCJsb2dpbiI6InN0YW5pc2xhdmQ0OTEiLCJpYXQiOjE3NTg3MTYzODAsImV4cCI6MTc1OTMyMTE4MH0.nKIFYH0tsh_RKDGLngzvDcHutOLu-5DU9o-KdHHexiY	t	f	1758708790761-957759653.jpg	Станислав									\N	f	f	f	\N	\N	1	offline	\N	\N	f
-580	aseeev	ilya.aseev.2000@mail.ru	$2b$10$kH/gCpbq/jXHewRgCd244uJvgvPpCm2fpf6dtamUGmTzpET/lt2Xu	2025-10-11 10:26:34.216	2025-10-11 10:26:34.235	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjU4MCwibG9naW4iOiJhc2VlZXYiLCJpYXQiOjE3NjAxNzgzOTQsImV4cCI6MTc2MDc4MzE5NH0.8xGJFRPctGy_A8XpWmsxltvMRtdTBwIjurkHs1CwpwA	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	f
-183	LevinaTK	Tanya472003@gmail.com	$2b$10$FCngGOMBdEeIBQ4BNy.pI.c1oxkaJXqcuKwaX6GKytDknkglBR/8.	2025-10-07 07:58:55.405	2025-10-08 13:23:20.272	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE4MywiaWF0IjoxNzU5OTI5ODAwLCJleHAiOjE3NjA1MzQ2MDB9.4yLJpfvCBhCU9MVGr_FaKS0CBEZj2fCgu94W0c28Mk4	t	f	\N	Татьяна Левина	Луганск			+79591823081	@Levinatk	https://vk.com/levinatk		Более 6 лет	\N	f	f	f	\N	\N	1	offline	\N	\N	f
-150	SapunA	natalasapunkova112@gmail.com	$2b$10$ED5pxgUhHaY2IV39jMOLIe6Hf1R5tpxaZyvMSu6/FzNATZOE9e6S2	2025-10-06 08:11:05.51	2025-10-06 08:11:35.259	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE1MCwibG9naW4iOiJTYXB1bkEiLCJpYXQiOjE3NTk3MzgyNjUsImV4cCI6MTc2MDM0MzA2NX0.KY-3mFaNGt22-esy7JOXowOfF0sA5Wig7a6aNrgjerw	t	f	\N	Наталья Сапункова	Барнаул			89130995143					\N	f	f	f	\N	\N	1	offline	\N	\N	f
-316	VikiKuzmina95	yagodckaviktoria@yandex.ru	$2b$10$6XqA96Iv2Z.1.gzGI6i43.PiQtuZ7u2K3kjFswRVpbLbmgOZx.Oem	2025-10-10 10:32:51.944	2025-10-10 10:33:18.375	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMxNiwibG9naW4iOiJWaWtpS3V6bWluYTk1IiwiaWF0IjoxNzYwMDkyMzcxLCJleHAiOjE3NjA2OTcxNzF9.CVQC0A-gw4Moh3jz391JmSPzW3ImiYE49db4-JEESjc	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	f
-349	gelmanmax	gelmanmax@gmail.com	$2b$10$E8uo5SeEgdD.5RW4epno5Os256Rf2W15jr1nWaTuLVZLEY/9mzqaa	2025-10-10 12:35:25.744	2025-10-10 12:35:25.772	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjM0OSwibG9naW4iOiJnZWxtYW5tYXgiLCJpYXQiOjE3NjAwOTk3MjUsImV4cCI6MTc2MDcwNDUyNX0.1eCrtkIWnXN884NuAku4D9P3p_JvBUdJxjjtrxLrNrI	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	f
-415	Agata.K	kostyukovaagata@mail.ru	$2b$10$RsvFUqozAsvhoLm7Lfk02.dcqAUghZZ7t3UKd0c3gcaxXWvwz7DRq	2025-10-10 15:30:44.793	2025-10-10 15:32:03.737	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQxNSwibG9naW4iOiJBZ2F0YS5LIiwiaWF0IjoxNzYwMTEwMjQ0LCJleHAiOjE3NjA3MTUwNDR9.T16bjbR05LF3zD_WbdOvt_jXgxqWbQjHak22RN0w8aY	t	f	1760110304013-402406214.jpeg	Агата Костюкова	Витебск								1760110323692-341318632.png	f	f	f	\N	\N	1	offline	\N	\N	f
-382	shpolinart	shpolinart@yandex.kz	$2b$10$2LaXvmMe8NK7PQYtoSi6b.ZvVZgI4yslckEY/tM61a07GdhB2xmT.	2025-10-10 13:03:09.922	2025-10-10 13:03:09.94	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjM4MiwibG9naW4iOiJzaHBvbGluYXJ0IiwiaWF0IjoxNzYwMTAxMzg5LCJleHAiOjE3NjA3MDYxODl9.ml1u5F0fSM0NDWd7XmRh8QMvMsqGD5gjnyH0bgyHypA	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	f
-250	ktleilaxu	ohmudak@gmail.com	$2b$10$8C5ltz.Z0XpO2r4XN8bpeOuaUgjs9bgppWHx/U/hrjbPll.k22vbm	2025-10-08 10:10:03.399	2025-10-08 10:10:03.456	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI1MCwibG9naW4iOiJrdGxlaWxheHUiLCJpYXQiOjE3NTk5MTgyMDMsImV4cCI6MTc2MDUyMzAwM30.QnYDa1ubEBr1sgHokA7xd0ipPdSn6x309dPJJ6YvwuI	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	f
-448	Shekvera	vera.shek.05@bk.ru	$2b$10$aB4PHqD2wj3nYVRfvWWMPOu6S6FCAu8yrYKdAQ6LhtW4jFc./5DBO	2025-10-10 16:36:53.21	2025-10-10 16:36:53.231	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQ0OCwibG9naW4iOiJTaGVrdmVyYSIsImlhdCI6MTc2MDExNDIxMywiZXhwIjoxNzYwNzE5MDEzfQ.G49cxVWERpl8psNpIxyDNU4fhcvjF6ICqCQWNnMXE2c	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	f
-547	Miron	tatanasapel232@gmail.com	$2b$10$HfEgMjXaVBX5Aj78pg4BPes9E0u1wE2KG3WNTWVyuFadnEdEl3hRu	2025-10-11 08:23:03.952	2025-10-11 08:25:00.533	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjU0NywibG9naW4iOiJNaXJvbiIsImlhdCI6MTc2MDE3MDk4NCwiZXhwIjoxNzYwNzc1Nzg0fQ.jsOUIVxydmVrr5OOLNKUqU3xhmasOrT4IWHuGWraYrE	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	f
-481	problesk	probleskagency@gmail.com	$2b$10$2dWoTDuE7heA2iP3q6Zd9OGIqSOsQ.jDSF4N0HrDGpUWNap/FPvyG	2025-10-10 17:20:34.34	2025-10-10 17:20:34.385	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQ4MSwibG9naW4iOiJwcm9ibGVzayIsImlhdCI6MTc2MDExNjgzNCwiZXhwIjoxNzYwNzIxNjM0fQ.mhSEDdfrT9IITr_Uzp1CE9efZNvf7Wu0XQmCkDLNz0g	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	f
-217	Safronov Artem	safronovwork0@gmail.com	$2b$10$as6RrUGr5RYGGGIgxfz8/eilsJylB/vD2nGQ5hrJp/s4uKxkaGO1W	2025-10-07 13:04:41.617	2025-10-13 15:04:56.45	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIxNywiaWF0IjoxNzYwMzY3ODk2LCJleHAiOjE3NjA5NzI2OTZ9.lEeo9Iiy94eSyCRCWDKmigY0jDZW6N5sztlQpd33ZEs	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	3	online	2026-01-05 13:04:23.336	2025-10-07 13:04:23.336	f
-646	WorkerFullStack	kay.li@internet.ru	$2b$10$ji8GLt9hRKq.ZS1ElX06UOaibO59OQbWrHzl1uEjyYTeKDi.DpvP.	2025-10-12 12:21:14.993	2025-10-12 12:23:31.578	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjY0NiwibG9naW4iOiJXb3JrZXJGdWxsU3RhY2siLCJpYXQiOjE3NjAyNzE4MTEsImV4cCI6MTc2MDg3NjYxMX0.IEgRBwK6DnXt3wUQ3IpaJgrndnidwTUTUQZaxvPXsAE	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	f
-613	89505234844	angel.bestaeva@yandex.ru	$2b$10$ZQZkel8RtcY8DarEzmm0SOcxVSXEo4pvx/ONPt3QhMaU67ENSzj/m	2025-10-11 10:46:33.67	2025-10-11 10:51:01.789	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYxMywibG9naW4iOiI4OTUwNTIzNDg0NCIsImlhdCI6MTc2MDE3OTU5MywiZXhwIjoxNzYwNzg0MzkzfQ.wwhQOZgv1fmoIEh7P9d8JgPZLYGTPLiKoCIOJVcKQ24	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	f
-514	Оксана	oksana71.11@mail.ru	$2b$10$bEMm0Ct6EfcgAJvGE4NNe.MJtCgGc/6cHVluw7A61pzyTfIbuT3Hi	2025-10-11 08:11:08.886	2025-10-11 08:35:25.194	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjUxNCwiaWF0IjoxNzYwMTcxNzI1LCJleHAiOjE3NjA3NzY1MjV9.sXp4t1eKUXh_qL0qz8tmpEs5aLf5sqDBE8lB3M9XdCc	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	f
-283	Elizaveta	elizaveta-s04@mail.ru	$2b$10$uDXcjI2Jg5TzOSB1.RJgt.vH0eATZBjaWH2dyQ4TG0QxmpCh0MzDu	2025-10-09 11:31:04.91	2025-10-13 10:01:37.759	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI4MywiaWF0IjoxNzYwMzQ5Njk3LCJleHAiOjE3NjA5NTQ0OTd9.7Sfa_kuN8lVbWg4bIppAzYlIttQbEN_P1fp_5G0L9xk	t	f	1760016178701-917634195.jpg	Елизавета	Москва	Комплексная и масштабируемая система «под ключ»,\nкоторая регулярно приносит заявки\n\n>2 лет в инфобизе, делала запуски от 1 до 7 млн.\nрублей в различных нишах \n\nЭксперты заработали со мной \n\nсуммарно 14+ млн. рублей\n	Middle		@slavicghostgirl			1-3 года	1760291845726-475807369.avif	f	f	f	\N	\N	1	online	\N	\N	f
-679	NogameNolife	nik.maz.bel@gmail.com	$2b$10$Vwf5P8BiCn//PGpzzrgiwOZhTtyUjeF91NY0dob5Tk8GwDUR1Q2Yi	2025-10-12 12:31:33.853	2025-10-12 18:34:47.232	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjY3OSwiaWF0IjoxNzYwMjk0MDg3LCJleHAiOjE3NjA4OTg4ODd9.AN2BoKniZt3jbB0OsBtvsNremKt95OyR6hAX9DUmJ3I	t	f	1760272417696-937602194.jpg	Никита Мазиков	Омск	Занимаюсь ведением проектов по следующим направлениям: \n- SMM\\Сontent менеджмент (работа с полноценным ведением соц сетей, блогов, форумов и иных каналов коммуникаций);\n- Создание SEO оптимизированного контента под внутренние и внешние блоги; \n- Подготовка материалов под выставки и иные оффлайн мероприятия (Лендинги, печатные материалы, стенды, фоновые видеоролики); \n- Менеджмент проектов в области разработки ПО (игровые проекты, геймификация, приложения).\n- СRM менеджмент (рассылки, заведение бонусов и данных программы лояльности, кросс промо).\n\n\nРаботал в нишах: \n- Igaming\\Betting;\n- Сrypto\\Fintech;\n- Ecommerce; \n- Gaming\\Киберспорт.\n\nБыл опыт работы с Регионами: \n- Mena; \n- Latam; \n- Юговосточная азия; \n- Индия, Пакистан, Бангладеш; \n- Страны Ближнего востока; \n- Франкоязычная Африка; \n- CНГ и Восточная Европа.\n\nЗнание языков: \nРусский - Родной; \nАнглийский - C1;\nИтальянский - C1; \nПольский - А2; \n\n	Senior	+79835250775	@Nogameses			Более 6 лет	\N	f	f	f	\N	\N	1	offline	\N	\N	f
-713	Miranqa	miranqaajuga@gmail.com	$2b$10$fh9aGJAnuzznnwlnfwaQD.eyCNAjdff.6Q2nl9pIYc5MZhkyXHoNS	2025-10-14 04:38:54.9	2025-10-14 04:42:27.989	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjcxMywibG9naW4iOiJNaXJhbnFhIiwiaWF0IjoxNzYwNDE2NzM1LCJleHAiOjE3NjEwMjE1MzV9.I__UYDqzTM_msNGkmShfjT7DPoA6cKEs1FdVKG2qHrE	t	f	\N	Zhanna	Gomel			+375296010161	@ingaseotext	@miranqa7		Более 6 лет	\N	f	f	f	\N	\N	1	offline	\N	\N	f
-746	ellielka	kis892727272@gmail.com	$2b$10$D9EoYniUIpwKvuxT04PL3eiJcpzqdE6p3aDrFqOkXY8mw3ighm7MK	2025-10-14 07:30:46.338	2025-10-14 07:30:46.598	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjc0NiwibG9naW4iOiJlbGxpZWxrYSIsImlhdCI6MTc2MDQyNzA0NiwiZXhwIjoxNzYxMDMxODQ2fQ.MMu-gCW8JweO9NcmuH4cDmrOSQvtB6jpBr1qCsdinic	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	f
-712	Ellizyz	zyskina_liza2505@mail.ru	$2b$10$i0rK3oKg0KGmLwlFGD36oeaDu8go5F1HI20FYFHrOJ7bAgJV87rbi	2025-10-13 10:52:15.289	2025-10-13 11:29:18.944	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjcxMiwibG9naW4iOiJFbGxpenl6IiwiaWF0IjoxNzYwMzU0OTU4LCJleHAiOjE3NjA5NTk3NTh9.v8ZQmWXqDRe-w6Xm9lfKLPJL_-tZsjgXSYIvqpPZouk	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	f
+COPY public."User" (id, login, email, password, "createdAt", "updatedAt", "refreshToken", "isEmailVerified", "isResetVerified", "logoFileName", "fullName", city, about, level, "phoneNumber", telegram, vk, website, experience, "coverFileName", "joinAuthorsNotifications", "weeklySummaryNotifications", "rewardNotifications", "lastLoginUpdate", "blogId", "subscriptionId", status, "subscriptionEndAt", "subscriptionStartAt", "banReason", "isBanned") FROM stdin;
+84	Younni	yummy022007@gmail.com	$2b$10$zMvCMGjLn4cL44uekjb7zOFhsR9k0H9Zasp/I8bHlaJZyFqNcJjFS	2025-10-04 10:02:40.578	2025-10-04 10:03:46.52	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjg0LCJsb2dpbiI6IllvdW5uaSIsImlhdCI6MTc1OTU3MjE2MCwiZXhwIjoxNzYwMTc2OTYwfQ.1qgQsQe05BPCOp5EWreMBRbHqeC8EpQHwzageENJn4o	t	f	\N	Ион Хиким					@younni			1-3 года	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+117	sdeverley	bristolllf@gmail.com	$2b$10$p80GtBsQMV7XKdkdlCReteVGM4RdF1fMi5mLCrGMshAcmHK/VY0AG	2025-10-06 08:06:57.422	2025-10-06 08:12:33.311	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjExNywibG9naW4iOiJzZGV2ZXJsZXkiLCJpYXQiOjE3NTk3MzgwMTcsImV4cCI6MTc2MDM0MjgxN30._CkMaeJg1lDknzt9OJ_C-UwLjCQz8IyhOHYdP0qFcAA	t	f	\N	Svetlana Kopaneva	Нижний Новгород	В настоящее время я работаю в Т-Банке стажером в отделе социальных сетей на позиции SMM-менеджера. Моя стажировка заканчивается 17 декабря, и, к сожалению, продолжить работу в компании не получится, так как в штате нет открытых вакансий на позицию SMM-менеджера. Поэтому я ищу команду, где смогу применить полученный опыт и продолжить расти.\n\nВ Т-Банке я создаю контент для Telegram-канала, ВКонтакте и Пульс: пишу тексты о вакансиях и карьерных возможностях, принимаю участие в создании и запуске спецпроекта, готовлю ТЗ для дизайнеров, составляю контент-план и работаю с аналитикой в LiveDune. Благодаря этому я научилась воспринимать соцсети не как набор постов, а как инструмент, который помогает бизнесу и команде находить своих людей.\n\nСейчас я параллельно прохожу профессиональную переподготовку по специальности «Маркетолог», чтобы глубже изучить стратегическое планирование и современные методы продвижения.\n\nХочу быть частью команды, где можно экспериментировать с форматами, искать креативные решения и видеть, как результат моей работы напрямую влияет на отклик аудитории.	Junior	9867264131	sdeverley			Менее года	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+118	eskoej	dkasanova449@gmail.com	$2b$10$UedmuecQh4ns4XHWyiHE2u5WsmmnhAH2ulTTlTwGNEEI.8rvnePie	2025-10-06 08:09:23.149	2025-10-06 08:40:13.666	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjExOCwiaWF0IjoxNzU5NzQwMDEzLCJleHAiOjE3NjAzNDQ4MTN9.99zh_obtjAFdbLJPNhAWTuqU1RpS-wsAeUa5_PhNIiY	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+580	aseeev	ilya.aseev.2000@mail.ru	$2b$10$kH/gCpbq/jXHewRgCd244uJvgvPpCm2fpf6dtamUGmTzpET/lt2Xu	2025-10-11 10:26:34.216	2025-10-11 10:26:34.235	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjU4MCwibG9naW4iOiJhc2VlZXYiLCJpYXQiOjE3NjAxNzgzOTQsImV4cCI6MTc2MDc4MzE5NH0.8xGJFRPctGy_A8XpWmsxltvMRtdTBwIjurkHs1CwpwA	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+150	SapunA	natalasapunkova112@gmail.com	$2b$10$ED5pxgUhHaY2IV39jMOLIe6Hf1R5tpxaZyvMSu6/FzNATZOE9e6S2	2025-10-06 08:11:05.51	2025-10-06 08:11:35.259	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE1MCwibG9naW4iOiJTYXB1bkEiLCJpYXQiOjE3NTk3MzgyNjUsImV4cCI6MTc2MDM0MzA2NX0.KY-3mFaNGt22-esy7JOXowOfF0sA5Wig7a6aNrgjerw	t	f	\N	Наталья Сапункова	Барнаул			89130995143					\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+316	VikiKuzmina95	yagodckaviktoria@yandex.ru	$2b$10$6XqA96Iv2Z.1.gzGI6i43.PiQtuZ7u2K3kjFswRVpbLbmgOZx.Oem	2025-10-10 10:32:51.944	2025-10-10 10:33:18.375	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMxNiwibG9naW4iOiJWaWtpS3V6bWluYTk1IiwiaWF0IjoxNzYwMDkyMzcxLCJleHAiOjE3NjA2OTcxNzF9.CVQC0A-gw4Moh3jz391JmSPzW3ImiYE49db4-JEESjc	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+349	gelmanmax	gelmanmax@gmail.com	$2b$10$E8uo5SeEgdD.5RW4epno5Os256Rf2W15jr1nWaTuLVZLEY/9mzqaa	2025-10-10 12:35:25.744	2025-10-10 12:35:25.772	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjM0OSwibG9naW4iOiJnZWxtYW5tYXgiLCJpYXQiOjE3NjAwOTk3MjUsImV4cCI6MTc2MDcwNDUyNX0.1eCrtkIWnXN884NuAku4D9P3p_JvBUdJxjjtrxLrNrI	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+415	Agata.K	kostyukovaagata@mail.ru	$2b$10$RsvFUqozAsvhoLm7Lfk02.dcqAUghZZ7t3UKd0c3gcaxXWvwz7DRq	2025-10-10 15:30:44.793	2025-10-10 15:32:03.737	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQxNSwibG9naW4iOiJBZ2F0YS5LIiwiaWF0IjoxNzYwMTEwMjQ0LCJleHAiOjE3NjA3MTUwNDR9.T16bjbR05LF3zD_WbdOvt_jXgxqWbQjHak22RN0w8aY	t	f	1760110304013-402406214.jpeg	Агата Костюкова	Витебск								1760110323692-341318632.png	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+382	shpolinart	shpolinart@yandex.kz	$2b$10$2LaXvmMe8NK7PQYtoSi6b.ZvVZgI4yslckEY/tM61a07GdhB2xmT.	2025-10-10 13:03:09.922	2025-10-10 13:03:09.94	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjM4MiwibG9naW4iOiJzaHBvbGluYXJ0IiwiaWF0IjoxNzYwMTAxMzg5LCJleHAiOjE3NjA3MDYxODl9.ml1u5F0fSM0NDWd7XmRh8QMvMsqGD5gjnyH0bgyHypA	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+250	ktleilaxu	ohmudak@gmail.com	$2b$10$8C5ltz.Z0XpO2r4XN8bpeOuaUgjs9bgppWHx/U/hrjbPll.k22vbm	2025-10-08 10:10:03.399	2025-10-08 10:10:03.456	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI1MCwibG9naW4iOiJrdGxlaWxheHUiLCJpYXQiOjE3NTk5MTgyMDMsImV4cCI6MTc2MDUyMzAwM30.QnYDa1ubEBr1sgHokA7xd0ipPdSn6x309dPJJ6YvwuI	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+448	Shekvera	vera.shek.05@bk.ru	$2b$10$aB4PHqD2wj3nYVRfvWWMPOu6S6FCAu8yrYKdAQ6LhtW4jFc./5DBO	2025-10-10 16:36:53.21	2025-10-10 16:36:53.231	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQ0OCwibG9naW4iOiJTaGVrdmVyYSIsImlhdCI6MTc2MDExNDIxMywiZXhwIjoxNzYwNzE5MDEzfQ.G49cxVWERpl8psNpIxyDNU4fhcvjF6ICqCQWNnMXE2c	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+547	Miron	tatanasapel232@gmail.com	$2b$10$HfEgMjXaVBX5Aj78pg4BPes9E0u1wE2KG3WNTWVyuFadnEdEl3hRu	2025-10-11 08:23:03.952	2025-10-11 08:25:00.533	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjU0NywibG9naW4iOiJNaXJvbiIsImlhdCI6MTc2MDE3MDk4NCwiZXhwIjoxNzYwNzc1Nzg0fQ.jsOUIVxydmVrr5OOLNKUqU3xhmasOrT4IWHuGWraYrE	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+481	problesk	probleskagency@gmail.com	$2b$10$2dWoTDuE7heA2iP3q6Zd9OGIqSOsQ.jDSF4N0HrDGpUWNap/FPvyG	2025-10-10 17:20:34.34	2025-10-10 17:20:34.385	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQ4MSwibG9naW4iOiJwcm9ibGVzayIsImlhdCI6MTc2MDExNjgzNCwiZXhwIjoxNzYwNzIxNjM0fQ.mhSEDdfrT9IITr_Uzp1CE9efZNvf7Wu0XQmCkDLNz0g	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+646	WorkerFullStack	kay.li@internet.ru	$2b$10$ji8GLt9hRKq.ZS1ElX06UOaibO59OQbWrHzl1uEjyYTeKDi.DpvP.	2025-10-12 12:21:14.993	2025-10-12 12:23:31.578	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjY0NiwibG9naW4iOiJXb3JrZXJGdWxsU3RhY2siLCJpYXQiOjE3NjAyNzE4MTEsImV4cCI6MTc2MDg3NjYxMX0.IEgRBwK6DnXt3wUQ3IpaJgrndnidwTUTUQZaxvPXsAE	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+18	epica	alexeev230704@gmail.com	$2b$10$QbyOuNYkwlDTXmJtxRGiF.g/TtbqbDKi1Yalg5O7UCu.zGNurrB6S	2025-09-17 10:51:56.966	2025-10-16 11:26:24.843	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE4LCJpYXQiOjE3NjA2MTM5ODQsImV4cCI6MTc2MTIxODc4NH0.nWIDoczvtlzVE7Qq1nvlJX2vCKd-Ur3blmHOQ4mJ0Jg	t	f	1758134936838-389670038.png	Александр Алексеев	Москва							3-6 лет	1758106460249-127038363.png	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+613	89505234844	angel.bestaeva@yandex.ru	$2b$10$ZQZkel8RtcY8DarEzmm0SOcxVSXEo4pvx/ONPt3QhMaU67ENSzj/m	2025-10-11 10:46:33.67	2025-10-11 10:51:01.789	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYxMywibG9naW4iOiI4OTUwNTIzNDg0NCIsImlhdCI6MTc2MDE3OTU5MywiZXhwIjoxNzYwNzg0MzkzfQ.wwhQOZgv1fmoIEh7P9d8JgPZLYGTPLiKoCIOJVcKQ24	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+514	Оксана	oksana71.11@mail.ru	$2b$10$bEMm0Ct6EfcgAJvGE4NNe.MJtCgGc/6cHVluw7A61pzyTfIbuT3Hi	2025-10-11 08:11:08.886	2025-10-11 08:35:25.194	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjUxNCwiaWF0IjoxNzYwMTcxNzI1LCJleHAiOjE3NjA3NzY1MjV9.sXp4t1eKUXh_qL0qz8tmpEs5aLf5sqDBE8lB3M9XdCc	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+679	NogameNolife	nik.maz.bel@gmail.com	$2b$10$Vwf5P8BiCn//PGpzzrgiwOZhTtyUjeF91NY0dob5Tk8GwDUR1Q2Yi	2025-10-12 12:31:33.853	2025-10-12 18:34:47.232	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjY3OSwiaWF0IjoxNzYwMjk0MDg3LCJleHAiOjE3NjA4OTg4ODd9.AN2BoKniZt3jbB0OsBtvsNremKt95OyR6hAX9DUmJ3I	t	f	1760272417696-937602194.jpg	Никита Мазиков	Омск	Занимаюсь ведением проектов по следующим направлениям: \n- SMM\\Сontent менеджмент (работа с полноценным ведением соц сетей, блогов, форумов и иных каналов коммуникаций);\n- Создание SEO оптимизированного контента под внутренние и внешние блоги; \n- Подготовка материалов под выставки и иные оффлайн мероприятия (Лендинги, печатные материалы, стенды, фоновые видеоролики); \n- Менеджмент проектов в области разработки ПО (игровые проекты, геймификация, приложения).\n- СRM менеджмент (рассылки, заведение бонусов и данных программы лояльности, кросс промо).\n\n\nРаботал в нишах: \n- Igaming\\Betting;\n- Сrypto\\Fintech;\n- Ecommerce; \n- Gaming\\Киберспорт.\n\nБыл опыт работы с Регионами: \n- Mena; \n- Latam; \n- Юговосточная азия; \n- Индия, Пакистан, Бангладеш; \n- Страны Ближнего востока; \n- Франкоязычная Африка; \n- CНГ и Восточная Европа.\n\nЗнание языков: \nРусский - Родной; \nАнглийский - C1;\nИтальянский - C1; \nПольский - А2; \n\n	Senior	+79835250775	@Nogameses			Более 6 лет	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+713	Miranqa	miranqaajuga@gmail.com	$2b$10$fh9aGJAnuzznnwlnfwaQD.eyCNAjdff.6Q2nl9pIYc5MZhkyXHoNS	2025-10-14 04:38:54.9	2025-10-14 04:42:27.989	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjcxMywibG9naW4iOiJNaXJhbnFhIiwiaWF0IjoxNzYwNDE2NzM1LCJleHAiOjE3NjEwMjE1MzV9.I__UYDqzTM_msNGkmShfjT7DPoA6cKEs1FdVKG2qHrE	t	f	\N	Zhanna	Gomel			+375296010161	@ingaseotext	@miranqa7		Более 6 лет	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+746	ellielka	kis892727272@gmail.com	$2b$10$D9EoYniUIpwKvuxT04PL3eiJcpzqdE6p3aDrFqOkXY8mw3ighm7MK	2025-10-14 07:30:46.338	2025-10-14 07:30:46.598	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjc0NiwibG9naW4iOiJlbGxpZWxrYSIsImlhdCI6MTc2MDQyNzA0NiwiZXhwIjoxNzYxMDMxODQ2fQ.MMu-gCW8JweO9NcmuH4cDmrOSQvtB6jpBr1qCsdinic	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+712	Ellizyz	zyskina_liza2505@mail.ru	$2b$10$i0rK3oKg0KGmLwlFGD36oeaDu8go5F1HI20FYFHrOJ7bAgJV87rbi	2025-10-13 10:52:15.289	2025-10-13 11:29:18.944	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjcxMiwibG9naW4iOiJFbGxpenl6IiwiaWF0IjoxNzYwMzU0OTU4LCJleHAiOjE3NjA5NTk3NTh9.v8ZQmWXqDRe-w6Xm9lfKLPJL_-tZsjgXSYIvqpPZouk	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+217	Safronov Artem	safronovwork0@gmail.com	$2b$10$as6RrUGr5RYGGGIgxfz8/eilsJylB/vD2nGQ5hrJp/s4uKxkaGO1W	2025-10-07 13:04:41.617	2025-10-16 10:30:53.062	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIxNywiaWF0IjoxNzYwNjEwNjUzLCJleHAiOjE3NjEyMTU0NTN9.EIF_v9CwLqbIheJ8eokHQMZzwTcJIYS2hiDJfHwuafM	t	f	1760445853800-648934994.jpg	Артём			Middle					3-6 лет	\N	f	f	f	\N	\N	3	offline	2026-01-05 13:04:23.336	2025-10-07 13:04:23.336	\N	f
+812	Constanto	marinakury00@gmail.com	$2b$10$Y3xrLIq15i8/J70KZe6tbuWWQazDBsLBbOlcDPRS/6K18roIXo/0q	2025-10-15 14:31:11.807	2025-10-16 10:36:42.237	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjgxMiwibG9naW4iOiJDb25zdGFudG8iLCJpYXQiOjE3NjA2MTEwMDIsImV4cCI6MTc2MTIxNTgwMn0.xgy721BmxgBB7y8plO3loBAC-4-fxHWhYEHSHq5cBy8	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+779	Yuliyaaa_01_2001	Sazhina-2001@list.ru	$2b$10$CZ8zGBnr5V4sHHe9vaHd/u7iHCgLyt3r14lPSMf0YvOTS9vTwn5j.	2025-10-14 21:22:24.321	2025-10-14 21:22:24.362	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjc3OSwibG9naW4iOiJZdWxpeWFhYV8wMV8yMDAxIiwiaWF0IjoxNzYwNDc2OTQ0LCJleHAiOjE3NjEwODE3NDR9.Sl1agFMF9d8F32BCv1U4N_PPW_7ro1EreaKpLr9Ov6c	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+283	Elizaveta	elizaveta-s04@mail.ru	$2b$10$uDXcjI2Jg5TzOSB1.RJgt.vH0eATZBjaWH2dyQ4TG0QxmpCh0MzDu	2025-10-09 11:31:04.91	2025-10-16 10:41:06.008	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI4MywibG9naW4iOiJFbGl6YXZldGEiLCJpYXQiOjE3NjA2MTEyNjUsImV4cCI6MTc2MTIxNjA2NX0.V-HM761Tkf0UVVUEPr3uRh8OxZWfPhCLEeZ_stY7kIU	t	f	1760016178701-917634195.jpg	Елизавета	Москва	Комплексная и масштабируемая система «под ключ»,\nкоторая регулярно приносит заявки\n\n>2 лет в инфобизе, делала запуски от 1 до 7 млн.\nрублей в различных нишах \n\nЭксперты заработали со мной \n\nсуммарно 14+ млн. рублей\n	Middle		@slavicghostgirl			1-3 года	1760291845726-475807369.avif	f	f	f	\N	\N	1	online	\N	\N	\N	f
+183	LevinaTK	Tanya472003@gmail.com	$2b$10$FCngGOMBdEeIBQ4BNy.pI.c1oxkaJXqcuKwaX6GKytDknkglBR/8.	2025-10-07 07:58:55.405	2025-10-15 22:30:35.875	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE4MywiaWF0IjoxNzYwNTY3MzM4LCJleHAiOjE3NjExNzIxMzh9.MptpJSzKP7cYXpOb3ukBvbeR61ngTbJqd7aKRUslfGA	t	f	\N	Татьяна Левина	Луганск	Занимаюсь СММ с 2016 года. Освоила ряд компетенций:\n- аналитика (анализирую ЦА, конкурентов, разрабатываю стратегию по офлайн и онлайн способам продвижения)\n- таргетированная реклама \n- работа с визуалом (создание фирменного стиля, визуального сопровождения постов и монтаж роликов)\n- копирайтинг\n\nДополнительно:\nОкончила магистратуру по направлению "Юриспруденция", в данный момент являюсь куратором инновационного трека федеральной программы "Я в деле" в ЛНР.		+79591823081	@Levinatk	https://vk.com/levinatk		Более 6 лет	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
 \.
 
 
@@ -657,6 +658,7 @@ COPY public."_BlogLikes" ("A", "B") FROM stdin;
 
 COPY public."_BlogViews" ("A", "B") FROM stdin;
 45	18
+45	183
 \.
 
 
@@ -679,6 +681,16 @@ COPY public."_ProjectLikes" ("A", "B") FROM stdin;
 358	18
 391	18
 424	18
+523	217
+125	217
+457	217
+225	217
+258	217
+291	217
+325	217
+358	217
+391	217
+490	217
 \.
 
 
@@ -688,15 +700,11 @@ COPY public."_ProjectLikes" ("A", "B") FROM stdin;
 
 COPY public."_ProjectViews" ("A", "B") FROM stdin;
 125	18
-92	18
 225	183
 225	18
-92	183
-92	283
 125	283
 291	283
 258	283
-92	613
 325	283
 358	283
 391	283
@@ -710,6 +718,31 @@ COPY public."_ProjectViews" ("A", "B") FROM stdin;
 424	18
 457	712
 258	712
+523	217
+125	217
+457	217
+225	217
+258	217
+291	217
+325	217
+358	217
+391	217
+424	217
+490	217
+125	779
+258	779
+358	183
+258	183
+291	183
+457	183
+490	183
+325	183
+523	183
+125	183
+457	283
+225	812
+258	812
+457	812
 \.
 
 
@@ -723,8 +756,6 @@ COPY public."_User Specializations" ("A", "B") FROM stdin;
 3	18
 5	18
 1	117
-1	183
-5	183
 1	415
 1	679
 3	679
@@ -733,6 +764,9 @@ COPY public."_User Specializations" ("A", "B") FROM stdin;
 3	283
 1	713
 3	713
+1	183
+5	183
+1	217
 \.
 
 
@@ -765,16 +799,17 @@ COPY public."_UserStarred" ("A", "B") FROM stdin;
 --
 
 COPY public.projects (id, name, description, "photoName", "firstLink", "secondLink", "categoryId", "userId", "specializationId", "updatedAt", "createdAt", "contentHash", "contentPath", "contentSize") FROM stdin;
-92	Потеряй все	Как потерять все	1758708049758-338906084.jpg	\N	\N	18	51	3	2025-09-24 10:00:50.564	2025-09-24 10:00:50.424	494046dc23771c6e39cd1be483378f22838e3a4933ff0ab860c573fa9f0c7548	project_92.json	48395
 125	Grinar Ведение соц. сетей	Проект посвящен развитию бренда и повышению его узнаваемости. За полтора месяца мы создали брендбук, включающий логотип, цвета, шрифты и правила оформления документации и коммуникаций. Результат — единый стиль и чёткое позиционирование бренда, повысившие привлекательность проекта для аудитории.	1759771844172-93298012.png	\N	\N	8	18	1	2025-10-06 17:30:44.73	2025-09-24 12:02:40.517	ded65c4e88c6ed457d40c31d105b0b21d1e553fc89bb6024fdc7725769805445	project_125.json	2908412
-457	Telegram Ads: 57 заявок на Оптовый Пошив Одежды 	Что было\r\n\r\nСайт у которого средняя конверсия с яндекс директ 3% и нецелевые лиды. Клиент пришел с запросом найти рабочие связки с Telegram и полностью перенести весь бюджет.\r\nВ начале работы:\r\n\r\nРешили вести рекламу на сайт, так как других посадочных страниц не было. Цена клика была хорошая, но конверсия сайта 3%, тем самым цена заявки была 1760 рублей. Но я понимала, что мы привлекаем максимально целевую аудиторию, но сайт не конвертит.	1760294721226-853473416.png	\N	\N	7	283	2	2025-10-12 18:45:21.457	2025-10-12 18:45:21.436	1227dba30f3f0811e291678e5c414b727c670df54f73744641305f70b05dda71	project_457.json	3760999
 225	Таргет / Магазин гаджетов и игрушек	Star’s case — магазин стильных и креативных аксессуаров для мобильных телефонов и гаджетов.\r\n\r\nВ ассортименте представлены чехлы, защитные стекла, Power Bank, наушники, Bluetooth-колонки, часы, а также множество оригинальных подарков и товаров для настроения.\r\n\r\nМагазин ориентируется на аудиторию, которая ценит дизайн, функциональность и разумные цены. Продажи осуществляются онлайн с доставкой по всей России.\r\n\r\nЦели проекта:\r\nОсновная цель рекламной кампании — увеличение конверсий на сайте (оформление заказов через интернет-магазин) и собрать клиентов из области (исключив сам Луганск).\r\n\r\nДополнительные цели:\r\nПовысить узнаваемость бренда среди целевой аудитории;\r\nПривлечь трафик на сайт из ВКонтакте;\r\nПротестировать гипотезы по форматам креативов и аудиториям для дальнейшей оптимизации рекламы;\r\nСформировать устойчивый интерес к бренду и увеличить долю повторных заказов.\r\n	1759922726868-3250528.png	\N	\N	7	183	2	2025-10-08 11:25:27.151	2025-10-08 11:25:27.125	c10427ad362a227f63344cfaf71f98d6f350a25d9586860fcf1265b2d3e51490	project_225.json	6436334
 258	Онлайн проект по фрилансу	Комплексная и масштабируемая система «под ключ»,\r\nкоторая регулярно приносит заявки	1760016720090-660160336.png	\N	\N	9	283	5	2025-10-09 13:32:00.362	2025-10-09 13:32:00.332	11e0ce3914755dda925f9f516e5ae0c74ef593c328deb32e257d21dd41b51864	project_258.json	4009124
 291	Запуск обучения по Wildberries на 7.3 млн ₽	Собрать сильный запуск с нуля и показать результат в деньгах и увеличить количество продаж, используя комплексный маркетинг	1760017884248-674378268.png	\N	\N	9	283	5	2025-10-09 13:51:24.681	2025-10-09 13:51:24.652	966f6050e5cbbb00bd0a112a8ff476f860fa28bcb254c228b29a53bc3f13c075	project_291.json	3189637
-325	Telegram Ads: +1471 подписчиков по 1,31€ для канала по крипте 	В телеграм-канале было довольно много косяков по упаковке канала, поэтому мы прописали рекомендации и обратную связь клиенту, он оперативно внес все правки и мы уже приступили к подготовке запуска. Сделали хорошее описание, поправили аватарку и основной закреп в канале. 	1760287600355-418198994.png	\N	\N	14	283	2	2025-10-12 16:46:40.404	2025-10-12 16:45:48.086	2787ff40d9d4236627d14fd9f702d5c92ffe31918b9b2e2193c1679d243d43b2	project_325.json	445606
-358	Telegram Ads: +698 подписчиков по 1,43€ для онлайн школы по ЕГЭ	Онлайн школа по подготовке к ЕГЭ/ОГЭ\r\n\r\nЧто было:\r\n3 разных телеграм-канала по подготовке к сдаче ЕГЭ, которые ведут 3 разных эксперта по предметам: математика/информатика; обществознание/история; химия/биология. Перед стартом рекламы, как обычно заполнили БРИФ, определили цель нашего сотрудничества и приступили к работе.\r\n\r\nТакже перед стартом мы прописали рекомендации по упаковке каналов на основе своего опыта, со всеми фишками и лайфхаками, поправили описания и закрепы в каналах	1760289025861-275048716.png	\N	\N	9	283	2	2025-10-12 17:10:26.106	2025-10-12 17:10:26.034	cddade04feeeb058293cb95eb482f3b4d98d4fe1efadd15b2a240473a73c8bca	project_358.json	1344582
 391	Telegram Ads. Психолог подписчики по 2,27 евро	Телеграм-канал с 200+ подписчиков, перед началом работы мы прописали список рекомендаций по упаковке, доработали описание, пост-закреп, название канала. Также изучили конкурентов, на основе этого дали рекомендации еще и по формату контента и приступили к работе.	1760290131638-221385847.png	\N	\N	8	283	2	2025-10-12 17:28:51.701	2025-10-12 17:28:51.685	72b3954122ea5a5abcb6bb9b42b94a1fcefd138b8314501754791bd1967ee8cc	project_391.json	239429
+325	Telegram Ads: +1471 подписчиков по 1,31€ для канала по крипте 	В телеграм-канале было довольно много косяков по упаковке канала, поэтому мы прописали рекомендации и обратную связь клиенту, он оперативно внес все правки и мы уже приступили к подготовке запуска. Сделали хорошее описание, поправили аватарку и основной закреп в канале. 	1760287600355-418198994.png	\N	\N	14	283	2	2025-10-16 10:42:35.723	2025-10-12 16:45:48.086	d635656424e085012e7658a1ba2d26ebb494da1277bbd96d057da84e778a5bda	project_325.json	445725
 424	Telegram Ads: +1 828 подписчика по 1,35€ для магазина Айфонов	Кейс по Telegram Ads: +1828 подписчика по 1,35€ для магазина Айфонов\r\nКратко результаты:\r\nВложено — 2461,96€ \r\nПривлечено — 1828 подписчика\r\nЦена подписчика — 1,35€\r\n\r\nЧтобы было:\r\n Есть хороший телеграм канал в который нужен целевой трафик.  \r\n\r\nВ начале работы:\r\nОтобрали 4 сегмента с клиентом:\r\nПрямые конкуренты \r\nСмежные каналы \r\nКаналы по запчастям для айфонов\r\nНовостные каналы по технике	1760291254670-103903622.png	\N	\N	7	283	2	2025-10-12 17:47:34.797	2025-10-12 17:46:25.49	74f1153e9101b6fd4e272045195659e5ea98a1646bb3ad60c4e36aa14499addc	project_424.json	1017283
+358	Telegram Ads: +698 подписчиков по 1,43€ для онлайн школы по ЕГЭ	Онлайн школа по подготовке к ЕГЭ/ОГЭ\r\n\r\nЧто было:\r\n3 разных телеграм-канала по подготовке к сдаче ЕГЭ, которые ведут 3 разных эксперта по предметам: математика/информатика; обществознание/история; химия/биология. Перед стартом рекламы, как обычно заполнили БРИФ, определили цель нашего сотрудничества и приступили к работе.\r\n\r\nТакже перед стартом мы прописали рекомендации по упаковке каналов на основе своего опыта, со всеми фишками и лайфхаками, поправили описания и закрепы в каналах	1760289025861-275048716.png	\N	\N	9	283	2	2025-10-16 10:42:07.886	2025-10-12 17:10:26.034	a23536d06e6ebf638298bb3acbc70b3fd5d3f95b0de780801013a328fbcabc92	project_358.json	1344527
+523	Привлечение клиентов в Детский Лагерь» через таргет ВКонтакте	Это открытый скейт-парк в центре Тулы, где дети и подростки катаются, посещают тренировки на скейтах, трюковых самокатах, роликах и трюковых велосипедах.\r\n\r\nРанее с этим клиентом мы полностью упаковали сообщество, построили все виджеты, добавили товары, разработали единый стиль соц сетей и проработали каждый раздел сообщества.\r\n\r\nБлагодаря этому навигация клиента становится легкой и удобной, а конверсия подписчика в лиде значительно выше.	1760447409846-81960647.png	\N	\N	9	217	2	2025-10-14 13:10:10.276	2025-10-14 13:10:10.251	822a681ff423e61853aa71145e2a26e3c8cc808c449372b4e64d9a21b3d678f6	project_523.json	10917168
+490	Клиенты для стоматологии» через таргет ВКонтакте	Как заработать стоматологии х10 на рекламных вложениях всего лишь за пол года благодаря Таргету? Рассказал о проблемах и результатах!	1760446045756-54754335.png	\N	\N	3	217	1	2025-10-16 09:08:49.749	2025-10-14 12:43:22.543	ab5d662da3e0936aea071493b5e4e06d682b5dcbc437f83120346ae937ed8c20	project_490.json	1885854
+457	Telegram Ads: 57 заявок на Оптовый Пошив Одежды 	Что было\r\n\r\nСайт у которого средняя конверсия с яндекс директ 3% и нецелевые лиды. Клиент пришел с запросом найти рабочие связки с Telegram и полностью перенести весь бюджет.\r\nВ начале работы:\r\n\r\nРешили вести рекламу на сайт, так как других посадочных страниц не было. Цена клика была хорошая, но конверсия сайта 3%, тем самым цена заявки была 1760 рублей. Но я понимала, что мы привлекаем максимально целевую аудиторию, но сайт не конвертит.	1760294721226-853473416.png	\N	\N	7	283	2	2025-10-16 10:41:36.571	2025-10-12 18:45:21.436	81a80840a3c80fe06a9ee4f53a006ea4336bd82ab1375230c007bf2f3ac849e0	project_457.json	3760997
 \.
 
 
@@ -824,14 +859,14 @@ SELECT pg_catalog.setval('public."Subscription_id_seq"', 3, true);
 -- Name: User_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."User_id_seq"', 778, true);
+SELECT pg_catalog.setval('public."User_id_seq"', 844, true);
 
 
 --
 -- Name: projects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.projects_id_seq', 489, true);
+SELECT pg_catalog.setval('public.projects_id_seq', 555, true);
 
 
 --
@@ -1307,6 +1342,7 @@ ALTER TABLE ONLY public.projects
 --
 
 REVOKE USAGE ON SCHEMA public FROM PUBLIC;
+GRANT CREATE ON SCHEMA public TO PUBLIC;
 
 
 --
