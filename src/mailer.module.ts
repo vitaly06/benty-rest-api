@@ -22,7 +22,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           from: `"Benty" <${configService.get('SMTP_USER')}>`, // Формат "Имя <email>"
         },
         template: {
-          dir: join(__dirname, '../../templates'),
+          dir: join(__dirname, '../templates'),
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true,

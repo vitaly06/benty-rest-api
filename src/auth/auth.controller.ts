@@ -12,6 +12,7 @@ import { AuthService } from './auth.service';
 import { signUpRequest } from './dto/sign-up.dto';
 import { signInRequest } from './dto/sign-in.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
+import { JwtRefreshGuard } from 'src/common/guards/jwt-refresh.guard';
 import { Response } from 'express';
 import {
   RequestWithUser,
@@ -75,7 +76,7 @@ export class AuthController {
   @ApiOperation({
     summary: 'Обновление токенов',
   })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtRefreshGuard)
   @Post('refresh')
   async refresh(
     @Res({ passthrough: true }) res: Response,

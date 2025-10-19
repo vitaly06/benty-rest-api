@@ -18,6 +18,7 @@ import { PaymentModule } from './payment/payment.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { AdminModule } from './admin/admin.module';
+import { AdvertisementModule } from './advertisement/advertisement.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { AdminModule } from './admin/admin.module';
     WebhookModule,
     SubscriptionModule,
     AdminModule,
+    AdvertisementModule,
   ],
   providers: [],
 })

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as fs from 'fs';
@@ -7,18 +7,15 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
-import { JwtStrategy } from 'src/auth/strategies/jwt.strategy';
-import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
-import { JwtRefreshStrategy } from 'src/auth/strategies/jwt-refresh.strategy';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AuthModule } from 'src/auth/auth.module';
 import { ProjectModule } from 'src/project/project.module';
 import { BlogModule } from 'src/blog/blog.module';
 
 @Module({
   imports: [
-    ProjectModule,
-    BlogModule,
+    forwardRef(() => AuthModule),
+    forwardRef(() => ProjectModule),
+    forwardRef(() => BlogModule),
     MulterModule.registerAsync({
       useFactory: () => ({
         storage: diskStorage({
@@ -39,16 +36,6 @@ import { BlogModule } from 'src/blog/blog.module';
             cb(null, `${uniqueSuffix}${ext}`);
           },
         }),
-      }),
-    }),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('JWT_ACCESS_SECRET'),
-        signOptions: {
-          expiresIn: configService.get('JWT_ACCESS_EXPIRES_IN'),
-        },
       }),
     }),
     MailerModule.forRoot({
@@ -74,6 +61,6 @@ import { BlogModule } from 'src/blog/blog.module';
     }),
   ],
   controllers: [UserController],
-  providers: [UserService, JwtStrategy, JwtAuthGuard, JwtRefreshStrategy],
+  providers: [UserService],
 })
 export class UserModule {}

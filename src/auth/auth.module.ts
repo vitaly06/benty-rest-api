@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UserModule } from 'src/user/user.module';
@@ -8,6 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
+import { JwtRefreshGuard } from 'src/common/guards/jwt-refresh.guard';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { CustomMailerModule } from 'src/mailer.module';
 import { ProjectModule } from 'src/project/project.module';
@@ -15,11 +16,11 @@ import { BlogModule } from 'src/blog/blog.module';
 
 @Module({
   imports: [
-    UserModule,
+    forwardRef(() => UserModule),
+    forwardRef(() => ProjectModule),
+    forwardRef(() => BlogModule),
     ConfigModule,
     PassportModule,
-    ProjectModule,
-    BlogModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -38,8 +39,16 @@ import { BlogModule } from 'src/blog/blog.module';
     UserService,
     JwtStrategy,
     JwtAuthGuard,
+    JwtRefreshGuard,
     JwtRefreshStrategy,
   ],
-  exports: [AuthModule],
+  exports: [
+    AuthService,
+    JwtStrategy,
+    JwtAuthGuard,
+    JwtRefreshGuard,
+    JwtRefreshStrategy,
+    JwtModule,
+  ],
 })
 export class AuthModule {}

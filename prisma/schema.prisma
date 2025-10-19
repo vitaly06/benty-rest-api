@@ -70,6 +70,7 @@ model User {
   lastLoginUpdate DateTime?
   projects        Project[]
   Blog            Blog[]
+  advertisements Advertisement[]
   blogId          Int?
 
   // Сообщения
@@ -177,8 +178,37 @@ model Blog {
   updatedAt DateTime @updatedAt
 }
 
+
+
 model Category {
   id       Int       @id @default(autoincrement())
   name     String    @unique
   projects Project[]
+}
+
+enum AdvertisementType {
+  VACANCY
+  ORDER
+}
+
+model Advertisement {
+  id Int @id @default(autoincrement())
+  photoName String
+  type AdvertisementType @default(VACANCY)
+  name String
+  companyName String
+  employmentType String 
+  jobFormat String
+  whatToDo String
+  expectations String
+  weOffer String
+  minWage Int
+  maxWage Int
+  currency String
+  telegram String?
+  vk String?
+  email String?
+
+  userId Int
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

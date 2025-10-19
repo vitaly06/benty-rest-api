@@ -33,9 +33,70 @@ ALTER SCHEMA public OWNER TO postgres;
 COMMENT ON SCHEMA public IS '';
 
 
+--
+-- Name: AdvertisementType; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public."AdvertisementType" AS ENUM (
+    'VACANCY',
+    'ORDER'
+);
+
+
+ALTER TYPE public."AdvertisementType" OWNER TO postgres;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
+
+--
+-- Name: Advertisement; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."Advertisement" (
+    id integer NOT NULL,
+    "photoName" text NOT NULL,
+    type public."AdvertisementType" DEFAULT 'VACANCY'::public."AdvertisementType" NOT NULL,
+    name text NOT NULL,
+    "companyName" text NOT NULL,
+    "employmentType" text NOT NULL,
+    "jobFormat" text NOT NULL,
+    "whatToDo" text NOT NULL,
+    expectations text NOT NULL,
+    "weOffer" text NOT NULL,
+    "minWage" integer NOT NULL,
+    "maxWage" integer NOT NULL,
+    currency text NOT NULL,
+    telegram text,
+    vk text,
+    email text,
+    "userId" integer NOT NULL
+);
+
+
+ALTER TABLE public."Advertisement" OWNER TO postgres;
+
+--
+-- Name: Advertisement_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public."Advertisement_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Advertisement_id_seq" OWNER TO postgres;
+
+--
+-- Name: Advertisement_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public."Advertisement_id_seq" OWNED BY public."Advertisement".id;
+
 
 --
 -- Name: Blog; Type: TABLE; Schema: public; Owner: postgres
@@ -475,6 +536,13 @@ ALTER SEQUENCE public.projects_id_seq OWNED BY public.projects.id;
 
 
 --
+-- Name: Advertisement id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Advertisement" ALTER COLUMN id SET DEFAULT nextval('public."Advertisement_id_seq"'::regclass);
+
+
+--
 -- Name: Blog id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -528,6 +596,15 @@ ALTER TABLE ONLY public."User" ALTER COLUMN id SET DEFAULT nextval('public."User
 --
 
 ALTER TABLE ONLY public.projects ALTER COLUMN id SET DEFAULT nextval('public.projects_id_seq'::regclass);
+
+
+--
+-- Data for Name: Advertisement; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."Advertisement" (id, "photoName", type, name, "companyName", "employmentType", "jobFormat", "whatToDo", expectations, "weOffer", "minWage", "maxWage", currency, telegram, vk, email, "userId") FROM stdin;
+1	1760789494888-683010401.png	VACANCY	Middle Frontend Developer	IT Solutions Ltd	Полная занятость	Удаленно	Разрабатывать веб-приложения на React	Опыт работы с React от 2 лет	Гибкий график, ДМС, обучение	80000	150000	RUB	@company_hr	vk.com/company	hr@company.com	845
+\.
 
 
 --
@@ -641,6 +718,7 @@ COPY public."User" (id, login, email, password, "createdAt", "updatedAt", "refre
 779	Yuliyaaa_01_2001	Sazhina-2001@list.ru	$2b$10$CZ8zGBnr5V4sHHe9vaHd/u7iHCgLyt3r14lPSMf0YvOTS9vTwn5j.	2025-10-14 21:22:24.321	2025-10-14 21:22:24.362	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjc3OSwibG9naW4iOiJZdWxpeWFhYV8wMV8yMDAxIiwiaWF0IjoxNzYwNDc2OTQ0LCJleHAiOjE3NjEwODE3NDR9.Sl1agFMF9d8F32BCv1U4N_PPW_7ro1EreaKpLr9Ov6c	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
 283	Elizaveta	elizaveta-s04@mail.ru	$2b$10$uDXcjI2Jg5TzOSB1.RJgt.vH0eATZBjaWH2dyQ4TG0QxmpCh0MzDu	2025-10-09 11:31:04.91	2025-10-16 10:41:06.008	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI4MywibG9naW4iOiJFbGl6YXZldGEiLCJpYXQiOjE3NjA2MTEyNjUsImV4cCI6MTc2MTIxNjA2NX0.V-HM761Tkf0UVVUEPr3uRh8OxZWfPhCLEeZ_stY7kIU	t	f	1760016178701-917634195.jpg	Елизавета	Москва	Комплексная и масштабируемая система «под ключ»,\nкоторая регулярно приносит заявки\n\n>2 лет в инфобизе, делала запуски от 1 до 7 млн.\nрублей в различных нишах \n\nЭксперты заработали со мной \n\nсуммарно 14+ млн. рублей\n	Middle		@slavicghostgirl			1-3 года	1760291845726-475807369.avif	f	f	f	\N	\N	1	online	\N	\N	\N	f
 183	LevinaTK	Tanya472003@gmail.com	$2b$10$FCngGOMBdEeIBQ4BNy.pI.c1oxkaJXqcuKwaX6GKytDknkglBR/8.	2025-10-07 07:58:55.405	2025-10-15 22:30:35.875	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE4MywiaWF0IjoxNzYwNTY3MzM4LCJleHAiOjE3NjExNzIxMzh9.MptpJSzKP7cYXpOb3ukBvbeR61ngTbJqd7aKRUslfGA	t	f	\N	Татьяна Левина	Луганск	Занимаюсь СММ с 2016 года. Освоила ряд компетенций:\n- аналитика (анализирую ЦА, конкурентов, разрабатываю стратегию по офлайн и онлайн способам продвижения)\n- таргетированная реклама \n- работа с визуалом (создание фирменного стиля, визуального сопровождения постов и монтаж роликов)\n- копирайтинг\n\nДополнительно:\nОкончила магистратуру по направлению "Юриспруденция", в данный момент являюсь куратором инновационного трека федеральной программы "Я в деле" в ЛНР.		+79591823081	@Levinatk	https://vk.com/levinatk		Более 6 лет	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
+845	vitaly.sadikov	vitaly.sadikov1@yandex.ru	$2b$10$47/yzt0M9xgA9Tr7rNroaOCTzKoD4JO0D/djxoSO.cZFLVLw/NiWS	2025-10-18 11:57:51.178	2025-10-19 12:52:27.508	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjg0NSwibG9naW4iOiJ2aXRhbHkuc2FkaWtvdiIsImlhdCI6MTc2MDg3ODM0NywiZXhwIjoxNzYxNDgzMTQ3fQ.SgpuKQm07bWh1yr1Z3tvcmhfqO5aCmTwh__bu_055tM	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	3	offline	2026-01-16 11:57:25.033	2025-10-18 11:57:25.033	\N	f
 \.
 
 
@@ -814,6 +892,13 @@ COPY public.projects (id, name, description, "photoName", "firstLink", "secondLi
 
 
 --
+-- Name: Advertisement_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public."Advertisement_id_seq"', 1, true);
+
+
+--
 -- Name: Blog_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -859,7 +944,7 @@ SELECT pg_catalog.setval('public."Subscription_id_seq"', 3, true);
 -- Name: User_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."User_id_seq"', 844, true);
+SELECT pg_catalog.setval('public."User_id_seq"', 845, true);
 
 
 --
@@ -867,6 +952,14 @@ SELECT pg_catalog.setval('public."User_id_seq"', 844, true);
 --
 
 SELECT pg_catalog.setval('public.projects_id_seq', 555, true);
+
+
+--
+-- Name: Advertisement Advertisement_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Advertisement"
+    ADD CONSTRAINT "Advertisement_pkey" PRIMARY KEY (id);
 
 
 --
@@ -1135,6 +1228,14 @@ CREATE INDEX "_UserStarred_B_index" ON public."_UserStarred" USING btree ("B");
 --
 
 CREATE UNIQUE INDEX "projects_contentPath_key" ON public.projects USING btree ("contentPath");
+
+
+--
+-- Name: Advertisement Advertisement_userId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public."Advertisement"
+    ADD CONSTRAINT "Advertisement_userId_fkey" FOREIGN KEY ("userId") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
