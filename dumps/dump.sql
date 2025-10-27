@@ -902,7 +902,7 @@ SELECT pg_catalog.setval('public."Advertisement_id_seq"', 1, true);
 -- Name: Blog_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Blog_id_seq"', 110, true);
+SELECT pg_catalog.setval('public."Blog_id_seq"', 176, true);
 
 
 --
@@ -923,7 +923,7 @@ SELECT pg_catalog.setval('public."Message_id_seq"', 203, true);
 -- Name: Payment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Payment_id_seq"', 109, true);
+SELECT pg_catalog.setval('public."Payment_id_seq"', 241, true);
 
 
 --
@@ -944,14 +944,14 @@ SELECT pg_catalog.setval('public."Subscription_id_seq"', 3, true);
 -- Name: User_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."User_id_seq"', 845, true);
+SELECT pg_catalog.setval('public."User_id_seq"', 1042, true);
 
 
 --
 -- Name: projects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.projects_id_seq', 555, true);
+SELECT pg_catalog.setval('public.projects_id_seq', 621, true);
 
 
 --
