@@ -546,6 +546,9 @@ export class ProjectService {
     try {
       const projects = await this.prisma.project.findMany({
         take: 8,
+        orderBy: {
+          id: 'desc',
+        },
         include: {
           user: {
             include: {

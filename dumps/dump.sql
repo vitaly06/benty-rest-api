@@ -70,7 +70,8 @@ CREATE TABLE public."Advertisement" (
     telegram text,
     vk text,
     email text,
-    "userId" integer NOT NULL
+    "userId" integer NOT NULL,
+    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
@@ -602,8 +603,8 @@ ALTER TABLE ONLY public.projects ALTER COLUMN id SET DEFAULT nextval('public.pro
 -- Data for Name: Advertisement; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Advertisement" (id, "photoName", type, name, "companyName", "employmentType", "jobFormat", "whatToDo", expectations, "weOffer", "minWage", "maxWage", currency, telegram, vk, email, "userId") FROM stdin;
-1	1760789494888-683010401.png	VACANCY	Middle Frontend Developer	IT Solutions Ltd	Полная занятость	Удаленно	Разрабатывать веб-приложения на React	Опыт работы с React от 2 лет	Гибкий график, ДМС, обучение	80000	150000	RUB	@company_hr	vk.com/company	hr@company.com	845
+COPY public."Advertisement" (id, "photoName", type, name, "companyName", "employmentType", "jobFormat", "whatToDo", expectations, "weOffer", "minWage", "maxWage", currency, telegram, vk, email, "userId", "createdAt") FROM stdin;
+1	1760789494888-683010401.png	VACANCY	Middle Frontend Developer	IT Solutions Ltd	Полная занятость	Удаленно	Разрабатывать веб-приложения на React	Опыт работы с React от 2 лет	Гибкий график, ДМС, обучение	80000	150000	RUB	@company_hr	vk.com/company	hr@company.com	845	2025-11-08 13:32:43.539
 \.
 
 
@@ -718,7 +719,7 @@ COPY public."User" (id, login, email, password, "createdAt", "updatedAt", "refre
 779	Yuliyaaa_01_2001	Sazhina-2001@list.ru	$2b$10$CZ8zGBnr5V4sHHe9vaHd/u7iHCgLyt3r14lPSMf0YvOTS9vTwn5j.	2025-10-14 21:22:24.321	2025-10-14 21:22:24.362	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjc3OSwibG9naW4iOiJZdWxpeWFhYV8wMV8yMDAxIiwiaWF0IjoxNzYwNDc2OTQ0LCJleHAiOjE3NjEwODE3NDR9.Sl1agFMF9d8F32BCv1U4N_PPW_7ro1EreaKpLr9Ov6c	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
 283	Elizaveta	elizaveta-s04@mail.ru	$2b$10$uDXcjI2Jg5TzOSB1.RJgt.vH0eATZBjaWH2dyQ4TG0QxmpCh0MzDu	2025-10-09 11:31:04.91	2025-10-16 10:41:06.008	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI4MywibG9naW4iOiJFbGl6YXZldGEiLCJpYXQiOjE3NjA2MTEyNjUsImV4cCI6MTc2MTIxNjA2NX0.V-HM761Tkf0UVVUEPr3uRh8OxZWfPhCLEeZ_stY7kIU	t	f	1760016178701-917634195.jpg	Елизавета	Москва	Комплексная и масштабируемая система «под ключ»,\nкоторая регулярно приносит заявки\n\n>2 лет в инфобизе, делала запуски от 1 до 7 млн.\nрублей в различных нишах \n\nЭксперты заработали со мной \n\nсуммарно 14+ млн. рублей\n	Middle		@slavicghostgirl			1-3 года	1760291845726-475807369.avif	f	f	f	\N	\N	1	online	\N	\N	\N	f
 183	LevinaTK	Tanya472003@gmail.com	$2b$10$FCngGOMBdEeIBQ4BNy.pI.c1oxkaJXqcuKwaX6GKytDknkglBR/8.	2025-10-07 07:58:55.405	2025-10-15 22:30:35.875	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjE4MywiaWF0IjoxNzYwNTY3MzM4LCJleHAiOjE3NjExNzIxMzh9.MptpJSzKP7cYXpOb3ukBvbeR61ngTbJqd7aKRUslfGA	t	f	\N	Татьяна Левина	Луганск	Занимаюсь СММ с 2016 года. Освоила ряд компетенций:\n- аналитика (анализирую ЦА, конкурентов, разрабатываю стратегию по офлайн и онлайн способам продвижения)\n- таргетированная реклама \n- работа с визуалом (создание фирменного стиля, визуального сопровождения постов и монтаж роликов)\n- копирайтинг\n\nДополнительно:\nОкончила магистратуру по направлению "Юриспруденция", в данный момент являюсь куратором инновационного трека федеральной программы "Я в деле" в ЛНР.		+79591823081	@Levinatk	https://vk.com/levinatk		Более 6 лет	\N	f	f	f	\N	\N	1	offline	\N	\N	\N	f
-845	vitaly.sadikov	vitaly.sadikov1@yandex.ru	$2b$10$47/yzt0M9xgA9Tr7rNroaOCTzKoD4JO0D/djxoSO.cZFLVLw/NiWS	2025-10-18 11:57:51.178	2025-10-19 12:52:27.508	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjg0NSwibG9naW4iOiJ2aXRhbHkuc2FkaWtvdiIsImlhdCI6MTc2MDg3ODM0NywiZXhwIjoxNzYxNDgzMTQ3fQ.SgpuKQm07bWh1yr1Z3tvcmhfqO5aCmTwh__bu_055tM	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	3	offline	2026-01-16 11:57:25.033	2025-10-18 11:57:25.033	\N	f
+845	vitaly.sadikov	vitaly.sadikov1@yandex.ru	$2b$10$47/yzt0M9xgA9Tr7rNroaOCTzKoD4JO0D/djxoSO.cZFLVLw/NiWS	2025-10-18 11:57:51.178	2025-11-08 11:38:29.829	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjg0NSwibG9naW4iOiJ2aXRhbHkuc2FkaWtvdiIsImlhdCI6MTc2MjYwMTkwOSwiZXhwIjoxNzYzMjA2NzA5fQ.xHlabo_eo8vpLlAB3mJ4LH7epApXICxpfmAKuvKBSNk	t	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	f	f	\N	\N	3	offline	2026-01-16 11:57:25.033	2025-10-18 11:57:25.033	\N	f
 \.
 
 

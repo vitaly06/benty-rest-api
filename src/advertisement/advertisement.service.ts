@@ -30,7 +30,10 @@ export class AdvertisementService {
       },
     });
 
-    return advertisement;
+    return {
+      ...advertisement,
+      createdAt: this.formateDate(advertisement.createdAt),
+    };
   }
 
   async findAll() {
@@ -43,6 +46,7 @@ export class AdvertisementService {
         jobFormat: true,
         photoName: true,
         companyName: true,
+        createdAt: true,
       },
     });
 
@@ -50,6 +54,7 @@ export class AdvertisementService {
       return {
         ...job,
         type: this.types[job.type],
+        createdAt: this.formateDate(job.createdAt),
       };
     });
   }
@@ -67,6 +72,7 @@ export class AdvertisementService {
         jobFormat: true,
         photoName: true,
         companyName: true,
+        createdAt: true,
       },
     });
 
@@ -74,16 +80,20 @@ export class AdvertisementService {
       return {
         ...job,
         type: this.types[job.type],
+        createdAt: this.formateDate(job.createdAt),
       };
     });
   }
 
   async getAdvertisementById(id: number) {
-    const jobs = await this.prisma.advertisement.findMany({
+    const jobs = await this.prisma.advertisement.findUnique({
       where: { id },
     });
 
-    return jobs;
+    return {
+      ...jobs,
+      createdAt: this.formateDate(jobs.createdAt),
+    };
   }
 
   async updateAdvertisement(
@@ -131,6 +141,16 @@ export class AdvertisementService {
       data: updateData,
     });
 
-    return updatedAdvertisement;
+    return {
+      ...updatedAdvertisement,
+      createdAt: this.formateDate(updatedAdvertisement.createdAt),
+    };
+  }
+
+  private formateDate(date: Date): string {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   }
 }

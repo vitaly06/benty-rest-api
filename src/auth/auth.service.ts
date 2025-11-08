@@ -55,7 +55,11 @@ export class AuthService {
       console.log(promocode);
     }
 
-    if (promocode && promocode.toUpperCase() === 'BENTY90') {
+    if (
+      promocode &&
+      (promocode.toUpperCase() === 'BENTY90' ||
+        promocode.toLowerCase() === 'targerita')
+    ) {
       subscription = await this.prisma.subscription.findUnique({
         where: { name: 'premium' },
       });

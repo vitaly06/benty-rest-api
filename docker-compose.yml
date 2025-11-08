@@ -8,7 +8,7 @@ services:
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/Grinar?schema=public
-      - REDIS_HOST=redis  
+      - REDIS_HOST=redis
       - REDIS_PORT=6379
       - SMTP_HOST=smtp.beget.com
       - SMTP_PORT=465
@@ -19,7 +19,7 @@ services:
       - CLIENT_ID=18af41a0b464d33d7a6d3c5da98c10d1
     depends_on:
       - db
-      - redis  
+      - redis
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
@@ -37,23 +37,23 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./dumps/dump.sql:/docker-entrypoint-initdb.d/dump.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 5s
       timeout: 5s
       retries: 10
 
-  redis:  # Добавляем сервис Redis
+  redis: # Добавляем сервис Redis
     image: redis:7-alpine
     ports:
       - '6380:6379'
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
       timeout: 3s
       retries: 5
 
 volumes:
   postgres_data:
-  redis_data:  # Volume для Redis
+  redis_data: # Volume для Redis
