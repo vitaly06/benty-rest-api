@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { createAdvertisementDto } from './dto/create-advertisement.dto';
@@ -20,8 +21,12 @@ export class AdvertisementService {
     filename: string,
     userId: number,
   ) {
-    if (dto.email == '') {
+    if (dto.email == '' || !dto.email) {
       delete dto.email;
+    } else {
+      if (!this.isValidEmail(dto.email)) {
+        throw new BadRequestException('Неверный формат почты');
+      }
     }
     if (dto.vk == '') {
       delete dto.vk;
@@ -168,5 +173,10 @@ export class AdvertisementService {
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
+  }
+
+  private isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   }
 }

@@ -123,7 +123,6 @@ export class createAdvertisementDto {
     example: 'vitaly.sadikov1@yandex.ru',
   })
   @IsString({ message: 'Почта должна быть строкой' })
-  @IsEmail({}, { message: 'Неверный формат почты' })
   @IsOptional()
   email: string;
 }
