@@ -20,6 +20,16 @@ export class AdvertisementService {
     filename: string,
     userId: number,
   ) {
+    if (dto.email == '') {
+      delete dto.email;
+    }
+    if (dto.vk == '') {
+      delete dto.vk;
+    }
+    if (dto.telegram == '') {
+      delete dto.telegram;
+    }
+
     const advertisement = await this.prisma.advertisement.create({
       data: {
         ...dto,
@@ -88,11 +98,17 @@ export class AdvertisementService {
   async getAdvertisementById(id: number) {
     const jobs = await this.prisma.advertisement.findUnique({
       where: { id },
+      include: {
+        user: {
+          select: { id: true },
+        },
+      },
     });
 
     return {
       ...jobs,
       createdAt: this.formateDate(jobs.createdAt),
+      creatorId: jobs.user.id,
     };
   }
 
